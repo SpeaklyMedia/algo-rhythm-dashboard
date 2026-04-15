@@ -532,7 +532,7 @@ code, pre {
 
 .page-title {
   margin: 0.22rem 0 0;
-  font: 700 5rem/0.88 var(--font-display);
+  font: 700 5.25rem/0.88 var(--font-display);
   letter-spacing: -0.025em;
   color: #fff;
 }
@@ -574,8 +574,8 @@ code, pre {
 }
 
 .panel:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.34), 0 14px 40px rgba(0, 0, 0, 0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.34), 0 16px 44px rgba(0, 0, 0, 0.24);
 }
 
 .panel,
