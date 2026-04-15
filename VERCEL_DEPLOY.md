@@ -14,19 +14,18 @@ The Vercel deployment serves only the compiled frontend assets.
 
 ---
 
-## Step 1 — Push this repo to GitHub
+## Step 1 — GitHub repository
 
-If the repo is not yet on GitHub:
+The project is already pushed to GitHub:
+**https://github.com/SpeaklyMedia/algo-rhythm-dashboard**
 
-```bash
-git init         # if not already a git repo
-git add .
-git commit -m "Initial commit: Algo-Rhythm strategy dashboard"
-gh repo create algo-rhythm-dashboard --public --push --source=.
-# OR, if you prefer manual setup:
-git remote add origin https://github.com/<your-username>/algo-rhythm-dashboard.git
-git push -u origin main
-```
+All 127 source files are present, including `vercel.json`, `pnpm-lock.yaml`,
+and the full `artifacts/strategy-dashboard/` tree.
+
+> Note: `.github/workflows/vercel-preview.yml` was not auto-pushed (the API
+> blocks `.github/` paths). To add it manually: go to the repo on GitHub →
+> **Add file → Create new file** → paste the path `.github/workflows/vercel-preview.yml`
+> → paste the contents from the local file.
 
 ---
 
