@@ -1004,6 +1004,13 @@ function App() {
   const [activePage, setActivePage] = useState('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 861px)');
+    const handler = (e) => { if (e.matches) setIsSidebarOpen(false); };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
   const pageDefinitions = useMemo(() => {
     if (!index?.navigation) return [];
     return PAGE_ORDER.map((id) => index.navigation.find((page) => page.id === id)).filter(Boolean);
