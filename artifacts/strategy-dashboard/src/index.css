@@ -116,11 +116,20 @@ pre {
 }
 
 .sidebar-copy,
-.metric-detail,
 .muted,
 .header-note,
 .page-lede {
   color: var(--text-soft);
+}
+
+.metric-detail {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 
 .pill-row {
@@ -159,6 +168,8 @@ pre {
     linear-gradient(135deg, rgba(104, 214, 255, 0.16), rgba(61, 157, 255, 0.06) 60%, rgba(255, 163, 71, 0.1)),
     rgba(255, 255, 255, 0.02);
   border-color: rgba(104, 214, 255, 0.44);
+  border-left-color: var(--accent);
+  border-left-width: 3px;
 }
 
 .nav-item span {
@@ -239,9 +250,57 @@ pre {
 }
 
 .strip-card strong {
-  font-size: 1.02rem;
-  line-height: 1.35;
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.5;
   overflow-wrap: anywhere;
+  color: var(--text);
+}
+
+.strip-card--promoted {
+  border-color: rgba(46, 184, 92, 0.32);
+  background:
+    linear-gradient(135deg, rgba(46, 184, 92, 0.1), rgba(46, 184, 92, 0.04)),
+    rgba(17, 22, 29, 0.88);
+}
+
+.strip-card--promoted span {
+  color: #9df0b9;
+}
+
+.strip-card--package {
+  border-color: rgba(46, 184, 92, 0.22);
+  background:
+    linear-gradient(135deg, rgba(46, 184, 92, 0.07), rgba(17, 22, 29, 0.88)),
+    rgba(17, 22, 29, 0.88);
+}
+
+.strip-card--package span {
+  color: #9df0b9;
+}
+
+.strip-card--latest {
+  border-color: rgba(255, 163, 71, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 163, 71, 0.09), rgba(17, 22, 29, 0.88)),
+    rgba(17, 22, 29, 0.88);
+}
+
+.strip-card--latest span {
+  color: #ffd19a;
+}
+
+.strip-card--recommended {
+  border-color: rgba(255, 163, 71, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 163, 71, 0.09), rgba(17, 22, 29, 0.88)),
+    rgba(17, 22, 29, 0.88);
+}
+
+.strip-card--recommended span {
+  color: #ffd19a;
 }
 
 .content-header {
@@ -312,10 +371,10 @@ pre {
 .hero-panel::after {
   content: "";
   position: absolute;
-  inset: auto -12% -35% auto;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(104, 214, 255, 0.16), transparent 64%);
+  inset: auto -10% -30% auto;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(104, 214, 255, 0.26), transparent 64%);
   pointer-events: none;
 }
 
@@ -411,6 +470,10 @@ pre {
 .key-value-grid dd {
   margin: 0;
   overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-soft);
 }
 
 .split-grid {
@@ -431,6 +494,9 @@ pre {
 .surface-card h3 {
   margin: 0;
   font-size: 1.15rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .surface-heading {

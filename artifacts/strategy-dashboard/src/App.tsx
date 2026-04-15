@@ -868,19 +868,19 @@ function App() {
 
       <main className="content">
         <section className="status-strip">
-          <div className="strip-card">
+          <div className="strip-card strip-card--promoted">
             <span>Promoted alias</span>
             <strong>{summary.top_level_alias_run_id || 'Unavailable'}</strong>
           </div>
-          <div className="strip-card">
+          <div className="strip-card strip-card--latest">
             <span>Latest success</span>
             <strong>{summary.latest_successful_run_id || 'Unavailable'}</strong>
           </div>
-          <div className="strip-card">
+          <div className="strip-card strip-card--recommended">
             <span>Review recommendation</span>
             <strong>{summary.latest_review_recommended_run_id || 'Unavailable'}</strong>
           </div>
-          <div className="strip-card">
+          <div className="strip-card strip-card--package">
             <span>Latest package</span>
             <strong>{summary.latest_package_run_id || 'Unavailable'}</strong>
           </div>
