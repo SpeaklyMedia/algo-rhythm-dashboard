@@ -118,9 +118,9 @@ function MetricCard({ label, value, detail, tone }) {
 
 function KeyValueTable({ rows }) {
   return (
-    <dl className="key-value-grid">
+    <dl className="kv-list">
       {rows.map((row) => (
-        <div key={row.label}>
+        <div key={row.label} className="kv-row">
           <dt>{row.label}</dt>
           <dd>{row.value}</dd>
         </div>
@@ -191,33 +191,34 @@ function AccountSelector({ title }) {
   );
 }
 
-function PipelineStrip({ pages, activePage, onNavigate, datasets }) {
+function PipelineBar({ pages, activePage, onNavigate, datasets }) {
   return (
-    <div className="pipeline-strip" role="navigation" aria-label="Pipeline stages">
+    <header className="pipeline-bar" role="navigation" aria-label="Pipeline stages">
       {pages.map((page, i) => {
         const display = PAGE_DISPLAY[page.id] || {};
         const isActive = page.id === activePage;
         const hasData = pageHasData(page.id, datasets || {});
-        let nodeClass = 'pipeline-node';
-        if (isActive) nodeClass += ' pipeline-node--active';
-        else if (hasData) nodeClass += ' pipeline-node--available';
-        else nodeClass += ' pipeline-node--dim';
+        let cls = 'pipeline-bar__stage';
+        if (isActive) cls += ' pipeline-bar__stage--active';
+        else if (!hasData) cls += ' pipeline-bar__stage--dim';
         return (
-          <div key={page.id} className="pipeline-step">
+          <span key={page.id} className="pipeline-bar__item">
             <button
               type="button"
-              className={nodeClass}
+              className={cls}
               onClick={() => onNavigate(page.id)}
-              title={display.label || page.label}
               aria-current={isActive ? 'page' : undefined}
             >
-              {i + 1}
+              <span className="pipeline-bar__num">{i + 1}</span>
+              <span className="pipeline-bar__name">{display.label || page.label}</span>
             </button>
-            {i < pages.length - 1 && <div className="pipeline-connector" aria-hidden="true" />}
-          </div>
+            {i < pages.length - 1 && (
+              <span className="pipeline-bar__sep" aria-hidden="true">·</span>
+            )}
+          </span>
         );
       })}
-    </div>
+    </header>
   );
 }
 
@@ -633,10 +634,12 @@ function ReviewPage({ datasets }) {
                     <td>
                       <div className="score-cell">
                         <span>{run.total_score}</span>
-                        <div
-                          className="score-bar"
-                          style={{ width: `${Math.min(100, Math.max(0, run.total_score || 0))}%` }}
-                        />
+                        <div className="score-track">
+                          <div
+                            className="score-bar"
+                            style={{ width: `${Math.min(100, Math.max(0, run.total_score || 0))}%` }}
+                          />
+                        </div>
                       </div>
                     </td>
                     <td>{run.selected_platform_count}/{run.target_platform_count}</td>
@@ -853,7 +856,7 @@ function HandoffPage({ index }) {
                   <td>
                     {item.bundled && item.public_path ? (
                       <a href={`${base}${item.public_path}`} download={item.filename} className="btn-download">
-                        ↓ {item.filename}
+                        → {item.filename}
                       </a>
                     ) : (
                       <span className="muted">Unavailable</span>
@@ -1011,150 +1014,153 @@ function App() {
 
   return (
     <div className="shell">
-      <aside className="sidebar">
-        <AccountSelector title={index.app?.title} />
+      {/* Full-width pipeline bar spanning sidebar + content */}
+      <PipelineBar
+        pages={pageDefinitions}
+        activePage={activePage}
+        onNavigate={setActivePage}
+        datasets={datasets}
+      />
 
-        <div className="brand-block">
-          <p className="eyebrow">Lane B · Internal review</p>
-          <h1>{index.app?.title || 'Strategy Dashboard'}</h1>
-          <div className="pill-row">
-            <StatusBadge tone="good">{index.app?.data_mode || 'static_json'}</StatusBadge>
-            <StatusBadge tone="warn">{index.app?.handoff_mode || 'replit_ui_packet'}</StatusBadge>
-            <StatusBadge tone="neutral">no backend</StatusBadge>
+      <div className="shell-body">
+        {/* Sidebar — no bordered section cards */}
+        <aside className="sidebar">
+          <div className="sidebar-top">
+            <AccountSelector title={index.app?.title} />
+            <div className="brand-text">
+              <p className="eyebrow">Lane B · Internal review</p>
+              <div className="pill-row">
+                <StatusBadge tone="good">{index.app?.data_mode || 'static_json'}</StatusBadge>
+                <StatusBadge tone="neutral">no backend</StatusBadge>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <PipelineStrip
-          pages={pageDefinitions}
-          activePage={activePage}
-          onNavigate={setActivePage}
-          datasets={datasets}
-        />
+          <nav className="nav-list" aria-label="Dashboard sections">
+            {pageDefinitions.map((page) => (
+              <button
+                key={page.id}
+                type="button"
+                className={page.id === activePage ? 'nav-item active' : 'nav-item'}
+                onClick={() => setActivePage(page.id)}
+              >
+                <span>{PAGE_DISPLAY[page.id]?.label || page.label}</span>
+                <small>{PAGE_DISPLAY[page.id]?.subtitle || page.subtitle}</small>
+              </button>
+            ))}
+          </nav>
 
-        <nav className="nav-list" aria-label="Dashboard sections">
-          {pageDefinitions.map((page) => (
+          <div className="sidebar-footer">
+            <p>Generated {formatDateShort(index.generated_at)}</p>
+            {index.contract_version && <p>v{index.contract_version}</p>}
+            {propertyCount > 0 && (
+              <button
+                type="button"
+                className="sidebar-link"
+                onClick={() => setActivePage('package')}
+              >
+                {propertyCount} {propertyCount === 1 ? 'property' : 'properties'}
+              </button>
+            )}
             <button
-              key={page.id}
               type="button"
-              className={page.id === activePage ? 'nav-item active' : 'nav-item'}
-              onClick={() => setActivePage(page.id)}
+              className="sidebar-link sidebar-link--secondary"
+              onClick={() => setActivePage('handoff')}
             >
-              <span>{PAGE_DISPLAY[page.id]?.label || page.label}</span>
-              <small>{PAGE_DISPLAY[page.id]?.subtitle || page.subtitle}</small>
+              Design authority →
             </button>
-          ))}
-        </nav>
+          </div>
+        </aside>
 
-        <div className="sidebar-meta sidebar-meta--compact">
-          <p>
-            {'Generated '}
-            <span>{formatDateShort(index.generated_at)}</span>
+        {/* Main content */}
+        <main className="content">
+          {/* Unified data rail — replaces 5 floating strip cards */}
+          <div className="data-rail">
+            <div className="rail-cell">
+              <div className="rail-label-row">
+                <span className="rail-label">Currently live</span>
+                <span className="rail-icon">{STRIP_ICONS.promoted}</span>
+              </div>
+              <code className="rail-value">{summary.top_level_alias_run_id || '—'}</code>
+            </div>
+            <div className="rail-divider" />
+            <div className="rail-cell">
+              <div className="rail-label-row">
+                <span className="rail-label">Most recent run</span>
+                <span className="rail-icon">{STRIP_ICONS.latest}</span>
+              </div>
+              <code className="rail-value">{summary.latest_successful_run_id || '—'}</code>
+            </div>
+            <div className="rail-divider" />
+            <div className="rail-cell">
+              <div className="rail-label-row">
+                <span className="rail-label">Recommended pick</span>
+                <span className="rail-icon">{STRIP_ICONS.recommended}</span>
+              </div>
+              <code className="rail-value">{summary.latest_review_recommended_run_id || '—'}</code>
+            </div>
+            <div className="rail-divider" />
+            <div className="rail-cell">
+              <div className="rail-label-row">
+                <span className="rail-label">Packaged & ready</span>
+                <span className="rail-icon">{STRIP_ICONS.package}</span>
+              </div>
+              <code className="rail-value">{summary.latest_package_run_id || '—'}</code>
+            </div>
             {propertyCount > 0 && (
               <>
-                {' · '}
-                <button
-                  type="button"
-                  className="sidebar-link"
-                  onClick={() => setActivePage('package')}
-                >
-                  {propertyCount} {propertyCount === 1 ? 'property' : 'properties'}
-                </button>
+                <div className="rail-divider" />
+                <div className="rail-cell">
+                  <div className="rail-label-row">
+                    <span className="rail-label">Active properties</span>
+                    <span className="rail-icon">{STRIP_ICONS.properties}</span>
+                  </div>
+                  <code className="rail-value">{propertyCount}</code>
+                </div>
               </>
             )}
-            {index.contract_version && (
-              <>
-                {' · '}
-                <span>v{index.contract_version}</span>
-              </>
-            )}
-          </p>
-          <button
-            type="button"
-            className="sidebar-link sidebar-link--secondary"
-            onClick={() => setActivePage('handoff')}
-          >
-            Design authority →
-          </button>
-        </div>
-      </aside>
+          </div>
 
-      <main className="content">
-        <section className="status-strip">
-          <div className="strip-card strip-card--promoted">
-            <div className="strip-card__header">
-              <span>Currently live</span>
-              <span className="strip-card__icon">{STRIP_ICONS.promoted}</span>
+          {/* Content header — large page title, right-aligned badges */}
+          <header className="content-header">
+            <div className="header-left">
+              <p className="eyebrow">
+                {pageIndex + 1} / {pageDefinitions.length} · {displaySubtitle}
+              </p>
+              <h2 className="page-title">{displayLabel}</h2>
+              <p className="header-note">Bundled JSON only · No live API · No raw repo reads</p>
             </div>
-            <strong>{summary.top_level_alias_run_id || 'Unavailable'}</strong>
-          </div>
-          <div className="strip-card strip-card--latest">
-            <div className="strip-card__header">
-              <span>Most recent run</span>
-              <span className="strip-card__icon">{STRIP_ICONS.latest}</span>
-            </div>
-            <strong>{summary.latest_successful_run_id || 'Unavailable'}</strong>
-          </div>
-          <div className="strip-card strip-card--recommended">
-            <div className="strip-card__header">
-              <span>Recommended pick</span>
-              <span className="strip-card__icon">{STRIP_ICONS.recommended}</span>
-            </div>
-            <strong>{summary.latest_review_recommended_run_id || 'Unavailable'}</strong>
-          </div>
-          <div className="strip-card strip-card--package">
-            <div className="strip-card__header">
-              <span>Packaged & ready</span>
-              <span className="strip-card__icon">{STRIP_ICONS.package}</span>
-            </div>
-            <strong>{summary.latest_package_run_id || 'Unavailable'}</strong>
-          </div>
-          {propertyCount > 0 && (
-            <div className="strip-card strip-card--properties">
-              <div className="strip-card__header">
-                <span>Active properties</span>
-                <span className="strip-card__icon">{STRIP_ICONS.properties}</span>
-              </div>
-              <strong>{propertyCount}</strong>
-            </div>
-          )}
-        </section>
-
-        <header className="content-header">
-          <div className="header-stack">
-            <p className="eyebrow">
-              {pageIndex + 1} / {pageDefinitions.length} · {displaySubtitle}
-            </p>
-            <div className="header-title-row">
-              <h2>{displayLabel}</h2>
+            <div className="header-right">
               <div className="header-badges-inline">
                 <StatusBadge tone="good">{index.status || 'PASS'}</StatusBadge>
                 <StatusBadge tone="good">review bound</StatusBadge>
-                {Object.keys(optionalErrors).length ? (
+                {Object.keys(optionalErrors).length > 0 && (
                   <StatusBadge tone="warn">Optional gaps</StatusBadge>
-                ) : null}
+                )}
               </div>
             </div>
+          </header>
+
+          {/* Optional data gaps notice */}
+          {Object.keys(optionalErrors).length > 0 && (
+            <details className="optional-errors">
+              <summary>
+                {Object.keys(optionalErrors).length} optional dataset{Object.keys(optionalErrors).length !== 1 ? 's' : ''} unavailable — expand for details
+              </summary>
+              <ul>
+                {Object.entries(optionalErrors).map(([id, msg]) => (
+                  <li key={id}><strong>{id}:</strong> {msg}</li>
+                ))}
+              </ul>
+            </details>
+          )}
+
+          {/* Page content — keyed so panels re-animate on navigation */}
+          <div key={activePage}>
+            {renderPage()}
           </div>
-          <p className="header-note muted">Bundled JSON only · No live API · No raw repo reads</p>
-        </header>
-
-        {Object.keys(optionalErrors).length ? (
-          <section className="panel warning-panel">
-            <h2>Some optional data is unavailable</h2>
-            <ul className="stack-list">
-              {Object.entries(optionalErrors).map(([id, error]) => (
-                <li key={id}>
-                  <strong>{id}</strong>: {error}
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-
-        <div key={activePage}>
-          {renderPage()}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
