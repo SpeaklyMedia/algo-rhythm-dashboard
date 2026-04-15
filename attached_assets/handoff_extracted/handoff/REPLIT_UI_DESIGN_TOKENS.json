@@ -1,0 +1,52 @@
+{
+  "version": "r24-hybrid-v1",
+  "theme": "dark_premium_operator",
+  "authority": {
+    "shell_navigation": "Modal-Nodal",
+    "lane_hierarchy": "ThetaFrame",
+    "function_modules": "Yuki",
+    "operator_tone": "Flipper"
+  },
+  "typography": {
+    "body": "\"Plus Jakarta Sans\", ui-sans-serif, system-ui, sans-serif",
+    "display": "\"League Spartan\", \"Arial Narrow\", sans-serif",
+    "mono": "\"IBM Plex Mono\", ui-monospace, monospace"
+  },
+  "color": {
+    "background": "#0b0f14",
+    "background_deep": "#070a0e",
+    "surface": "#11161d",
+    "surface_strong": "#161c24",
+    "surface_soft": "#0e131a",
+    "line": "rgba(255,255,255,0.10)",
+    "line_strong": "rgba(255,255,255,0.18)",
+    "text": "#f5f7fa",
+    "text_soft": "rgba(245,247,250,0.82)",
+    "text_muted": "rgba(245,247,250,0.56)",
+    "primary": "#68d6ff",
+    "primary_deep": "#3d9dff",
+    "primary_soft": "rgba(104,214,255,0.16)",
+    "warm_secondary": "#ffa347",
+    "warm_secondary_soft": "rgba(255,163,71,0.18)",
+    "status_ready": "hsl(142 60% 45%)",
+    "status_warn": "hsl(45 90% 50%)",
+    "status_danger": "hsl(0 70% 55%)",
+    "status_info": "hsl(210 60% 55%)"
+  },
+  "radius": {
+    "panel": "20px",
+    "hero": "28px",
+    "pill": "999px"
+  },
+  "spacing": {
+    "page_padding": "24px",
+    "panel_gap": "16px",
+    "card_gap": "12px"
+  },
+  "rules": [
+    "Brown and amber are accent-only; they do not own the base shell.",
+    "Primary signal color is cyan/blue, not pink/purple.",
+    "Status colors must stay semantic and separate from decorative accents.",
+    "The shell should feel premium but still subordinate to the review data."
+  ]
+}

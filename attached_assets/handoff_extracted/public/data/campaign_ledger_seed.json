@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-04-14T23:27:56.516526Z",
+  "ledger_version": "r16_seed",
+  "entries": [
+    {
+      "entry_id": "ledger_lane_b_foundation_sample",
+      "status": "planned",
+      "content_object_ref": "lane_b_foundation_sample",
+      "target_platforms": [
+        "LinkedIn",
+        "TikTok",
+        "Meta",
+        "X"
+      ],
+      "selected_card_ids": [
+        "LI_SHIFT_DWELL",
+        "LI_PIPELINE",
+        "TT_FACTORS",
+        "TT_SHIFT_CONTROLS",
+        "META_UNCONNECTED_SHARE",
+        "IG_EXPLORE_FUNNEL",
+        "X_PIPELINE",
+        "X_RANKER"
+      ],
+      "trend_refs": [
+        "TREND_ASSUMPTION_OPERATOR_CHECKLIST",
+        "TREND_ASSUMPTION_MULTI_SURFACE_REWRITE",
+        "TREND_ASSUMPTION_EVIDENCE_FIRST_EXPLAINERS"
+      ],
+      "viability_recommendation": "PRIORITIZE_NOW",
+      "assumption_count": 3,
+      "artifact_refs": [
+        "CONTENT_OBJECT.json",
+        "TREND_SHORTLIST.json",
+        "PLATFORM_SIGNAL_SELECTION.json",
+        "VIABILITY_SCORECARD.json",
+        "FOUR_TIER_ADAPTATIONS.json",
+        "EXPERIMENT_PLAN.json",
+        "CAMPAIGN_LEDGER.seed.json",
+        "STRATEGY_ARTIFACT_SET_SUMMARY.md"
+      ],
+      "next_operator_action": "Review the assumptions, choose the first two platforms, and run a manual test pass."
+    }
+  ]
+}

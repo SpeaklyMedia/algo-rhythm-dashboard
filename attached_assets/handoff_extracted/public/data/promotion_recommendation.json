@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-04-15T00:09:20.107241Z",
+  "review_id": "20260415T000500Z",
+  "promotion_mode": "manual_only",
+  "recommended_run_id": "20260414T232200Z",
+  "recommended_total_score": 100,
+  "reviewed_run_ids": [
+    "20260414T231500Z",
+    "20260414T231700Z",
+    "20260414T232000Z",
+    "20260414T232200Z",
+    "20260414T232500Z"
+  ],
+  "promotable_run_ids": [
+    "20260414T232200Z",
+    "20260414T232000Z",
+    "20260414T232500Z"
+  ],
+  "ranking": [
+    {
+      "rank": 1,
+      "run_id": "20260414T232200Z",
+      "total_score": 100,
+      "promotable": true
+    },
+    {
+      "rank": 2,
+      "run_id": "20260414T232000Z",
+      "total_score": 100,
+      "promotable": true
+    },
+    {
+      "rank": 3,
+      "run_id": "20260414T232500Z",
+      "total_score": 100,
+      "promotable": true
+    }
+  ],
+  "rationale": [
+    "The recommendation is deterministic and derived only from stamped run manifests and output files.",
+    "Promotion remains manual-only; this file prepares the decision surface but does not change top-level outputs."
+  ]
+}

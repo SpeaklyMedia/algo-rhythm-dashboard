@@ -1,0 +1,41 @@
+{
+  "review_id": "20260415T000500Z",
+  "packages": [
+    {
+      "run_id": "20260414T232200Z",
+      "package_mode": "promoted_canonical",
+      "package_dir": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232200Z",
+      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232200Z/PACKAGE_MANIFEST.json",
+      "package_manifest_sha256": "adebe689913b52d7eb61051b91f72f7292538be8fc857920199ba51e23a2f61f",
+      "package_zip": {
+        "path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T044337Z.zip",
+        "sha256": "ae3dd64dd004121a96f6720645f8e0b8bcbaa7f6455428e551919226306f813d"
+      },
+      "selected_card_count": 8
+    },
+    {
+      "run_id": "20260414T232000Z",
+      "package_mode": "reviewed_promotable",
+      "package_dir": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232000Z",
+      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232000Z/PACKAGE_MANIFEST.json",
+      "package_manifest_sha256": "5de53e50d95772d444db31783acdddf122936f88112986d9278c421f550e8f60",
+      "package_zip": {
+        "path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/STRATEGY_RUN_PACKAGE__20260414T232000Z__20260415T044337Z.zip",
+        "sha256": "9a8b0f860d5a2bc27402e8bbe5d411e2c78ba56a943554a70bac6cc797ba41d5"
+      },
+      "selected_card_count": 8
+    },
+    {
+      "run_id": "20260414T232500Z",
+      "package_mode": "reviewed_promotable",
+      "package_dir": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232500Z",
+      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232500Z/PACKAGE_MANIFEST.json",
+      "package_manifest_sha256": "faa4d4af20d3d8a9f75312f7a44ed303f0336e874730676c46e1fb1f7726ded5",
+      "package_zip": {
+        "path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/STRATEGY_RUN_PACKAGE__20260414T232500Z__20260415T044337Z.zip",
+        "sha256": "0c7d5a4319a02b640de2f2a356ffce6de2c8ba7291dcf62d61f025f80f1fbe1d"
+      },
+      "selected_card_count": 8
+    }
+  ]
+}

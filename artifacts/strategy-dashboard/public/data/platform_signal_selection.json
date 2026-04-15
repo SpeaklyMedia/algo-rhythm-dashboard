@@ -1,0 +1,143 @@
+{
+  "generated_at": "2026-04-14T23:27:56.516526Z",
+  "content_object_ref": "lane_b_foundation_sample",
+  "card_library_generated_at": "2026-04-14T22:32:51Z",
+  "platforms": {
+    "LinkedIn": {
+      "selection_reason": "Selected the best-fit supported cards for LinkedIn using the operator goal preference order and the card priority order.",
+      "selected_card_ids": [
+        "LI_SHIFT_DWELL",
+        "LI_PIPELINE"
+      ],
+      "selected_cards": [
+        {
+          "card_id": "LI_SHIFT_DWELL",
+          "priority": "P1",
+          "claim_type": "shift",
+          "surface": "Home Feed",
+          "operator_implication": "Treat this as a recent platform adjustment; monitor for recency drift and keep claims tied to source_ref.",
+          "claim_ref": "LI_SHIFT_DWELL",
+          "source_ref": [
+            "LI_ENG_DWELL_2020"
+          ]
+        },
+        {
+          "card_id": "LI_PIPELINE",
+          "priority": "P2",
+          "claim_type": "pipeline",
+          "surface": "Home Feed",
+          "operator_implication": "Design hooks and structure so content survives candidate selection before heavier ranking stages.",
+          "claim_ref": "LI_PIPELINE",
+          "source_ref": [
+            "LI_ENG_DWELL_2020"
+          ]
+        }
+      ]
+    },
+    "TikTok": {
+      "selection_reason": "Selected the best-fit supported cards for TikTok using the operator goal preference order and the card priority order.",
+      "selected_card_ids": [
+        "TT_FACTORS",
+        "TT_SHIFT_CONTROLS"
+      ],
+      "selected_cards": [
+        {
+          "card_id": "TT_FACTORS",
+          "priority": "P1",
+          "claim_type": "signals",
+          "surface": "For You",
+          "operator_implication": "Optimize for the strong signals explicitly named in the source, not generic engagement folklore.",
+          "claim_ref": "TT_FACTORS",
+          "source_ref": [
+            "TT_NEWSROOM_FORYOU_EU"
+          ]
+        },
+        {
+          "card_id": "TT_SHIFT_CONTROLS",
+          "priority": "P1",
+          "claim_type": "shift",
+          "surface": "For You",
+          "operator_implication": "Treat this as a recent platform adjustment; monitor for recency drift and keep claims tied to source_ref.",
+          "claim_ref": "TT_SHIFT_CONTROLS",
+          "source_ref": [
+            "TT_NEWSROOM_MANAGE_TOPICS_2025"
+          ]
+        }
+      ]
+    },
+    "Meta": {
+      "selection_reason": "Selected the best-fit supported cards for Meta using the operator goal preference order and the card priority order.",
+      "selected_card_ids": [
+        "META_UNCONNECTED_SHARE",
+        "IG_EXPLORE_FUNNEL"
+      ],
+      "selected_cards": [
+        {
+          "card_id": "META_UNCONNECTED_SHARE",
+          "priority": "P1",
+          "claim_type": "shift",
+          "surface": "Feeds",
+          "operator_implication": "Treat this as a recent platform adjustment; monitor for recency drift and keep claims tied to source_ref.",
+          "claim_ref": "META_UNCONNECTED_SHARE",
+          "source_ref": [
+            "META_AI_UNCONNECTED_2023"
+          ]
+        },
+        {
+          "card_id": "IG_EXPLORE_FUNNEL",
+          "priority": "P2",
+          "claim_type": "pipeline",
+          "surface": "Explore",
+          "operator_implication": "Design hooks and structure so content survives candidate selection before heavier ranking stages.",
+          "claim_ref": "IG_EXPLORE_FUNNEL",
+          "source_ref": [
+            "IG_META_ENG_EXPLORE_2023"
+          ]
+        }
+      ]
+    },
+    "X": {
+      "selection_reason": "Selected the best-fit supported cards for X using the operator goal preference order and the card priority order.",
+      "selected_card_ids": [
+        "X_PIPELINE",
+        "X_RANKER"
+      ],
+      "selected_cards": [
+        {
+          "card_id": "X_PIPELINE",
+          "priority": "P2",
+          "claim_type": "pipeline",
+          "surface": "For You Timeline",
+          "operator_implication": "Design hooks and structure so content survives candidate selection before heavier ranking stages.",
+          "claim_ref": "X_PIPELINE",
+          "source_ref": [
+            "X_ENG_ALGO_2023",
+            "X_GITHUB_THE_ALGORITHM"
+          ]
+        },
+        {
+          "card_id": "X_RANKER",
+          "priority": "P2",
+          "claim_type": "model",
+          "surface": "For You Timeline",
+          "operator_implication": "Assume the system generalizes across sparse user/content features; consistency and metadata quality matter.",
+          "claim_ref": "X_RANKER",
+          "source_ref": [
+            "X_ENG_ALGO_2023"
+          ]
+        }
+      ]
+    }
+  },
+  "skipped_platforms": [],
+  "selected_card_ids": [
+    "LI_SHIFT_DWELL",
+    "LI_PIPELINE",
+    "TT_FACTORS",
+    "TT_SHIFT_CONTROLS",
+    "META_UNCONNECTED_SHARE",
+    "IG_EXPLORE_FUNNEL",
+    "X_PIPELINE",
+    "X_RANKER"
+  ]
+}

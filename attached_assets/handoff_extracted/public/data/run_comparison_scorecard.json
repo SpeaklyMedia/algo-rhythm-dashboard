@@ -1,0 +1,153 @@
+{
+  "generated_at": "2026-04-15T00:09:20.107241Z",
+  "review_id": "20260415T000500Z",
+  "scoring_dimensions": [
+    "input_completeness",
+    "artifact_completeness",
+    "platform_coverage",
+    "selected_card_depth",
+    "assumption_labeling_compliance",
+    "validation_checks"
+  ],
+  "ranked_runs": [
+    {
+      "run_id": "20260414T232200Z",
+      "generated_at": "2026-04-14T23:27:56.516526Z",
+      "promoted_canonical": true,
+      "promotable": true,
+      "total_score": 100,
+      "dimension_scores": {
+        "input_completeness": 15,
+        "artifact_completeness": 25,
+        "platform_coverage": 20,
+        "selected_card_depth": 10,
+        "assumption_labeling_compliance": 15,
+        "validation_checks": 15
+      },
+      "selected_platform_count": 4,
+      "target_platform_count": 4,
+      "selected_card_count": 8,
+      "skipped_platforms": [],
+      "summary": {
+        "target_platform_count": 4,
+        "selected_platform_count": 4,
+        "selected_card_count": 8,
+        "trend_count": 3,
+        "assumption_labeled_trend_count": 3,
+        "skipped_platforms": [],
+        "viability_total_score": 89,
+        "viability_recommendation": "PRIORITIZE_NOW"
+      },
+      "exclusion_reasons": [],
+      "rank": 1
+    },
+    {
+      "run_id": "20260414T232000Z",
+      "generated_at": "2026-04-14T23:27:56.529166Z",
+      "promoted_canonical": false,
+      "promotable": true,
+      "total_score": 100,
+      "dimension_scores": {
+        "input_completeness": 15,
+        "artifact_completeness": 25,
+        "platform_coverage": 20,
+        "selected_card_depth": 10,
+        "assumption_labeling_compliance": 15,
+        "validation_checks": 15
+      },
+      "selected_platform_count": 4,
+      "target_platform_count": 4,
+      "selected_card_count": 8,
+      "skipped_platforms": [],
+      "summary": {
+        "target_platform_count": 4,
+        "selected_platform_count": 4,
+        "selected_card_count": 8,
+        "trend_count": 3,
+        "assumption_labeled_trend_count": 3,
+        "skipped_platforms": [],
+        "viability_total_score": 89,
+        "viability_recommendation": "PRIORITIZE_NOW"
+      },
+      "exclusion_reasons": [],
+      "rank": 2
+    },
+    {
+      "run_id": "20260414T232500Z",
+      "generated_at": "2026-04-14T23:28:14.964864Z",
+      "promoted_canonical": true,
+      "promotable": true,
+      "total_score": 100,
+      "dimension_scores": {
+        "input_completeness": 15,
+        "artifact_completeness": 25,
+        "platform_coverage": 20,
+        "selected_card_depth": 10,
+        "assumption_labeling_compliance": 15,
+        "validation_checks": 15
+      },
+      "selected_platform_count": 4,
+      "target_platform_count": 4,
+      "selected_card_count": 8,
+      "skipped_platforms": [],
+      "summary": {
+        "target_platform_count": 4,
+        "selected_platform_count": 4,
+        "selected_card_count": 8,
+        "trend_count": 3,
+        "assumption_labeled_trend_count": 3,
+        "skipped_platforms": [],
+        "viability_total_score": 89,
+        "viability_recommendation": "PRIORITIZE_NOW"
+      },
+      "exclusion_reasons": [],
+      "rank": 3
+    }
+  ],
+  "excluded_runs": [
+    {
+      "run_id": "20260414T231500Z",
+      "run_dir": "04_OUTPUTS/STRATEGY_RUNS/20260414T231500Z",
+      "run_manifest_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T231500Z/RUN_MANIFEST.json",
+      "run_manifest_sha256": "46e2d9762cafe0d4dcc96b9df6c428f05d43baa4c57acea41418a3c3516996e5",
+      "status": "PASS",
+      "promoted_canonical": false,
+      "brief_sha256": "3141ce914e5e3eaa79614593eec67b5a166127e960fb6bd9b129b6810cfd85f9",
+      "generated_at": "2026-04-14T23:27:17.146102Z",
+      "included_in_ranking": false,
+      "promotable": false,
+      "exclusion_reasons": [
+        "output_path_mismatch:CONTENT_OBJECT.json",
+        "output_path_mismatch:TREND_SHORTLIST.json",
+        "output_path_mismatch:PLATFORM_SIGNAL_SELECTION.json",
+        "output_path_mismatch:VIABILITY_SCORECARD.json",
+        "output_path_mismatch:FOUR_TIER_ADAPTATIONS.json",
+        "output_path_mismatch:EXPERIMENT_PLAN.json",
+        "output_path_mismatch:CAMPAIGN_LEDGER.seed.json",
+        "output_path_mismatch:STRATEGY_ARTIFACT_SET_SUMMARY.md"
+      ]
+    },
+    {
+      "run_id": "20260414T231700Z",
+      "run_dir": "04_OUTPUTS/STRATEGY_RUNS/20260414T231700Z",
+      "run_manifest_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T231700Z/RUN_MANIFEST.json",
+      "run_manifest_sha256": "07be0a17b3e33fbc5e92190877f4c96d65cec939cd20424c454946b65c125a77",
+      "status": "PASS",
+      "promoted_canonical": true,
+      "brief_sha256": "3141ce914e5e3eaa79614593eec67b5a166127e960fb6bd9b129b6810cfd85f9",
+      "generated_at": "2026-04-14T23:27:17.269615Z",
+      "included_in_ranking": false,
+      "promotable": false,
+      "exclusion_reasons": [
+        "output_path_mismatch:CONTENT_OBJECT.json",
+        "output_path_mismatch:TREND_SHORTLIST.json",
+        "output_path_mismatch:PLATFORM_SIGNAL_SELECTION.json",
+        "output_path_mismatch:VIABILITY_SCORECARD.json",
+        "output_path_mismatch:FOUR_TIER_ADAPTATIONS.json",
+        "output_path_mismatch:EXPERIMENT_PLAN.json",
+        "output_path_mismatch:CAMPAIGN_LEDGER.seed.json",
+        "output_path_mismatch:STRATEGY_ARTIFACT_SET_SUMMARY.md"
+      ]
+    }
+  ]
+}

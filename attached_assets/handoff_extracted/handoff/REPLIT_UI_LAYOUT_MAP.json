@@ -1,0 +1,66 @@
+{
+  "version": "r24-layout-v1",
+  "shell": {
+    "navigation": "left_rail",
+    "header": "status_strip_plus_page_header",
+    "content": "hero_panel_then_modular_cards",
+    "responsive_mode": "desktop_first_tablet_safe"
+  },
+  "pages": [
+    {
+      "id": "overview",
+      "hero": "lane_b_delivery_posture",
+      "sections": [
+        "review_bound_package_state",
+        "batch_state",
+        "required_state_distinctions",
+        "contract_warnings"
+      ]
+    },
+    {
+      "id": "strategy",
+      "hero": "strategy_substrate",
+      "sections": [
+        "trend_shortlist",
+        "viability_scorecard",
+        "platform_selections",
+        "adaptations",
+        "experiment_plan"
+      ]
+    },
+    {
+      "id": "review",
+      "hero": "latest_review_recommendation",
+      "sections": [
+        "ranked_runs",
+        "excluded_runs"
+      ]
+    },
+    {
+      "id": "package",
+      "hero": "latest_package",
+      "sections": [
+        "package_manifest_facts",
+        "selected_signal_cards"
+      ]
+    },
+    {
+      "id": "batch",
+      "hero": "latest_batch",
+      "sections": [
+        "batch_manifest_facts",
+        "included_run_packages"
+      ]
+    },
+    {
+      "id": "handoff",
+      "hero": "canonical_handoff_set",
+      "sections": [
+        "contract_metadata",
+        "missing_data_behavior",
+        "design_authority",
+        "replit_handoff_packet"
+      ]
+    }
+  ]
+}

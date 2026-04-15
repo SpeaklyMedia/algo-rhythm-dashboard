@@ -1,0 +1,410 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-04-15T14:23:31.305801Z",
+  "contract_version": "r24-replit-ui-v1",
+  "app": {
+    "name": "strategy_dashboard_replit",
+    "title": "Lane B Strategy Review Dashboard",
+    "description": "Static seeded dashboard for reviewing the promoted run, latest successful run, review, package, batch, and handoff surfaces.",
+    "data_mode": "static_json",
+    "target_runtime": "React + Vite",
+    "audience": "internal_operator_strategy_reviewer",
+    "handoff_mode": "replit_ui_packet"
+  },
+  "summary": {
+    "top_level_alias_run_id": "20260414T232200Z",
+    "top_level_alias_candidate_ids": [
+      "20260414T232200Z"
+    ],
+    "latest_successful_run_id": "20260414T232500Z",
+    "latest_review_recommended_run_id": "20260414T232200Z",
+    "latest_package_run_id": "20260414T232200Z",
+    "latest_batch_review_id": "20260415T000500Z",
+    "latest_batch_run_ids": [
+      "20260414T232200Z",
+      "20260414T232000Z",
+      "20260414T232500Z"
+    ]
+  },
+  "warnings": [
+    "Latest successful run differs from the current top-level alias source run."
+  ],
+  "navigation": [
+    {
+      "id": "overview",
+      "label": "Overview",
+      "subtitle": "Promoted, latest, review, package, batch"
+    },
+    {
+      "id": "strategy",
+      "label": "Strategy",
+      "subtitle": "Content, trends, scorecard, platform decisions"
+    },
+    {
+      "id": "review",
+      "label": "Review",
+      "subtitle": "Recommendation, ranked runs, exclusions"
+    },
+    {
+      "id": "package",
+      "label": "Package",
+      "subtitle": "Latest package facts and selected cards"
+    },
+    {
+      "id": "batch",
+      "label": "Batch",
+      "subtitle": "Reviewed cohort and included package modes"
+    },
+    {
+      "id": "handoff",
+      "label": "Handoff",
+      "subtitle": "Canonical downloads and contract metadata"
+    }
+  ],
+  "ui_contract": {
+    "design_authority": {
+      "shell_navigation": {
+        "source": "Modal-Nodal",
+        "applies_to": "dark-neutral shell, top status strip, pill navigation tone",
+        "notes": "Use restrained cyan signal color and low-glare premium surfaces."
+      },
+      "lane_hierarchy": {
+        "source": "ThetaFrame",
+        "applies_to": "page hierarchy, hero-summary-first layout, status semantics",
+        "notes": "Keep the lane structure explicit before secondary detail panels."
+      },
+      "function_modules": {
+        "source": "Yuki",
+        "applies_to": "roadmap cards, selectable function groups, modular canvases",
+        "notes": "Reuse layout discipline, not the anime-neon palette."
+      },
+      "operator_tone": {
+        "source": "Flipper local scaffold",
+        "applies_to": "local-first wording, blunt controls, fail-closed behavior",
+        "notes": "Do not treat Flipper as the visual brand system."
+      }
+    },
+    "pages": [
+      {
+        "id": "overview",
+        "label": "Overview",
+        "subtitle": "Promoted, latest, review, package, batch",
+        "required_dataset_ids": [
+          "latest_run",
+          "latest_review",
+          "latest_package",
+          "latest_batch"
+        ]
+      },
+      {
+        "id": "strategy",
+        "label": "Strategy",
+        "subtitle": "Content, trends, scorecard, platform decisions",
+        "required_dataset_ids": [
+          "content_object",
+          "trend_shortlist",
+          "platform_signal_selection",
+          "viability_scorecard",
+          "four_tier_adaptations",
+          "experiment_plan",
+          "campaign_ledger_seed"
+        ]
+      },
+      {
+        "id": "review",
+        "label": "Review",
+        "subtitle": "Recommendation, ranked runs, exclusions",
+        "required_dataset_ids": [
+          "promotion_recommendation",
+          "run_comparison_scorecard",
+          "run_review_index"
+        ]
+      },
+      {
+        "id": "package",
+        "label": "Package",
+        "subtitle": "Latest package facts and selected cards",
+        "required_dataset_ids": [
+          "latest_package",
+          "package_manifest",
+          "selected_signal_cards"
+        ]
+      },
+      {
+        "id": "batch",
+        "label": "Batch",
+        "subtitle": "Reviewed cohort and included package modes",
+        "required_dataset_ids": [
+          "latest_batch",
+          "batch_manifest",
+          "run_package_index"
+        ]
+      },
+      {
+        "id": "handoff",
+        "label": "Handoff",
+        "subtitle": "Canonical downloads and contract metadata",
+        "required_dataset_ids": []
+      }
+    ],
+    "required_state_distinctions": [
+      "promoted_canonical",
+      "latest_successful_run",
+      "review_recommended_run",
+      "latest_package",
+      "latest_batch"
+    ],
+    "missing_data_behavior": {
+      "required": "block_page_with_error_panel",
+      "optional": "render_unavailable_state"
+    },
+    "data_refresh": {
+      "command": "python3 01_WORKINGSET/strategy_dashboard_replit/tools/sync_dashboard_data.py",
+      "mode": "static_bundle_only"
+    },
+    "download_policy": {
+      "source": "public/downloads only",
+      "bundled_archives": [
+        "latest_package_zip",
+        "latest_batch_zip",
+        "canonical_pointer",
+        "canonical_sha"
+      ],
+      "non_bundled_archives": [
+        "canonical_ssot",
+        "non_bundled_transport",
+        "project_travel",
+        "full_travel"
+      ]
+    }
+  },
+  "handoff_packet": {
+    "artifact_name": "SOCIAL_UTILITY__REPLIT_UI_HANDOFF__20260415__R24.zip",
+    "runtime_files": [
+      ".replit",
+      "replit.nix",
+      "replit.md",
+      "README.md"
+    ],
+    "brief_files": [
+      "handoff/REPLIT_UI_IMPLEMENTATION_BRIEF.md",
+      "handoff/REPLIT_UI_SOURCE_AUTHORITY.md",
+      "handoff/REPLIT_UI_DESIGN_TOKENS.json",
+      "handoff/REPLIT_UI_LAYOUT_MAP.json",
+      "handoff/REPLIT_UI_COMPONENT_SPEC.md",
+      "handoff/REPLIT_UI_WIRING_SPEC.md",
+      "handoff/REPLIT_UI_PROMPT__REFINED.md",
+      "handoff/REPLIT_UI_QA_CHECKLIST.md"
+    ],
+    "delivery_mode": "self-contained_replit_import_packet"
+  },
+  "datasets": {
+    "latest_run": {
+      "public_path": "/data/latest_run.json",
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/LATEST.json",
+      "required": true,
+      "sha256": "a7d4da2f9c8fe475340ffed2c5fe4becc49f86c07c08200a2a53a12c9c34eadc"
+    },
+    "latest_review": {
+      "public_path": "/data/latest_review.json",
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/LATEST_REVIEW.json",
+      "required": true,
+      "sha256": "25068d0417a0b9ae228b1a4b15ce2e5a9626711df4581f17c950e31e9b537de7"
+    },
+    "latest_package": {
+      "public_path": "/data/latest_package.json",
+      "source_path": "04_OUTPUTS/STRATEGY_PACKAGES/LATEST_PACKAGE.json",
+      "required": true,
+      "sha256": "33f75a6d32bd6b288ae31b80ef68662c897107e859a74aa240b3c06fca93f6be"
+    },
+    "latest_batch": {
+      "public_path": "/data/latest_batch.json",
+      "source_path": "04_OUTPUTS/STRATEGY_BATCHES/LATEST_BATCH.json",
+      "required": true,
+      "sha256": "653c2b1685c88ebda0017f6b0fe2460d0418395036768d2f0f07318a186b17e8"
+    },
+    "content_object": {
+      "public_path": "/data/content_object.json",
+      "source_path": "04_OUTPUTS/CONTENT_OBJECT.json",
+      "required": true,
+      "sha256": "55a2903f5efed58d3a6a7f80407b7c0201807a09307cfd3f3f80863c661d9989"
+    },
+    "trend_shortlist": {
+      "public_path": "/data/trend_shortlist.json",
+      "source_path": "04_OUTPUTS/TREND_SHORTLIST.json",
+      "required": true,
+      "sha256": "fef97f53f1e747671cb46bec72afd1f2382140ff9cffe165ea350e1e87095a79"
+    },
+    "platform_signal_selection": {
+      "public_path": "/data/platform_signal_selection.json",
+      "source_path": "04_OUTPUTS/PLATFORM_SIGNAL_SELECTION.json",
+      "required": true,
+      "sha256": "ec63248073a6517d9ecee2a24f27e93249c2c1d61de664e2c0dda0f4dab4438f"
+    },
+    "viability_scorecard": {
+      "public_path": "/data/viability_scorecard.json",
+      "source_path": "04_OUTPUTS/VIABILITY_SCORECARD.json",
+      "required": true,
+      "sha256": "9e052e15b268797c58dd4f2a8e15f882e3a2db86a37bb2326084886eea85e136"
+    },
+    "four_tier_adaptations": {
+      "public_path": "/data/four_tier_adaptations.json",
+      "source_path": "04_OUTPUTS/FOUR_TIER_ADAPTATIONS.json",
+      "required": true,
+      "sha256": "5ccecaa49e9171eda14b7de30145f5b82cbcb347d4caad168b454f7e6d8bffe1"
+    },
+    "experiment_plan": {
+      "public_path": "/data/experiment_plan.json",
+      "source_path": "04_OUTPUTS/EXPERIMENT_PLAN.json",
+      "required": true,
+      "sha256": "f727095a2ba455766fcac0ac58139eb28d8772ebdcdb3540798e4f8390ff6d00"
+    },
+    "campaign_ledger_seed": {
+      "public_path": "/data/campaign_ledger_seed.json",
+      "source_path": "04_OUTPUTS/CAMPAIGN_LEDGER.seed.json",
+      "required": false,
+      "sha256": "704e103c782bddf3e8815c530ba8a967ad691984551fe8dd9fe26a284e7611da"
+    },
+    "promotion_recommendation": {
+      "public_path": "/data/promotion_recommendation.json",
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/PROMOTION_RECOMMENDATION.json",
+      "required": true,
+      "sha256": "59e95419d6ae688b24eb1969f0d4c0bfd2b934a5d1bafb9a76c9fabdadfa94da"
+    },
+    "run_comparison_scorecard": {
+      "public_path": "/data/run_comparison_scorecard.json",
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/RUN_COMPARISON_SCORECARD.json",
+      "required": true,
+      "sha256": "9691593e491d451ff59ce54a39d858ce12cc095bdf044c8e05f06fd385fb6147"
+    },
+    "run_review_index": {
+      "public_path": "/data/run_review_index.json",
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/RUN_REVIEW_INDEX.json",
+      "required": true,
+      "sha256": "d9ec7647f4006f2363fe7835034d4798c3646c52ce38d383acf1e604a5e21b82"
+    },
+    "package_manifest": {
+      "public_path": "/data/package_manifest.json",
+      "source_path": "04_OUTPUTS/STRATEGY_PACKAGES/20260415T003909Z/PACKAGE_MANIFEST.json",
+      "required": true,
+      "sha256": "c1266e5013ae5bc007d6d4c78b7c6fa62ecb5a2d36e51f66ce8b62a175d9a456"
+    },
+    "selected_signal_cards": {
+      "public_path": "/data/selected_signal_cards.json",
+      "source_path": "04_OUTPUTS/STRATEGY_PACKAGES/20260415T003909Z/SELECTED_SIGNAL_CARDS.json",
+      "required": false,
+      "sha256": "1d0edfcff0673df29a17dea1d939c1a4f575ee508d22da29d457ab73c337e5ca"
+    },
+    "batch_manifest": {
+      "public_path": "/data/batch_manifest.json",
+      "source_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/BATCH_MANIFEST.json",
+      "required": true,
+      "sha256": "5a6818fb4563ef45b9066ed9b8f011fd55bf6b0d349bfd300591946b77cdde1d"
+    },
+    "run_package_index": {
+      "public_path": "/data/run_package_index.json",
+      "source_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/RUN_PACKAGE_INDEX.json",
+      "required": false,
+      "sha256": "aab9308c92a3767dcdbae5118cfae5918d5fe1a3819b0307c74e567fbcd070ad"
+    }
+  },
+  "downloads": [
+    {
+      "id": "canonical_pointer",
+      "label": "CANONICAL_POINTER SSOT_LATEST",
+      "filename": "CANONICAL_POINTER__SSOT_LATEST.txt",
+      "public_path": "/downloads/CANONICAL_POINTER__SSOT_LATEST.txt",
+      "bundled": true,
+      "source_path": "transports/project_folder_travel/CANONICAL_POINTER__SSOT_LATEST.txt",
+      "sha256": "8986015dcfc88554f4c8347fa99bd6e44b6bd540b82a2f0ae58e804eecf96657",
+      "size_bytes": 52,
+      "hash_note": null
+    },
+    {
+      "id": "canonical_sha",
+      "label": "CANONICAL_SHA256 SSOT_LATEST",
+      "filename": "CANONICAL_SHA256__SSOT_LATEST.txt",
+      "public_path": "/downloads/CANONICAL_SHA256__SSOT_LATEST.txt",
+      "bundled": true,
+      "source_path": "transports/project_folder_travel/CANONICAL_SHA256__SSOT_LATEST.txt",
+      "sha256": "7a3539cb3b0d44def7cbdb11a4be974e6a2595e461a73bc49eccdca6e9b6eda2",
+      "size_bytes": 65,
+      "hash_note": null
+    },
+    {
+      "id": "canonical_ssot",
+      "label": "SOCIAL_UTILITY SSOT MVP_LANE_1 20260409 R24",
+      "filename": "SOCIAL_UTILITY__SSOT__MVP_LANE_1__20260409__R24.zip",
+      "public_path": null,
+      "bundled": false,
+      "source_path": "raw_downloads/SOCIAL_UTILITY__SSOT__MVP_LANE_1__20260409__R24.zip",
+      "sha256": null,
+      "size_bytes": null,
+      "hash_note": "See bundled selector files or external export receipts for canonical archive hashes."
+    },
+    {
+      "id": "non_bundled_transport",
+      "label": "SOCIAL_UTILITY NON_BUNDLED_ARTIFACTS 20260415 R24_TRANSPORT",
+      "filename": "SOCIAL_UTILITY__NON_BUNDLED_ARTIFACTS__20260415__R24_TRANSPORT.zip",
+      "public_path": null,
+      "bundled": false,
+      "source_path": "raw_downloads/SOCIAL_UTILITY__NON_BUNDLED_ARTIFACTS__20260415__R24_TRANSPORT.zip",
+      "sha256": null,
+      "size_bytes": null,
+      "hash_note": "See bundled selector files or external export receipts for canonical archive hashes."
+    },
+    {
+      "id": "project_travel",
+      "label": "SOCIAL_UTILITY PROJECT_FOLDER_TRAVEL 20260409 R24",
+      "filename": "SOCIAL_UTILITY__PROJECT_FOLDER_TRAVEL__20260409__R24.zip",
+      "public_path": null,
+      "bundled": false,
+      "source_path": "raw_downloads/SOCIAL_UTILITY__PROJECT_FOLDER_TRAVEL__20260409__R24.zip",
+      "sha256": null,
+      "size_bytes": null,
+      "hash_note": "See bundled selector files or external export receipts for canonical archive hashes."
+    },
+    {
+      "id": "full_travel",
+      "label": "SOCIAL_UTILITY FULL_PROJECT_TRAVEL 20260409 R24",
+      "filename": "SOCIAL_UTILITY__FULL_PROJECT_TRAVEL__20260409__R24.zip",
+      "public_path": null,
+      "bundled": false,
+      "source_path": "raw_downloads/SOCIAL_UTILITY__FULL_PROJECT_TRAVEL__20260409__R24.zip",
+      "sha256": null,
+      "size_bytes": null,
+      "hash_note": "See bundled selector files or external export receipts for canonical archive hashes."
+    },
+    {
+      "id": "latest_package_zip",
+      "label": "STRATEGY_RUN_PACKAGE 20260414T232200Z 20260415T003909Z",
+      "filename": "STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T003909Z.zip",
+      "public_path": "/downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T003909Z.zip",
+      "bundled": true,
+      "source_path": "raw_downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T003909Z.zip",
+      "sha256": "3a142ca8e1b504972d750a561433818c0bd0887bb20a9a071552ee9953f33c9e",
+      "size_bytes": 20638,
+      "hash_note": null
+    },
+    {
+      "id": "latest_batch_zip",
+      "label": "STRATEGY_RUN_BATCH 20260415T000500Z 20260415T044337Z",
+      "filename": "STRATEGY_RUN_BATCH__20260415T000500Z__20260415T044337Z.zip",
+      "public_path": "/downloads/STRATEGY_RUN_BATCH__20260415T000500Z__20260415T044337Z.zip",
+      "bundled": true,
+      "source_path": "raw_downloads/STRATEGY_RUN_BATCH__20260415T000500Z__20260415T044337Z.zip",
+      "sha256": "b81fef8032a1f6347a99cbf52dc8f5b376b68c3f7041c306edead5a40c66a7fd",
+      "size_bytes": 69695,
+      "hash_note": null
+    }
+  ],
+  "top_level_alias_hashes": {
+    "CONTENT_OBJECT.json": "55a2903f5efed58d3a6a7f80407b7c0201807a09307cfd3f3f80863c661d9989",
+    "TREND_SHORTLIST.json": "fef97f53f1e747671cb46bec72afd1f2382140ff9cffe165ea350e1e87095a79",
+    "PLATFORM_SIGNAL_SELECTION.json": "ec63248073a6517d9ecee2a24f27e93249c2c1d61de664e2c0dda0f4dab4438f",
+    "VIABILITY_SCORECARD.json": "9e052e15b268797c58dd4f2a8e15f882e3a2db86a37bb2326084886eea85e136",
+    "FOUR_TIER_ADAPTATIONS.json": "5ccecaa49e9171eda14b7de30145f5b82cbcb347d4caad168b454f7e6d8bffe1",
+    "EXPERIMENT_PLAN.json": "f727095a2ba455766fcac0ac58139eb28d8772ebdcdb3540798e4f8390ff6d00",
+    "CAMPAIGN_LEDGER.seed.json": "704e103c782bddf3e8815c530ba8a967ad691984551fe8dd9fe26a284e7611da"
+  }
+}

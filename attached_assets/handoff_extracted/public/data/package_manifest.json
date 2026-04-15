@@ -1,0 +1,191 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-04-15T00:42:13.304054Z",
+  "package_command": "python3 01_WORKINGSET/strategy_toolset/tools/assemble_strategy_run_package.py",
+  "package_id": "20260415T003909Z",
+  "package_mode": "promoted_canonical",
+  "run": {
+    "run_id": "20260414T232200Z",
+    "run_dir": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z",
+    "run_manifest_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/RUN_MANIFEST.json",
+    "run_manifest_sha256": "dcee78f4c8cbd6e00c52b3de0ff73a600d729839a6f3170ff48ab5545ad1e45f",
+    "promoted_canonical": true
+  },
+  "review": {
+    "review_id": "20260415T000500Z",
+    "review_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/PROMOTION_RECOMMENDATION.json",
+    "review_sha256": "59e95419d6ae688b24eb1969f0d4c0bfd2b934a5d1bafb9a76c9fabdadfa94da",
+    "review_receipt_path": "05_RECEIPTS/STRATEGY_RUN_REVIEW_REPORT__20260414__R17.json",
+    "review_receipt_sha256": "81becebd4bde5bfcf0a057d348979aada3edb7e684b22687a1191b4d519fa265",
+    "promotion_receipt_path": "05_RECEIPTS/STRATEGY_RUN_PROMOTION_REPORT__20260414__R17.json",
+    "promotion_receipt_sha256": "d36b3a7100da9b8c63b6ee4f8c2c2c108032458c82151f78df3aab6d4dfa6add"
+  },
+  "source_inputs": {
+    "brief_path": "01_WORKINGSET/strategy_toolset/inputs/sample_content_brief.json",
+    "brief_sha256": "3141ce914e5e3eaa79614593eec67b5a166127e960fb6bd9b129b6810cfd85f9",
+    "brief_schema_path": "01_WORKINGSET/strategy_toolset/inputs/content_brief.schema.json",
+    "brief_schema_sha256": "f12fc288b1cc2271037bd9497db7750b86f47e1afd9200b9a660101286eca8c5",
+    "card_library_path": "04_OUTPUTS/SIGNAL_PRIORITY_CARD_LIBRARY.json",
+    "card_library_sha256": "6d5a30db39812c941ebb745bd6e3a14cd82cabb9931e751dcbde9b2519cd5797"
+  },
+  "copied_artifacts": {
+    "CONTENT_OBJECT.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/CONTENT_OBJECT.json",
+      "source_sha256": "55a2903f5efed58d3a6a7f80407b7c0201807a09307cfd3f3f80863c661d9989",
+      "packaged_path": "CONTENT_OBJECT.json",
+      "packaged_sha256": "55a2903f5efed58d3a6a7f80407b7c0201807a09307cfd3f3f80863c661d9989"
+    },
+    "TREND_SHORTLIST.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/TREND_SHORTLIST.json",
+      "source_sha256": "fef97f53f1e747671cb46bec72afd1f2382140ff9cffe165ea350e1e87095a79",
+      "packaged_path": "TREND_SHORTLIST.json",
+      "packaged_sha256": "fef97f53f1e747671cb46bec72afd1f2382140ff9cffe165ea350e1e87095a79"
+    },
+    "PLATFORM_SIGNAL_SELECTION.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/PLATFORM_SIGNAL_SELECTION.json",
+      "source_sha256": "ec63248073a6517d9ecee2a24f27e93249c2c1d61de664e2c0dda0f4dab4438f",
+      "packaged_path": "PLATFORM_SIGNAL_SELECTION.json",
+      "packaged_sha256": "ec63248073a6517d9ecee2a24f27e93249c2c1d61de664e2c0dda0f4dab4438f"
+    },
+    "VIABILITY_SCORECARD.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/VIABILITY_SCORECARD.json",
+      "source_sha256": "9e052e15b268797c58dd4f2a8e15f882e3a2db86a37bb2326084886eea85e136",
+      "packaged_path": "VIABILITY_SCORECARD.json",
+      "packaged_sha256": "9e052e15b268797c58dd4f2a8e15f882e3a2db86a37bb2326084886eea85e136"
+    },
+    "FOUR_TIER_ADAPTATIONS.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/FOUR_TIER_ADAPTATIONS.json",
+      "source_sha256": "5ccecaa49e9171eda14b7de30145f5b82cbcb347d4caad168b454f7e6d8bffe1",
+      "packaged_path": "FOUR_TIER_ADAPTATIONS.json",
+      "packaged_sha256": "5ccecaa49e9171eda14b7de30145f5b82cbcb347d4caad168b454f7e6d8bffe1"
+    },
+    "EXPERIMENT_PLAN.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/EXPERIMENT_PLAN.json",
+      "source_sha256": "f727095a2ba455766fcac0ac58139eb28d8772ebdcdb3540798e4f8390ff6d00",
+      "packaged_path": "EXPERIMENT_PLAN.json",
+      "packaged_sha256": "f727095a2ba455766fcac0ac58139eb28d8772ebdcdb3540798e4f8390ff6d00"
+    },
+    "CAMPAIGN_LEDGER.seed.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/CAMPAIGN_LEDGER.seed.json",
+      "source_sha256": "704e103c782bddf3e8815c530ba8a967ad691984551fe8dd9fe26a284e7611da",
+      "packaged_path": "CAMPAIGN_LEDGER.seed.json",
+      "packaged_sha256": "704e103c782bddf3e8815c530ba8a967ad691984551fe8dd9fe26a284e7611da"
+    },
+    "STRATEGY_ARTIFACT_SET_SUMMARY.md": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/STRATEGY_ARTIFACT_SET_SUMMARY.md",
+      "source_sha256": "9a02b94ef2abae8e83f96b69af29f3f289d9d1fad1cf97f995ec159bd4cc94d7",
+      "packaged_path": "STRATEGY_ARTIFACT_SET_SUMMARY.md",
+      "packaged_sha256": "9a02b94ef2abae8e83f96b69af29f3f289d9d1fad1cf97f995ec159bd4cc94d7"
+    },
+    "RUN_MANIFEST.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232200Z/RUN_MANIFEST.json",
+      "source_sha256": "dcee78f4c8cbd6e00c52b3de0ff73a600d729839a6f3170ff48ab5545ad1e45f",
+      "packaged_path": "RUN_MANIFEST.json",
+      "packaged_sha256": "dcee78f4c8cbd6e00c52b3de0ff73a600d729839a6f3170ff48ab5545ad1e45f"
+    },
+    "sample_content_brief.json": {
+      "source_path": "01_WORKINGSET/strategy_toolset/inputs/sample_content_brief.json",
+      "source_sha256": "3141ce914e5e3eaa79614593eec67b5a166127e960fb6bd9b129b6810cfd85f9",
+      "packaged_path": "sample_content_brief.json",
+      "packaged_sha256": "3141ce914e5e3eaa79614593eec67b5a166127e960fb6bd9b129b6810cfd85f9"
+    },
+    "content_brief.schema.json": {
+      "source_path": "01_WORKINGSET/strategy_toolset/inputs/content_brief.schema.json",
+      "source_sha256": "f12fc288b1cc2271037bd9497db7750b86f47e1afd9200b9a660101286eca8c5",
+      "packaged_path": "content_brief.schema.json",
+      "packaged_sha256": "f12fc288b1cc2271037bd9497db7750b86f47e1afd9200b9a660101286eca8c5"
+    },
+    "PROMOTION_RECOMMENDATION.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/PROMOTION_RECOMMENDATION.json",
+      "source_sha256": "59e95419d6ae688b24eb1969f0d4c0bfd2b934a5d1bafb9a76c9fabdadfa94da",
+      "packaged_path": "PROMOTION_RECOMMENDATION.json",
+      "packaged_sha256": "59e95419d6ae688b24eb1969f0d4c0bfd2b934a5d1bafb9a76c9fabdadfa94da"
+    },
+    "RUN_REVIEW_INDEX.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/RUN_REVIEW_INDEX.json",
+      "source_sha256": "d9ec7647f4006f2363fe7835034d4798c3646c52ce38d383acf1e604a5e21b82",
+      "packaged_path": "RUN_REVIEW_INDEX.json",
+      "packaged_sha256": "d9ec7647f4006f2363fe7835034d4798c3646c52ce38d383acf1e604a5e21b82"
+    },
+    "RUN_COMPARISON_SCORECARD.json": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/RUN_COMPARISON_SCORECARD.json",
+      "source_sha256": "9691593e491d451ff59ce54a39d858ce12cc095bdf044c8e05f06fd385fb6147",
+      "packaged_path": "RUN_COMPARISON_SCORECARD.json",
+      "packaged_sha256": "9691593e491d451ff59ce54a39d858ce12cc095bdf044c8e05f06fd385fb6147"
+    },
+    "RUN_REVIEW_SUMMARY.md": {
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/RUN_REVIEW_SUMMARY.md",
+      "source_sha256": "0897c22159d7bd9aa5b07183a5121317aa1f3a13c097743426fe57fa9830d74b",
+      "packaged_path": "RUN_REVIEW_SUMMARY.md",
+      "packaged_sha256": "0897c22159d7bd9aa5b07183a5121317aa1f3a13c097743426fe57fa9830d74b"
+    },
+    "STRATEGY_RUN_REVIEW_REPORT__20260414__R17.json": {
+      "source_path": "05_RECEIPTS/STRATEGY_RUN_REVIEW_REPORT__20260414__R17.json",
+      "source_sha256": "81becebd4bde5bfcf0a057d348979aada3edb7e684b22687a1191b4d519fa265",
+      "packaged_path": "STRATEGY_RUN_REVIEW_REPORT__20260414__R17.json",
+      "packaged_sha256": "81becebd4bde5bfcf0a057d348979aada3edb7e684b22687a1191b4d519fa265"
+    },
+    "STRATEGY_RUN_PROMOTION_REPORT__20260414__R17.json": {
+      "source_path": "05_RECEIPTS/STRATEGY_RUN_PROMOTION_REPORT__20260414__R17.json",
+      "source_sha256": "d36b3a7100da9b8c63b6ee4f8c2c2c108032458c82151f78df3aab6d4dfa6add",
+      "packaged_path": "STRATEGY_RUN_PROMOTION_REPORT__20260414__R17.json",
+      "packaged_sha256": "d36b3a7100da9b8c63b6ee4f8c2c2c108032458c82151f78df3aab6d4dfa6add"
+    }
+  },
+  "derived_artifacts": {
+    "SELECTED_SIGNAL_CARDS.json": {
+      "path": "SELECTED_SIGNAL_CARDS.json",
+      "sha256": "1d0edfcff0673df29a17dea1d939c1a4f575ee508d22da29d457ab73c337e5ca"
+    },
+    "PACKAGE_SUMMARY.md": {
+      "path": "PACKAGE_SUMMARY.md",
+      "sha256": "f13b9fb96b2d32684ce331b29adff4c2b78205b0c429bb0d4f67f5d8eae327b3"
+    }
+  },
+  "selected_cards": {
+    "selected_card_ids": [
+      "LI_SHIFT_DWELL",
+      "LI_PIPELINE",
+      "TT_FACTORS",
+      "TT_SHIFT_CONTROLS",
+      "META_UNCONNECTED_SHARE",
+      "IG_EXPLORE_FUNNEL",
+      "X_PIPELINE",
+      "X_RANKER"
+    ],
+    "selected_card_count": 8
+  },
+  "package_zip": {
+    "path": "raw_downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T003909Z.zip",
+    "sha256": "3a142ca8e1b504972d750a561433818c0bd0887bb20a9a071552ee9953f33c9e",
+    "contents_exclude": [
+      "PACKAGE_MANIFEST.json"
+    ]
+  },
+  "negative_checks": [
+    {
+      "name": "missing_run_id",
+      "expected": "run_not_found",
+      "actual": "run_not_found:NONEXISTENT_RUN_ID",
+      "pass": true
+    },
+    {
+      "name": "run_not_in_review",
+      "expected": "run_not_in_review",
+      "actual": "run_not_in_review:20260414T232200Z",
+      "pass": true
+    },
+    {
+      "name": "unresolved_selected_card",
+      "expected": "unresolved_selected_card",
+      "actual": "unresolved_selected_card:LI_PIPELINE",
+      "pass": true
+    },
+    {
+      "name": "source_hash_drift",
+      "expected": "source_hash_drift",
+      "actual": "source_hash_drift:synthetic_hash_drift",
+      "pass": true
+    }
+  ]
+}

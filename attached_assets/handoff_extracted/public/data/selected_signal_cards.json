@@ -1,0 +1,197 @@
+{
+  "generated_at": "2026-04-15T00:42:13.284721Z",
+  "run_id": "20260414T232200Z",
+  "review_id": "20260415T000500Z",
+  "card_library_generated_at": "2026-04-14T22:32:51Z",
+  "selected_card_ids": [
+    "LI_SHIFT_DWELL",
+    "LI_PIPELINE",
+    "TT_FACTORS",
+    "TT_SHIFT_CONTROLS",
+    "META_UNCONNECTED_SHARE",
+    "IG_EXPLORE_FUNNEL",
+    "X_PIPELINE",
+    "X_RANKER"
+  ],
+  "selected_card_count": 8,
+  "platforms": {
+    "LinkedIn": {
+      "selected_card_ids": [
+        "LI_SHIFT_DWELL",
+        "LI_PIPELINE"
+      ],
+      "selected_cards": [
+        {
+          "card_id": "LI_SHIFT_DWELL",
+          "platform": "LinkedIn",
+          "surface": "Home Feed",
+          "priority": "P1",
+          "claim_type": "shift",
+          "signal_priority_card": "Added dwell-time based P(skip) to reduce skipped updates by downranking high-skip posts.",
+          "operator_implication": "Treat this as a recent platform adjustment; monitor for recency drift and keep claims tied to source_ref.",
+          "claim_ref": "LI_SHIFT_DWELL",
+          "source_ref": [
+            "LI_ENG_DWELL_2020"
+          ],
+          "excerpt_refs": [
+            "EX_LI_DWELL_001",
+            "EX_LI_DWELL_002"
+          ],
+          "status": "SUPPORTED"
+        },
+        {
+          "card_id": "LI_PIPELINE",
+          "platform": "LinkedIn",
+          "surface": "Home Feed",
+          "priority": "P2",
+          "claim_type": "pipeline",
+          "signal_priority_card": "First-pass candidate generation followed by ML second-pass ranking.",
+          "operator_implication": "Design hooks and structure so content survives candidate selection before heavier ranking stages.",
+          "claim_ref": "LI_PIPELINE",
+          "source_ref": [
+            "LI_ENG_DWELL_2020"
+          ],
+          "excerpt_refs": [
+            "EX_LI_DWELL_001",
+            "EX_LI_DWELL_002"
+          ],
+          "status": "SUPPORTED"
+        }
+      ]
+    },
+    "TikTok": {
+      "selected_card_ids": [
+        "TT_FACTORS",
+        "TT_SHIFT_CONTROLS"
+      ],
+      "selected_cards": [
+        {
+          "card_id": "TT_FACTORS",
+          "platform": "TikTok",
+          "surface": "For You",
+          "priority": "P1",
+          "claim_type": "signals",
+          "signal_priority_card": "Ranking uses user interactions, video info, and device/account settings with different weights.",
+          "operator_implication": "Optimize for the strong signals explicitly named in the source, not generic engagement folklore.",
+          "claim_ref": "TT_FACTORS",
+          "source_ref": [
+            "TT_NEWSROOM_FORYOU_EU"
+          ],
+          "excerpt_refs": [
+            "EX_TT_001",
+            "EX_TT_002"
+          ],
+          "status": "SUPPORTED"
+        },
+        {
+          "card_id": "TT_SHIFT_CONTROLS",
+          "platform": "TikTok",
+          "surface": "For You",
+          "priority": "P1",
+          "claim_type": "shift",
+          "signal_priority_card": "Added Manage Topics and Smart Keyword Filters to give users more control over recommendations.",
+          "operator_implication": "Treat this as a recent platform adjustment; monitor for recency drift and keep claims tied to source_ref.",
+          "claim_ref": "TT_SHIFT_CONTROLS",
+          "source_ref": [
+            "TT_NEWSROOM_MANAGE_TOPICS_2025"
+          ],
+          "excerpt_refs": [
+            "EX_TT_003",
+            "EX_TT_004"
+          ],
+          "status": "SUPPORTED"
+        }
+      ]
+    },
+    "Meta": {
+      "selected_card_ids": [
+        "META_UNCONNECTED_SHARE",
+        "IG_EXPLORE_FUNNEL"
+      ],
+      "selected_cards": [
+        {
+          "card_id": "META_UNCONNECTED_SHARE",
+          "platform": "Meta",
+          "surface": "Feeds",
+          "priority": "P1",
+          "claim_type": "shift",
+          "signal_priority_card": "A significant portion of feed content is AI-recommended from accounts a user does not follow (>20%).",
+          "operator_implication": "Treat this as a recent platform adjustment; monitor for recency drift and keep claims tied to source_ref.",
+          "claim_ref": "META_UNCONNECTED_SHARE",
+          "source_ref": [
+            "META_AI_UNCONNECTED_2023"
+          ],
+          "excerpt_refs": [
+            "EX_META_UNC_001",
+            "EX_META_UNC_002"
+          ],
+          "status": "SUPPORTED"
+        },
+        {
+          "card_id": "IG_EXPLORE_FUNNEL",
+          "platform": "Meta",
+          "surface": "Explore",
+          "priority": "P2",
+          "claim_type": "pipeline",
+          "signal_priority_card": "Explore uses multi-stage retrieval and ranking funnel; Two-tower retrieval used for candidate sourcing.",
+          "operator_implication": "Design hooks and structure so content survives candidate selection before heavier ranking stages.",
+          "claim_ref": "IG_EXPLORE_FUNNEL",
+          "source_ref": [
+            "IG_META_ENG_EXPLORE_2023"
+          ],
+          "excerpt_refs": [
+            "EX_IG_EXPLORE_001",
+            "EX_IG_EXPLORE_002"
+          ],
+          "status": "SUPPORTED"
+        }
+      ]
+    },
+    "X": {
+      "selected_card_ids": [
+        "X_PIPELINE",
+        "X_RANKER"
+      ],
+      "selected_cards": [
+        {
+          "card_id": "X_PIPELINE",
+          "platform": "X",
+          "surface": "For You Timeline",
+          "priority": "P2",
+          "claim_type": "pipeline",
+          "signal_priority_card": "Three-stage pipeline: candidate sourcing, ML ranking, heuristics/filters; served by Home Mixer.",
+          "operator_implication": "Design hooks and structure so content survives candidate selection before heavier ranking stages.",
+          "claim_ref": "X_PIPELINE",
+          "source_ref": [
+            "X_ENG_ALGO_2023",
+            "X_GITHUB_THE_ALGORITHM"
+          ],
+          "excerpt_refs": [
+            "EX_X_001",
+            "EX_X_002",
+            "EX_X_003"
+          ],
+          "status": "SUPPORTED"
+        },
+        {
+          "card_id": "X_RANKER",
+          "platform": "X",
+          "surface": "For You Timeline",
+          "priority": "P2",
+          "claim_type": "model",
+          "signal_priority_card": "Ranking uses a ~48M parameter neural network trained on interaction labels.",
+          "operator_implication": "Assume the system generalizes across sparse user/content features; consistency and metadata quality matter.",
+          "claim_ref": "X_RANKER",
+          "source_ref": [
+            "X_ENG_ALGO_2023"
+          ],
+          "excerpt_refs": [
+            "EX_X_001",
+            "EX_X_002"
+          ],
+          "status": "SUPPORTED"
+        }
+      ]
+    }
+  }
+}

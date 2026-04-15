@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-04-14T23:27:56.516526Z",
+  "content_object_ref": "lane_b_foundation_sample",
+  "items": [
+    {
+      "trend_id": "TREND_ASSUMPTION_OPERATOR_CHECKLIST",
+      "label": "Saveable operator checklist framing",
+      "basis": "assumption",
+      "assumption_label": "ASSUMPTION_ONLY",
+      "confidence": "low",
+      "uncertainty_note": "No live trend research was fetched in R16; this is a deterministic planning assumption based on the source asset shape.",
+      "rationale": "The content already behaves like a reusable workflow, so a checklist framing is a plausible save-oriented wrapper.",
+      "applicable_platforms": [
+        "LinkedIn",
+        "TikTok",
+        "Meta",
+        "X"
+      ],
+      "source_content_refs": [
+        "lane_b_foundation_sample"
+      ],
+      "related_card_ids": [
+        "LI_SHIFT_DWELL",
+        "LI_PIPELINE",
+        "TT_FACTORS",
+        "TT_SHIFT_CONTROLS"
+      ],
+      "status": "ASSUMPTION_LABELED"
+    },
+    {
+      "trend_id": "TREND_ASSUMPTION_MULTI_SURFACE_REWRITE",
+      "label": "Single-source multi-surface rewrite packages",
+      "basis": "assumption",
+      "assumption_label": "ASSUMPTION_ONLY",
+      "confidence": "low",
+      "uncertainty_note": "This is a planning assumption about packaging behavior, not a verified current-market trend claim.",
+      "rationale": "The operator goal explicitly aims to reuse one asset across multiple platforms, so a rewrite-package angle is a stable working assumption.",
+      "applicable_platforms": [
+        "LinkedIn",
+        "TikTok",
+        "Meta",
+        "X"
+      ],
+      "source_content_refs": [
+        "lane_b_foundation_sample"
+      ],
+      "related_card_ids": [
+        "LI_PIPELINE",
+        "TT_FACTORS",
+        "TT_SHIFT_CONTROLS",
+        "META_UNCONNECTED_SHARE"
+      ],
+      "status": "ASSUMPTION_LABELED"
+    },
+    {
+      "trend_id": "TREND_ASSUMPTION_EVIDENCE_FIRST_EXPLAINERS",
+      "label": "Evidence-first practical explainers",
+      "basis": "assumption",
+      "assumption_label": "ASSUMPTION_ONLY",
+      "confidence": "low",
+      "uncertainty_note": "This remains an assumption-labeled execution angle until a future pass intentionally adds fresh external research.",
+      "rationale": "The source asset is educational and constraint-heavy, so an evidence-first explainer angle is the safest deterministic trend assumption.",
+      "applicable_platforms": [
+        "LinkedIn",
+        "TikTok",
+        "Meta",
+        "X"
+      ],
+      "source_content_refs": [
+        "lane_b_foundation_sample"
+      ],
+      "related_card_ids": [
+        "META_UNCONNECTED_SHARE",
+        "IG_EXPLORE_FUNNEL",
+        "X_PIPELINE",
+        "X_RANKER"
+      ],
+      "status": "ASSUMPTION_LABELED"
+    }
+  ],
+  "assumption_labeled_count": 3
+}

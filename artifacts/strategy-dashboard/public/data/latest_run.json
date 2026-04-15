@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "latest_successful_run_id": "20260414T232500Z",
+  "run_dir": "04_OUTPUTS/STRATEGY_RUNS/20260414T232500Z",
+  "run_manifest_path": "04_OUTPUTS/STRATEGY_RUNS/20260414T232500Z/RUN_MANIFEST.json",
+  "run_manifest_sha256": "4ae18394197b48888c88f2d6bf51e4b8480ae59af1a26dbd1fbcfcc7c5b524d9",
+  "promoted_canonical": true,
+  "generated_at": "2026-04-14T23:28:14.964864Z"
+}

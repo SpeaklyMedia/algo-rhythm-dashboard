@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-04-14T23:27:56.516526Z",
+  "content_id": "lane_b_foundation_sample",
+  "brief_ref": "lane_b_foundation_sample",
+  "title": "One source asset, four platform rewrites: an evidence-first social workflow",
+  "source_format": "long_form_post",
+  "core_thesis": "Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+  "source_summary": "Use one clear source asset, keep the thesis stable, rewrite the hook and pacing per platform, and let platform signal cards shape emphasis instead of unsupported algorithm folklore.",
+  "source_text": "Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch. A better starting point is one clear source asset with a repeatable rewrite process: keep the core claim stable, adjust the hook and pacing per surface, and let platform-specific ranking signals shape the final version rather than the original idea. The practical workflow is simple: define the thesis, list the strongest proof points, decide what action you want from the reader, then create lean platform-native variants instead of publishing the same post everywhere. This creates a better testing loop and makes it easier to learn what actually travels across platforms without inventing unsupported algorithm myths.",
+  "key_points": [
+    "Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+    "A better starting point is one clear source asset with a repeatable rewrite process: keep the core claim...",
+    "The practical workflow is simple: define the thesis, list the strongest proof points, decide what action you want...",
+    "This creates a better testing loop and makes it easier to learn what actually travels across platforms without..."
+  ],
+  "operator_goal": "Turn one educational source asset into a multi-platform test package that improves reach, saves, and qualified replies without adding unsupported claims.",
+  "primary_cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+  "audience": "Small business operators and solo marketers who need a practical repeatable content workflow.",
+  "constraints": [
+    "No sensational claims about platform algorithms.",
+    "Keep every recommendation tied to evidence-backed platform signal cards.",
+    "No third-party automation, scraping, or outreach language.",
+    "Keep the test plan manual and operator-reviewed."
+  ],
+  "notes": [
+    "Treat trend suggestions as assumptions, not current-market facts.",
+    "Prefer practical hooks over platform slang.",
+    "Optimize for reuse from one source asset."
+  ],
+  "brand_voice": "direct, calm, evidence-first",
+  "offer": "",
+  "target_platforms": [
+    "LinkedIn",
+    "TikTok",
+    "Meta",
+    "X"
+  ],
+  "tags": [
+    "long_form_post",
+    "evidence_first",
+    "multi_platform_rewrite",
+    "manual_experiment"
+  ]
+}

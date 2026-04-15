@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-04-14T23:27:56.516526Z",
+  "content_object_ref": "lane_b_foundation_sample",
+  "trend_shortlist_ref": "TREND_SHORTLIST.json",
+  "selected_card_ids": [
+    "LI_SHIFT_DWELL",
+    "LI_PIPELINE",
+    "TT_FACTORS",
+    "TT_SHIFT_CONTROLS",
+    "META_UNCONNECTED_SHARE",
+    "IG_EXPLORE_FUNNEL",
+    "X_PIPELINE",
+    "X_RANKER"
+  ],
+  "dimensions": {
+    "evidence_alignment": {
+      "score": 90,
+      "reason": "All selected platform recommendations point back to supported Lane A card IDs."
+    },
+    "message_clarity": {
+      "score": 95,
+      "reason": "The brief contains a clear thesis, reusable proof points, and a concrete CTA."
+    },
+    "platform_fit": {
+      "score": 95,
+      "reason": "The generator can map the source asset to supported signal-card selections on each requested platform."
+    },
+    "production_efficiency": {
+      "score": 78,
+      "reason": "A text-first source asset can be rewritten into multiple platform variants with limited structural risk."
+    },
+    "experimentation_readiness": {
+      "score": 85,
+      "reason": "The brief includes constraints, notes, and an explicit operator goal that can be turned into manual test rules."
+    }
+  },
+  "total_score": 89,
+  "recommendation": "PRIORITIZE_NOW",
+  "confidence": "medium",
+  "uncertainty_note": "Trend inputs remain assumption-labeled in R16, so the scorecard is deterministic planning support rather than a market-truth predictor.",
+  "assumption_labeled_trend_count": 3
+}

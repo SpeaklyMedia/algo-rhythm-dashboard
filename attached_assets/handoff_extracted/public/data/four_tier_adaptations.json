@@ -1,0 +1,194 @@
+{
+  "generated_at": "2026-04-14T23:27:56.516526Z",
+  "content_object_ref": "lane_b_foundation_sample",
+  "tiers": [
+    {
+      "tier_id": "T1_CORE",
+      "tier_label": "Core thesis cut",
+      "description": "Lowest lift version that keeps the original thesis intact.",
+      "per_platform": [
+        {
+          "platform": "LinkedIn",
+          "hook_direction": "Use an operator pain point followed by a practical working note built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a proof-led text post with a tight takeaway stack",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "LI_SHIFT_DWELL",
+            "LI_PIPELINE"
+          ]
+        },
+        {
+          "platform": "TikTok",
+          "hook_direction": "Use a one-line pattern interrupt followed by three quick proof beats built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a caption-led short video or talking-head sequence",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "TT_FACTORS",
+            "TT_SHIFT_CONTROLS"
+          ]
+        },
+        {
+          "platform": "Meta",
+          "hook_direction": "Use a saveable frame plus one visually clear takeaway built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a carousel or caption-first explainer with a clear takeaway card",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "META_UNCONNECTED_SHARE",
+            "IG_EXPLORE_FUNNEL"
+          ]
+        },
+        {
+          "platform": "X",
+          "hook_direction": "Use a compressed claim followed by one proving line built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a tight post or short thread with one core thesis",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "X_PIPELINE",
+            "X_RANKER"
+          ]
+        }
+      ]
+    },
+    {
+      "tier_id": "T2_LEAN",
+      "tier_label": "Lean platform rewrite",
+      "description": "Adjust the opening, pacing, and CTA for each target platform.",
+      "per_platform": [
+        {
+          "platform": "LinkedIn",
+          "hook_direction": "Use an operator pain point followed by a practical working note built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a proof-led text post with a tight takeaway stack",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "LI_SHIFT_DWELL",
+            "LI_PIPELINE"
+          ]
+        },
+        {
+          "platform": "TikTok",
+          "hook_direction": "Use a one-line pattern interrupt followed by three quick proof beats built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a caption-led short video or talking-head sequence",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "TT_FACTORS",
+            "TT_SHIFT_CONTROLS"
+          ]
+        },
+        {
+          "platform": "Meta",
+          "hook_direction": "Use a saveable frame plus one visually clear takeaway built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a carousel or caption-first explainer with a clear takeaway card",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "META_UNCONNECTED_SHARE",
+            "IG_EXPLORE_FUNNEL"
+          ]
+        },
+        {
+          "platform": "X",
+          "hook_direction": "Use a compressed claim followed by one proving line built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a tight post or short thread with one core thesis",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "X_PIPELINE",
+            "X_RANKER"
+          ]
+        }
+      ]
+    },
+    {
+      "tier_id": "T3_NATIVE",
+      "tier_label": "Platform-native expansion",
+      "description": "Add stronger surface-specific structure while keeping the same proof base.",
+      "per_platform": [
+        {
+          "platform": "LinkedIn",
+          "hook_direction": "Use an operator pain point followed by a practical working note built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a proof-led text post with a tight takeaway stack",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "LI_SHIFT_DWELL",
+            "LI_PIPELINE"
+          ]
+        },
+        {
+          "platform": "TikTok",
+          "hook_direction": "Use a one-line pattern interrupt followed by three quick proof beats built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a caption-led short video or talking-head sequence",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "TT_FACTORS",
+            "TT_SHIFT_CONTROLS"
+          ]
+        },
+        {
+          "platform": "Meta",
+          "hook_direction": "Use a saveable frame plus one visually clear takeaway built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a carousel or caption-first explainer with a clear takeaway card",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "META_UNCONNECTED_SHARE",
+            "IG_EXPLORE_FUNNEL"
+          ]
+        },
+        {
+          "platform": "X",
+          "hook_direction": "Use a compressed claim followed by one proving line built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a tight post or short thread with one core thesis",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "X_PIPELINE",
+            "X_RANKER"
+          ]
+        }
+      ]
+    },
+    {
+      "tier_id": "T4_CAMPAIGN",
+      "tier_label": "Campaign package",
+      "description": "Turn the asset into a short series with follow-up variants and a manual test path.",
+      "per_platform": [
+        {
+          "platform": "LinkedIn",
+          "hook_direction": "Use an operator pain point followed by a practical working note built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a proof-led text post with a tight takeaway stack",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "LI_SHIFT_DWELL",
+            "LI_PIPELINE"
+          ]
+        },
+        {
+          "platform": "TikTok",
+          "hook_direction": "Use a one-line pattern interrupt followed by three quick proof beats built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a caption-led short video or talking-head sequence",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "TT_FACTORS",
+            "TT_SHIFT_CONTROLS"
+          ]
+        },
+        {
+          "platform": "Meta",
+          "hook_direction": "Use a saveable frame plus one visually clear takeaway built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a carousel or caption-first explainer with a clear takeaway card",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "META_UNCONNECTED_SHARE",
+            "IG_EXPLORE_FUNNEL"
+          ]
+        },
+        {
+          "platform": "X",
+          "hook_direction": "Use a compressed claim followed by one proving line built from the thesis: Most small teams treat each social platform like a separate content machine and burn time rewriting from scratch.",
+          "format_shift": "turn the source into a tight post or short thread with one core thesis",
+          "cta": "Save this workflow, then request the full checklist if you want the reusable planning template.",
+          "supporting_card_ids": [
+            "X_PIPELINE",
+            "X_RANKER"
+          ]
+        }
+      ]
+    }
+  ]
+}

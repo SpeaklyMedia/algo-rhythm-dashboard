@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "review_id": "20260415T000500Z",
+  "review_dir": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z",
+  "promotion_recommendation_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/PROMOTION_RECOMMENDATION.json",
+  "promotion_recommendation_sha256": "59e95419d6ae688b24eb1969f0d4c0bfd2b934a5d1bafb9a76c9fabdadfa94da",
+  "recommended_run_id": "20260414T232200Z",
+  "generated_at": "2026-04-15T00:09:20.107241Z"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "strategy-dashboard-replit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Static-data Lane B dashboard scaffold for Replit handoff",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "vite": "5.4.10"
+  }
+}

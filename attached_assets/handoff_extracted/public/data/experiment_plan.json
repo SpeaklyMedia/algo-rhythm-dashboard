@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-04-14T23:27:56.516526Z",
+  "content_object_ref": "lane_b_foundation_sample",
+  "viability_recommendation": "PRIORITIZE_NOW",
+  "hypotheses": [
+    {
+      "platform": "LinkedIn",
+      "hypothesis": "If the LinkedIn rewrite uses an operator pain point followed by a practical working note and keeps the source thesis intact, the manual test should outperform a generic cross-post on saves, replies, dwell.",
+      "supporting_card_ids": [
+        "LI_SHIFT_DWELL",
+        "LI_PIPELINE"
+      ],
+      "success_checks": [
+        "Operator-observed improvement in saves versus the usual baseline.",
+        "At least one qualitative signal that the rewrite landed, such as replies, comments, or saves tied to the core workflow."
+      ],
+      "pivot_rule": "Pivot the LinkedIn version if the opening hook is weak or the format shift does not match the expected LinkedIn surface behavior.",
+      "kill_rule": "Kill the LinkedIn variant if it requires unsupported claims or cannot be kept inside the manual-review constraints."
+    },
+    {
+      "platform": "TikTok",
+      "hypothesis": "If the TikTok rewrite uses a one-line pattern interrupt followed by three quick proof beats and keeps the source thesis intact, the manual test should outperform a generic cross-post on completion, comments, saves.",
+      "supporting_card_ids": [
+        "TT_FACTORS",
+        "TT_SHIFT_CONTROLS"
+      ],
+      "success_checks": [
+        "Operator-observed improvement in completion versus the usual baseline.",
+        "At least one qualitative signal that the rewrite landed, such as replies, comments, or saves tied to the core workflow."
+      ],
+      "pivot_rule": "Pivot the TikTok version if the opening hook is weak or the format shift does not match the expected TikTok surface behavior.",
+      "kill_rule": "Kill the TikTok variant if it requires unsupported claims or cannot be kept inside the manual-review constraints."
+    },
+    {
+      "platform": "Meta",
+      "hypothesis": "If the Meta rewrite uses a saveable frame plus one visually clear takeaway and keeps the source thesis intact, the manual test should outperform a generic cross-post on saves, shares, comments.",
+      "supporting_card_ids": [
+        "META_UNCONNECTED_SHARE",
+        "IG_EXPLORE_FUNNEL"
+      ],
+      "success_checks": [
+        "Operator-observed improvement in saves versus the usual baseline.",
+        "At least one qualitative signal that the rewrite landed, such as replies, comments, or saves tied to the core workflow."
+      ],
+      "pivot_rule": "Pivot the Meta version if the opening hook is weak or the format shift does not match the expected Meta surface behavior.",
+      "kill_rule": "Kill the Meta variant if it requires unsupported claims or cannot be kept inside the manual-review constraints."
+    },
+    {
+      "platform": "X",
+      "hypothesis": "If the X rewrite uses a compressed claim followed by one proving line and keeps the source thesis intact, the manual test should outperform a generic cross-post on replies, reposts, profile_clicks.",
+      "supporting_card_ids": [
+        "X_PIPELINE",
+        "X_RANKER"
+      ],
+      "success_checks": [
+        "Operator-observed improvement in replies versus the usual baseline.",
+        "At least one qualitative signal that the rewrite landed, such as replies, comments, or saves tied to the core workflow."
+      ],
+      "pivot_rule": "Pivot the X version if the opening hook is weak or the format shift does not match the expected X surface behavior.",
+      "kill_rule": "Kill the X variant if it requires unsupported claims or cannot be kept inside the manual-review constraints."
+    }
+  ],
+  "global_guardrails": [
+    "Keep every platform rewrite tied to supported signal-card IDs.",
+    "Do not promote assumption-labeled trends as external facts.",
+    "Keep the workflow manual and operator-reviewed."
+  ]
+}
