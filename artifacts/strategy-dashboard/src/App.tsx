@@ -168,6 +168,30 @@ function KeyValueTable({ rows }) {
   );
 }
 
+function formatDimensionLabel(key) {
+  return String(key).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function ScoreDimensionBlock({ label, score, reason }) {
+  const numScore = Number(score) || 0;
+  const tone = numScore >= 85 ? 'good' : numScore >= 70 ? 'warn' : 'bad';
+  return (
+    <div className="score-dim">
+      <div className="score-dim__header">
+        <span className="score-dim__label">{label}</span>
+        <span className={`score-dim__num score-dim__num--${tone}`}>{numScore}</span>
+      </div>
+      <div className="score-dim__bar">
+        <div
+          className={`score-dim__fill score-dim__fill--${tone}`}
+          style={{ width: `${Math.min(100, Math.max(0, numScore))}%` }}
+        />
+      </div>
+      {reason && <p className="score-dim__reason">{reason}</p>}
+    </div>
+  );
+}
+
 function EmptyState({ title, detail }) {
   return (
     <div className="empty-state">
@@ -563,12 +587,16 @@ function StrategyPage({ datasets }) {
               <MetricCard label="Recommendation" value={scorecard.recommendation} />
               <MetricCard label="Confidence" value={scorecard.confidence} tone="warn" />
             </div>
-            <KeyValueTable
-              rows={Object.entries(scorecard.dimensions || {}).map(([label, detail]) => ({
-                label,
-                value: `${detail.score} — ${detail.reason}`,
-              }))}
-            />
+            <div className="score-dim-list">
+              {Object.entries(scorecard.dimensions || {}).map(([key, detail]) => (
+                <ScoreDimensionBlock
+                  key={key}
+                  label={formatDimensionLabel(key)}
+                  score={detail.score}
+                  reason={detail.reason}
+                />
+              ))}
+            </div>
           </>
         ) : (
           <EmptyState title="Unavailable" detail="Viability scorecard data is missing." />

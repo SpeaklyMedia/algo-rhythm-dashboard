@@ -1394,6 +1394,130 @@ tbody tr:hover td {
 }
 
 /* ============================================================
+   SCORE DIMENSION BLOCKS — viability scorecard cards
+   ============================================================ */
+
+.score-dim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.score-dim {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  padding: 0.85rem 1rem;
+  border: var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+}
+
+.score-dim__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.score-dim__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  letter-spacing: 0.01em;
+}
+
+.score-dim__num {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.score-dim__num--good {
+  color: hsl(142 58% 48%);
+}
+
+.score-dim__num--warn {
+  color: var(--warm);
+}
+
+.score-dim__num--bad {
+  color: hsl(4 72% 56%);
+}
+
+.score-dim__bar {
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.score-dim__fill {
+  height: 100%;
+  border-radius: 3px;
+  transform-origin: left center;
+  animation: scoreBarFill 540ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.score-dim__fill--good {
+  background: linear-gradient(90deg, hsl(142 58% 38%), hsl(142 58% 54%));
+}
+
+.score-dim__fill--warn {
+  background: linear-gradient(90deg, hsl(35 90% 38%), hsl(35 90% 56%));
+}
+
+.score-dim__fill--bad {
+  background: linear-gradient(90deg, hsl(4 72% 40%), hsl(4 72% 56%));
+}
+
+.score-dim__reason {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* Light mode overrides */
+
+html[data-theme="light"] .score-dim {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 0, 0, 0.07);
+}
+
+html[data-theme="light"] .score-dim__bar {
+  background: rgba(0, 0, 0, 0.07);
+}
+
+html[data-theme="light"] .score-dim__num--good {
+  color: hsl(142 55% 32%);
+}
+
+html[data-theme="light"] .score-dim__num--warn {
+  color: hsl(35 85% 32%);
+}
+
+html[data-theme="light"] .score-dim__num--bad {
+  color: hsl(4 70% 40%);
+}
+
+html[data-theme="light"] .score-dim__fill--good {
+  background: linear-gradient(90deg, hsl(142 55% 32%), hsl(142 55% 48%));
+}
+
+html[data-theme="light"] .score-dim__fill--warn {
+  background: linear-gradient(90deg, hsl(35 85% 32%), hsl(35 85% 50%));
+}
+
+html[data-theme="light"] .score-dim__fill--bad {
+  background: linear-gradient(90deg, hsl(4 70% 36%), hsl(4 70% 52%));
+}
+
+/* ============================================================
    DOWNLOAD LINKS — clean text, no pill chrome
    ============================================================ */
 
