@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'handoff'];
 
@@ -29,31 +29,37 @@ const STRIP_ICONS = {
 const PAGE_DISPLAY = {
   overview: {
     label: 'Health Check',
+    shortLabel: 'Health',
     subtitle: "See what's running, what's promoted, and whether anything needs attention",
     kicker: 'Pipeline status',
   },
   strategy: {
     label: 'Content Strategy',
+    shortLabel: 'Strategy',
     subtitle: 'Understand the plan behind this run — topics, trends, platforms, and scores',
     kicker: 'Strategic substrate',
   },
   review: {
     label: 'Promotion Review',
+    shortLabel: 'Review',
     subtitle: 'Compare all the runs and confirm which one should move forward',
     kicker: 'Make your call',
   },
   package: {
     label: "What's in the Package",
+    shortLabel: 'Package',
     subtitle: 'See exactly what got bundled, which cards were picked, and how it was built',
     kicker: 'Package contents',
   },
   batch: {
     label: 'Run Collection',
+    shortLabel: 'Batch',
     subtitle: 'All runs included in this review cycle — modes, counts, and SHA verification',
     kicker: 'Batch cohort',
   },
   handoff: {
     label: 'Delivery & Downloads',
+    shortLabel: 'Delivery',
     subtitle: 'Get your files, verify artifact integrity, and confirm handoff is complete',
     kicker: 'Canonical handoff',
   },
@@ -191,33 +197,79 @@ function AccountSelector({ title }) {
   );
 }
 
-function PipelineBar({ pages, activePage, onNavigate, datasets }) {
+function getInitialTheme() {
+  if (typeof window === 'undefined') return 'dark';
+  try {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') return saved;
+  } catch (e) {}
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  useLayoutEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('theme', theme); } catch (e) {}
+  }, [theme]);
+
+  function toggle() {
+    setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+  }
+
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={toggle}
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+    >
+      {theme === 'dark' ? '☀' : '☽'}
+    </button>
+  );
+}
+
+function PipelineBar({ pages, activePage, onNavigate, datasets, onHamburger }) {
   return (
     <header className="pipeline-bar" role="navigation" aria-label="Pipeline stages">
-      {pages.map((page, i) => {
-        const display = PAGE_DISPLAY[page.id] || {};
-        const isActive = page.id === activePage;
-        const hasData = pageHasData(page.id, datasets || {});
-        let cls = 'pipeline-bar__stage';
-        if (isActive) cls += ' pipeline-bar__stage--active';
-        else if (!hasData) cls += ' pipeline-bar__stage--dim';
-        return (
-          <span key={page.id} className="pipeline-bar__item">
-            <button
-              type="button"
-              className={cls}
-              onClick={() => onNavigate(page.id)}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <span className="pipeline-bar__num">{i + 1}</span>
-              <span className="pipeline-bar__name">{display.label || page.label}</span>
-            </button>
-            {i < pages.length - 1 && (
-              <span className="pipeline-bar__sep" aria-hidden="true">·</span>
-            )}
-          </span>
-        );
-      })}
+      <button
+        type="button"
+        className="pipeline-bar__hamburger"
+        onClick={onHamburger}
+        aria-label="Toggle navigation menu"
+      >
+        ☰
+      </button>
+      <div className="pipeline-bar__stages">
+        {pages.map((page, i) => {
+          const display = PAGE_DISPLAY[page.id] || {};
+          const isActive = page.id === activePage;
+          const hasData = pageHasData(page.id, datasets || {});
+          let cls = 'pipeline-bar__stage';
+          if (isActive) cls += ' pipeline-bar__stage--active';
+          else if (!hasData) cls += ' pipeline-bar__stage--dim';
+          return (
+            <span key={page.id} className="pipeline-bar__item">
+              <button
+                type="button"
+                className={cls}
+                onClick={() => onNavigate(page.id)}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <span className="pipeline-bar__num">{i + 1}</span>
+                <span className="pipeline-bar__name pipeline-bar__name--full">{display.label || page.label}</span>
+                <span className="pipeline-bar__name pipeline-bar__name--short">{display.shortLabel || display.label}</span>
+              </button>
+              {i < pages.length - 1 && (
+                <span className="pipeline-bar__sep" aria-hidden="true">·</span>
+              )}
+            </span>
+          );
+        })}
+      </div>
+      <ThemeToggle />
     </header>
   );
 }
@@ -320,36 +372,36 @@ function OverviewPage({ index, datasets }) {
           The promoted alias, latest successful run, current review recommendation, and package/batch pointers are
           frozen into the static contract. All data below reads from bundled JSON only.
         </p>
-        <div className="metrics">
-          <MetricCard
-            label="Currently live"
-            value={summary.top_level_alias_run_id || 'Unavailable'}
-            detail={`Candidates: ${(summary.top_level_alias_candidate_ids || []).join(', ') || 'none'}`}
-            tone="good"
-          />
-          <MetricCard
-            label="Most recent run"
-            value={latestRun?.latest_successful_run_id || 'Unavailable'}
-            detail={latestRun?.run_manifest_path || ''}
-            tone="warn"
-          />
-          <MetricCard
-            label="Recommended pick"
-            value={latestReview?.recommended_run_id || 'Unavailable'}
-            detail={latestReview?.review_id || ''}
-            tone="warn"
-          />
-          <MetricCard
-            label="Packaged & ready"
-            value={latestPackage?.run_id || 'Unavailable'}
-            detail={latestPackage?.package_id || ''}
-            tone="good"
-          />
-          <MetricCard
-            label="Batch review"
-            value={latestBatch?.review_id || 'Unavailable'}
-            detail={`${latestBatch?.included_run_ids?.length || 0} included runs`}
-          />
+        <div className="stat-row">
+          <div className="stat-item stat-item--good">
+            <span className="stat-label">Currently live</span>
+            <code className="stat-value">{summary.top_level_alias_run_id || '—'}</code>
+            <span className="stat-detail">{(summary.top_level_alias_candidate_ids || []).join(', ') || 'No candidates'}</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat-item stat-item--warn">
+            <span className="stat-label">Most recent run</span>
+            <code className="stat-value">{latestRun?.latest_successful_run_id || '—'}</code>
+            <span className="stat-detail">{latestRun?.run_manifest_path || 'No path'}</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat-item stat-item--warn">
+            <span className="stat-label">Recommended pick</span>
+            <code className="stat-value">{latestReview?.recommended_run_id || '—'}</code>
+            <span className="stat-detail">{latestReview?.review_id || 'No review ID'}</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat-item stat-item--good">
+            <span className="stat-label">Packaged & ready</span>
+            <code className="stat-value">{latestPackage?.run_id || '—'}</code>
+            <span className="stat-detail">{latestPackage?.package_id || 'No package ID'}</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat-item">
+            <span className="stat-label">Batch review</span>
+            <code className="stat-value">{latestBatch?.review_id || '—'}</code>
+            <span className="stat-detail">{`${latestBatch?.included_run_ids?.length || 0} included runs`}</span>
+          </div>
         </div>
       </section>
 
@@ -950,6 +1002,7 @@ function HandoffPage({ index }) {
 function App() {
   const { loading, fatalError, index, datasets, optionalErrors } = useDashboardData();
   const [activePage, setActivePage] = useState('overview');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const pageDefinitions = useMemo(() => {
     if (!index?.navigation) return [];
@@ -962,6 +1015,11 @@ function App() {
       setActivePage(pageDefinitions[0].id);
     }
   }, [activePage, pageDefinitions]);
+
+  function handleNavigate(pageId) {
+    setActivePage(pageId);
+    setIsSidebarOpen(false);
+  }
 
   if (loading) {
     return (
@@ -993,7 +1051,7 @@ function App() {
   const propertyCount = Object.keys(datasets.selected_signal_cards?.platforms || {}).length;
 
   const displayLabel = PAGE_DISPLAY[activePage]?.label || activePageMeta?.label || 'Dashboard';
-  const displaySubtitle = PAGE_DISPLAY[activePage]?.subtitle || activePageMeta?.subtitle || '';
+  const displayKicker = PAGE_DISPLAY[activePage]?.kicker || '';
 
   const renderPage = () => {
     switch (activePage) {
@@ -1014,24 +1072,32 @@ function App() {
 
   return (
     <div className="shell">
-      {/* Full-width pipeline bar spanning sidebar + content */}
       <PipelineBar
         pages={pageDefinitions}
         activePage={activePage}
-        onNavigate={setActivePage}
+        onNavigate={handleNavigate}
         datasets={datasets}
+        onHamburger={() => setIsSidebarOpen((o) => !o)}
       />
 
       <div className="shell-body">
-        {/* Sidebar — no bordered section cards */}
-        <aside className="sidebar">
+        {isSidebarOpen && (
+          <div
+            className="sidebar-overlay"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        <aside className={isSidebarOpen ? 'sidebar sidebar--open' : 'sidebar'}>
           <div className="sidebar-top">
             <AccountSelector title={index.app?.title} />
             <div className="brand-text">
               <p className="eyebrow">Lane B · Internal review</p>
-              <div className="pill-row">
-                <StatusBadge tone="good">{index.app?.data_mode || 'static_json'}</StatusBadge>
-                <StatusBadge tone="neutral">no backend</StatusBadge>
+              <div className="mode-labels">
+                <span className="mode-label">{index.app?.data_mode || 'static_json'}</span>
+                <span className="mode-label-sep">·</span>
+                <span className="mode-label">no backend</span>
               </div>
             </div>
           </div>
@@ -1042,7 +1108,7 @@ function App() {
                 key={page.id}
                 type="button"
                 className={page.id === activePage ? 'nav-item active' : 'nav-item'}
-                onClick={() => setActivePage(page.id)}
+                onClick={() => handleNavigate(page.id)}
               >
                 <span>{PAGE_DISPLAY[page.id]?.label || page.label}</span>
                 <small>{PAGE_DISPLAY[page.id]?.subtitle || page.subtitle}</small>
@@ -1057,7 +1123,7 @@ function App() {
               <button
                 type="button"
                 className="sidebar-link"
-                onClick={() => setActivePage('package')}
+                onClick={() => handleNavigate('package')}
               >
                 {propertyCount} {propertyCount === 1 ? 'property' : 'properties'}
               </button>
@@ -1065,20 +1131,21 @@ function App() {
             <button
               type="button"
               className="sidebar-link sidebar-link--secondary"
-              onClick={() => setActivePage('handoff')}
+              onClick={() => handleNavigate('handoff')}
             >
               Design authority →
             </button>
           </div>
         </aside>
 
-        {/* Main content */}
         <main className="content">
-          {/* Unified data rail — replaces 5 floating strip cards */}
           <div className="data-rail">
             <div className="rail-cell">
               <div className="rail-label-row">
-                <span className="rail-label">Currently live</span>
+                <span className="rail-label">
+                  <span className="rail-label__full">Currently live</span>
+                  <span className="rail-label__short">LIVE</span>
+                </span>
                 <span className="rail-icon">{STRIP_ICONS.promoted}</span>
               </div>
               <code className="rail-value">{summary.top_level_alias_run_id || '—'}</code>
@@ -1086,7 +1153,10 @@ function App() {
             <div className="rail-divider" />
             <div className="rail-cell">
               <div className="rail-label-row">
-                <span className="rail-label">Most recent run</span>
+                <span className="rail-label">
+                  <span className="rail-label__full">Most recent run</span>
+                  <span className="rail-label__short">LATEST</span>
+                </span>
                 <span className="rail-icon">{STRIP_ICONS.latest}</span>
               </div>
               <code className="rail-value">{summary.latest_successful_run_id || '—'}</code>
@@ -1094,7 +1164,10 @@ function App() {
             <div className="rail-divider" />
             <div className="rail-cell">
               <div className="rail-label-row">
-                <span className="rail-label">Recommended pick</span>
+                <span className="rail-label">
+                  <span className="rail-label__full">Recommended pick</span>
+                  <span className="rail-label__short">PICK</span>
+                </span>
                 <span className="rail-icon">{STRIP_ICONS.recommended}</span>
               </div>
               <code className="rail-value">{summary.latest_review_recommended_run_id || '—'}</code>
@@ -1102,7 +1175,10 @@ function App() {
             <div className="rail-divider" />
             <div className="rail-cell">
               <div className="rail-label-row">
-                <span className="rail-label">Packaged & ready</span>
+                <span className="rail-label">
+                  <span className="rail-label__full">Packaged & ready</span>
+                  <span className="rail-label__short">PKG</span>
+                </span>
                 <span className="rail-icon">{STRIP_ICONS.package}</span>
               </div>
               <code className="rail-value">{summary.latest_package_run_id || '—'}</code>
@@ -1112,7 +1188,10 @@ function App() {
                 <div className="rail-divider" />
                 <div className="rail-cell">
                   <div className="rail-label-row">
-                    <span className="rail-label">Active properties</span>
+                    <span className="rail-label">
+                      <span className="rail-label__full">Active properties</span>
+                      <span className="rail-label__short">PROPS</span>
+                    </span>
                     <span className="rail-icon">{STRIP_ICONS.properties}</span>
                   </div>
                   <code className="rail-value">{propertyCount}</code>
@@ -1121,11 +1200,10 @@ function App() {
             )}
           </div>
 
-          {/* Content header — large page title, right-aligned badges */}
           <header className="content-header">
             <div className="header-left">
               <p className="eyebrow">
-                {pageIndex + 1} / {pageDefinitions.length} · {displaySubtitle}
+                {pageIndex + 1} / {pageDefinitions.length} · {displayKicker}
               </p>
               <h2 className="page-title">{displayLabel}</h2>
               <p className="header-note">Bundled JSON only · No live API · No raw repo reads</p>
@@ -1141,7 +1219,6 @@ function App() {
             </div>
           </header>
 
-          {/* Optional data gaps notice */}
           {Object.keys(optionalErrors).length > 0 && (
             <details className="optional-errors">
               <summary>
@@ -1155,7 +1232,6 @@ function App() {
             </details>
           )}
 
-          {/* Page content — keyed so panels re-animate on navigation */}
           <div key={activePage}>
             {renderPage()}
           </div>
