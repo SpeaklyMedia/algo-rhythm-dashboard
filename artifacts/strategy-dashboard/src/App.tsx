@@ -3,6 +3,29 @@ import { useEffect, useMemo, useState } from 'react';
 
 const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'handoff'];
 
+const PAGE_DATA_KEYS = {
+  overview: ['latest_run', 'latest_review', 'latest_package', 'latest_batch'],
+  strategy: ['content_object', 'trend_shortlist', 'viability_scorecard'],
+  review: ['promotion_recommendation', 'run_comparison_scorecard'],
+  package: ['latest_package', 'selected_signal_cards'],
+  batch: ['latest_batch', 'run_package_index'],
+  handoff: [],
+};
+
+function pageHasData(pageId, datasets) {
+  const keys = PAGE_DATA_KEYS[pageId] || [];
+  if (keys.length === 0) return true;
+  return keys.some((key) => datasets[key] != null);
+}
+
+const STRIP_ICONS = {
+  promoted: '↑ P',
+  latest: '✓ L',
+  recommended: '⊙ R',
+  package: '▣ K',
+  properties: '◈ X',
+};
+
 const PAGE_DISPLAY = {
   overview: {
     label: 'Health Check',
@@ -168,17 +191,22 @@ function AccountSelector({ title }) {
   );
 }
 
-function PipelineStrip({ pages, activePage, onNavigate }) {
+function PipelineStrip({ pages, activePage, onNavigate, datasets }) {
   return (
     <div className="pipeline-strip" role="navigation" aria-label="Pipeline stages">
       {pages.map((page, i) => {
         const display = PAGE_DISPLAY[page.id] || {};
         const isActive = page.id === activePage;
+        const hasData = pageHasData(page.id, datasets || {});
+        let nodeClass = 'pipeline-node';
+        if (isActive) nodeClass += ' pipeline-node--active';
+        else if (hasData) nodeClass += ' pipeline-node--available';
+        else nodeClass += ' pipeline-node--dim';
         return (
           <div key={page.id} className="pipeline-step">
             <button
               type="button"
-              className={`pipeline-node${isActive ? ' pipeline-node--active' : ' pipeline-node--available'}`}
+              className={nodeClass}
               onClick={() => onNavigate(page.id)}
               title={display.label || page.label}
               aria-current={isActive ? 'page' : undefined}
@@ -472,59 +500,81 @@ function StrategyPage({ datasets }) {
 
       <section className="panel">
         <h2>Execution playbook</h2>
-        {adaptations?.tiers?.length ? (
-          <div className="split-grid">
-            {adaptations.tiers.map((tier) => (
-              <article className="surface-card" key={tier.tier_id}>
-                <div className="surface-heading">
-                  <h3>{tier.tier_label}</h3>
-                  <StatusBadge tone="neutral">{tier.tier_id}</StatusBadge>
-                </div>
-                <p>{tier.description}</p>
-                {tier.per_platform?.length ? (
-                  <ul className="tight-list">
-                    {tier.per_platform.map((pp) => (
-                      <li key={pp.platform}>
-                        <strong>{pp.platform}</strong>
-                        <p className="muted">{pp.format_shift}</p>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        ) : adaptations ? (
-          <JsonCode value={adaptations} />
-        ) : (
+        {adaptations ? (() => {
+          const tiers = Array.isArray(adaptations.tiers)
+            ? adaptations.tiers
+            : Array.isArray(adaptations)
+            ? adaptations
+            : Object.entries(adaptations).map(([k, v]) =>
+                typeof v === 'object' && v !== null
+                  ? { tier_id: k, tier_label: k, ...v }
+                  : { tier_id: k, tier_label: k, description: String(v) }
+              );
+          if (!tiers.length) return <EmptyState title="Unavailable" detail="No tiers found in adaptation data." />;
+          return (
+            <div className="split-grid">
+              {tiers.map((tier) => (
+                <article className="surface-card" key={tier.tier_id || tier.id || tier.tier_label || String(Math.random())}>
+                  <div className="surface-heading">
+                    <h3>{tier.tier_label || tier.label || tier.tier_id || 'Tier'}</h3>
+                    {tier.tier_id && <StatusBadge tone="neutral">{tier.tier_id}</StatusBadge>}
+                  </div>
+                  {tier.description && <p>{tier.description}</p>}
+                  {Array.isArray(tier.per_platform) && tier.per_platform.length ? (
+                    <ul className="tight-list">
+                      {tier.per_platform.map((pp) => (
+                        <li key={pp.platform}>
+                          <strong>{pp.platform}</strong>
+                          {pp.format_shift && <p className="muted">{pp.format_shift}</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          );
+        })() : (
           <EmptyState title="Unavailable" detail="Adaptation data is missing." />
         )}
       </section>
 
       <section className="panel">
         <h2>Test hypotheses</h2>
-        {experiment?.hypotheses?.length ? (
-          <div className="split-grid">
-            {experiment.hypotheses.map((h) => (
-              <article className="surface-card" key={h.platform}>
-                <div className="surface-heading">
-                  <h3>{h.platform}</h3>
-                  <StatusBadge tone="warn">hypothesis</StatusBadge>
-                </div>
-                <p>{h.hypothesis}</p>
-                {h.success_checks?.length ? (
-                  <ul className="tight-list">
-                    {h.success_checks.map((check) => (
-                      <li key={check} className="muted">{check}</li>
-                    ))}
-                  </ul>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        ) : experiment ? (
-          <JsonCode value={experiment} />
-        ) : (
+        {experiment ? (() => {
+          const hyps = Array.isArray(experiment.hypotheses)
+            ? experiment.hypotheses
+            : Array.isArray(experiment.variants)
+            ? experiment.variants
+            : Array.isArray(experiment)
+            ? experiment
+            : Object.entries(experiment).map(([k, v]) =>
+                typeof v === 'object' && v !== null
+                  ? { platform: k, hypothesis: v.hypothesis || v.description || '', ...v }
+                  : { platform: k, hypothesis: String(v) }
+              );
+          if (!hyps.length) return <EmptyState title="Unavailable" detail="No hypotheses found in experiment plan." />;
+          return (
+            <div className="split-grid">
+              {hyps.map((h, i) => (
+                <article className="surface-card" key={h.platform || h.id || i}>
+                  <div className="surface-heading">
+                    <h3>{h.platform || h.name || h.id || `Hypothesis ${i + 1}`}</h3>
+                    <StatusBadge tone="warn">hypothesis</StatusBadge>
+                  </div>
+                  {h.hypothesis && <p>{h.hypothesis}</p>}
+                  {Array.isArray(h.success_checks) && h.success_checks.length ? (
+                    <ul className="tight-list">
+                      {h.success_checks.map((check) => (
+                        <li key={check} className="muted">{check}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          );
+        })() : (
           <EmptyState title="Unavailable" detail="Experiment plan data is missing." />
         )}
       </section>
@@ -536,9 +586,6 @@ function ReviewPage({ datasets }) {
   const recommendation = datasets.promotion_recommendation;
   const scorecard = datasets.run_comparison_scorecard;
   const reviewIndex = datasets.run_review_index;
-  const maxScore = scorecard?.ranked_runs?.length
-    ? Math.max(...scorecard.ranked_runs.map((r) => r.total_score || 0), 1)
-    : 1;
 
   return (
     <div className="page-grid">
@@ -588,7 +635,7 @@ function ReviewPage({ datasets }) {
                         <span>{run.total_score}</span>
                         <div
                           className="score-bar"
-                          style={{ width: `${Math.round(((run.total_score || 0) / maxScore) * 100)}%` }}
+                          style={{ width: `${Math.min(100, Math.max(0, run.total_score || 0))}%` }}
                         />
                       </div>
                     </td>
@@ -981,6 +1028,7 @@ function App() {
           pages={pageDefinitions}
           activePage={activePage}
           onNavigate={setActivePage}
+          datasets={datasets}
         />
 
         <nav className="nav-list" aria-label="Dashboard sections">
@@ -1033,24 +1081,39 @@ function App() {
       <main className="content">
         <section className="status-strip">
           <div className="strip-card strip-card--promoted">
-            <span>Currently live</span>
+            <div className="strip-card__header">
+              <span>Currently live</span>
+              <span className="strip-card__icon">{STRIP_ICONS.promoted}</span>
+            </div>
             <strong>{summary.top_level_alias_run_id || 'Unavailable'}</strong>
           </div>
           <div className="strip-card strip-card--latest">
-            <span>Most recent run</span>
+            <div className="strip-card__header">
+              <span>Most recent run</span>
+              <span className="strip-card__icon">{STRIP_ICONS.latest}</span>
+            </div>
             <strong>{summary.latest_successful_run_id || 'Unavailable'}</strong>
           </div>
           <div className="strip-card strip-card--recommended">
-            <span>Recommended pick</span>
+            <div className="strip-card__header">
+              <span>Recommended pick</span>
+              <span className="strip-card__icon">{STRIP_ICONS.recommended}</span>
+            </div>
             <strong>{summary.latest_review_recommended_run_id || 'Unavailable'}</strong>
           </div>
           <div className="strip-card strip-card--package">
-            <span>Packaged & ready</span>
+            <div className="strip-card__header">
+              <span>Packaged & ready</span>
+              <span className="strip-card__icon">{STRIP_ICONS.package}</span>
+            </div>
             <strong>{summary.latest_package_run_id || 'Unavailable'}</strong>
           </div>
           {propertyCount > 0 && (
             <div className="strip-card strip-card--properties">
-              <span>Active properties</span>
+              <div className="strip-card__header">
+                <span>Active properties</span>
+                <span className="strip-card__icon">{STRIP_ICONS.properties}</span>
+              </div>
               <strong>{propertyCount}</strong>
             </div>
           )}
@@ -1088,7 +1151,7 @@ function App() {
           </section>
         ) : null}
 
-        <div key={activePage} className="page-transition">
+        <div key={activePage}>
           {renderPage()}
         </div>
       </main>

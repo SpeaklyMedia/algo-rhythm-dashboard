@@ -232,7 +232,7 @@ pre {
 
 .strip-card {
   padding: 0.95rem 1rem;
-  min-height: 90px;
+  min-height: 96px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -242,6 +242,31 @@ pre {
     linear-gradient(135deg, rgba(104, 214, 255, 0.08), rgba(255, 163, 71, 0.03)),
     rgba(17, 22, 29, 0.88);
   box-shadow: var(--shadow-soft);
+}
+
+.strip-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-bottom: 0.45rem;
+}
+
+.strip-card__header span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.strip-card__icon {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  opacity: 0.7;
+  flex-shrink: 0;
+  letter-spacing: 0.05em;
 }
 
 .strip-card span {
@@ -761,6 +786,18 @@ td {
   box-shadow: 0 0 0 3px rgba(104, 214, 255, 0.12);
 }
 
+.pipeline-node--dim {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(245, 247, 250, 0.2);
+  cursor: pointer;
+}
+
+.pipeline-node--dim:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(245, 247, 250, 0.4);
+}
+
 .pipeline-connector {
   flex: 1;
   height: 1.5px;
@@ -913,12 +950,12 @@ td {
   text-decoration: none;
 }
 
-/* ─── Page transition ─── */
+/* ─── Staggered panel fade-in on navigation ─── */
 
-@keyframes pageEnter {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -926,9 +963,18 @@ td {
   }
 }
 
-.page-transition {
-  animation: pageEnter 220ms ease-out;
+.page-grid > * {
+  animation: fadeIn 200ms ease-out both;
 }
+
+.page-grid > *:nth-child(1) { animation-delay: 0ms; }
+.page-grid > *:nth-child(2) { animation-delay: 40ms; }
+.page-grid > *:nth-child(3) { animation-delay: 80ms; }
+.page-grid > *:nth-child(4) { animation-delay: 120ms; }
+.page-grid > *:nth-child(5) { animation-delay: 160ms; }
+.page-grid > *:nth-child(6) { animation-delay: 200ms; }
+.page-grid > *:nth-child(7) { animation-delay: 240ms; }
+.page-grid > *:nth-child(8) { animation-delay: 280ms; }
 
 /* ─── Hero panel texture overlay ─── */
 
