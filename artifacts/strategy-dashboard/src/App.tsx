@@ -2,13 +2,38 @@
 import { useEffect, useMemo, useState } from 'react';
 
 const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'handoff'];
-const PAGE_LEADS = {
-  overview: 'Promoted, latest, reviewed, packaged, and batched states should be visible without opening raw manifests.',
-  strategy: 'Show the content brief, trend assumptions, platform signals, viability rubric, and execution layers from the static contract only.',
-  review: 'Make the recommendation, ranked cohort, and exclusions legible enough for manual promotion review.',
-  package: 'Expose the latest package facts, selected cards, and package-mode semantics without requiring zip inspection.',
-  batch: 'Show the reviewed cohort, package modes, and retained batch facts with promoted vs promotable separation.',
-  handoff: 'Present the current downloads, contract metadata, design authority, and Replit packet contents as a closed handoff surface.',
+
+const PAGE_DISPLAY = {
+  overview: {
+    label: 'Health Check',
+    subtitle: "See what's running, what's promoted, and whether anything needs attention",
+    kicker: 'Pipeline status',
+  },
+  strategy: {
+    label: 'Content Strategy',
+    subtitle: 'Understand the plan behind this run — topics, trends, platforms, and scores',
+    kicker: 'Strategic substrate',
+  },
+  review: {
+    label: 'Promotion Review',
+    subtitle: 'Compare all the runs and confirm which one should move forward',
+    kicker: 'Make your call',
+  },
+  package: {
+    label: "What's in the Package",
+    subtitle: 'See exactly what got bundled, which cards were picked, and how it was built',
+    kicker: 'Package contents',
+  },
+  batch: {
+    label: 'Run Collection',
+    subtitle: 'All runs included in this review cycle — modes, counts, and SHA verification',
+    kicker: 'Batch cohort',
+  },
+  handoff: {
+    label: 'Delivery & Downloads',
+    subtitle: 'Get your files, verify artifact integrity, and confirm handoff is complete',
+    kicker: 'Canonical handoff',
+  },
 };
 
 function formatDate(value) {
@@ -20,6 +45,15 @@ function formatDate(value) {
   }
 }
 
+function formatDateShort(value) {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return value;
+  }
+}
+
 function formatNumber(value) {
   if (value === null || value === undefined || value === '') return 'Unavailable';
   return new Intl.NumberFormat().format(value);
@@ -27,12 +61,18 @@ function formatNumber(value) {
 
 function statusTone(value) {
   const normalized = String(value || '').toLowerCase();
-  if (normalized.includes('pass') || normalized.includes('ready') || normalized.includes('promoted') || normalized.includes('canonical')) {
-    return 'good';
-  }
-  if (normalized.includes('warn') || normalized.includes('manual') || normalized.includes('latest') || normalized.includes('recommended')) {
-    return 'warn';
-  }
+  if (
+    normalized.includes('pass') ||
+    normalized.includes('ready') ||
+    normalized.includes('promoted') ||
+    normalized.includes('canonical')
+  ) return 'good';
+  if (
+    normalized.includes('warn') ||
+    normalized.includes('manual') ||
+    normalized.includes('latest') ||
+    normalized.includes('recommended')
+  ) return 'warn';
   if (normalized.includes('fail') || normalized.includes('block') || normalized.includes('missing')) return 'bad';
   return 'neutral';
 }
@@ -95,6 +135,64 @@ function JsonCode({ value }) {
   return <pre className="json-block">{JSON.stringify(value, null, 2)}</pre>;
 }
 
+function AccountSelector({ title }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="account-selector">
+      <button
+        className="account-selector__trigger"
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className="account-selector__icon">▣</span>
+        <span className="account-selector__name">{title || 'Account'}</span>
+        <span className="account-selector__chevron">{open ? '∧' : '∨'}</span>
+      </button>
+      {open && (
+        <div className="account-selector__dropdown" role="listbox">
+          <div className="account-selector__item account-selector__item--active" role="option" aria-selected="true">
+            <span className="account-selector__item-dot">▣</span>
+            <span>{title || 'Account'}</span>
+            <span className="account-selector__item-check">✓</span>
+          </div>
+          <div className="account-selector__divider" />
+          <div className="account-selector__item account-selector__item--soon" role="option" aria-selected="false">
+            <span>+ Add account</span>
+            <span className="account-selector__soon-chip">Coming soon</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PipelineStrip({ pages, activePage, onNavigate }) {
+  return (
+    <div className="pipeline-strip" role="navigation" aria-label="Pipeline stages">
+      {pages.map((page, i) => {
+        const display = PAGE_DISPLAY[page.id] || {};
+        const isActive = page.id === activePage;
+        return (
+          <div key={page.id} className="pipeline-step">
+            <button
+              type="button"
+              className={`pipeline-node${isActive ? ' pipeline-node--active' : ' pipeline-node--available'}`}
+              onClick={() => onNavigate(page.id)}
+              title={display.label || page.label}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {i + 1}
+            </button>
+            {i < pages.length - 1 && <div className="pipeline-connector" aria-hidden="true" />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function useDashboardData() {
   const [state, setState] = useState({
     loading: true,
@@ -124,11 +222,11 @@ function useDashboardData() {
         const results = await Promise.all(
           datasetEntries.map(async ([id, meta]) => {
             try {
-              const publicPath = meta.public_path.startsWith('/') ? `${base}${meta.public_path}` : meta.public_path;
+              const publicPath = meta.public_path.startsWith('/')
+                ? `${base}${meta.public_path}`
+                : meta.public_path;
               const response = await fetch(publicPath, { cache: 'no-store' });
-              if (!response.ok) {
-                throw new Error(`fetch failed (${response.status})`);
-              }
+              if (!response.ok) throw new Error(`fetch failed (${response.status})`);
               const data = await response.json();
               return [id, { ok: true, data }];
             } catch (error) {
@@ -157,39 +255,19 @@ function useDashboardData() {
         }
 
         if (requiredErrors.length) {
-          setState({
-            loading: false,
-            fatalError: `Required datasets failed to load: ${requiredErrors.join('; ')}`,
-            index,
-            datasets,
-            optionalErrors,
-          });
+          setState({ loading: false, fatalError: `Required datasets failed to load: ${requiredErrors.join('; ')}`, index, datasets, optionalErrors });
           return;
         }
 
-        setState({
-          loading: false,
-          fatalError: null,
-          index,
-          datasets,
-          optionalErrors,
-        });
+        setState({ loading: false, fatalError: null, index, datasets, optionalErrors });
       } catch (error) {
         if (cancelled) return;
-        setState({
-          loading: false,
-          fatalError: error.message,
-          index: null,
-          datasets: {},
-          optionalErrors: {},
-        });
+        setState({ loading: false, fatalError: error.message, index: null, datasets: {}, optionalErrors: {} });
       }
     }
 
     load();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   return state;
@@ -207,39 +285,39 @@ function OverviewPage({ index, datasets }) {
   return (
     <div className="page-grid">
       <section className="panel span-2 hero-panel">
-        <p className="panel-kicker">Current contract state</p>
+        <p className="panel-kicker">Pipeline status</p>
         <h2>Lane B delivery posture</h2>
         <p className="lede">
           The promoted alias, latest successful run, current review recommendation, and package/batch pointers are
-          frozen into the static contract. Replit should render from this surface only.
+          frozen into the static contract. All data below reads from bundled JSON only.
         </p>
         <div className="metrics">
           <MetricCard
-            label="Top-level alias run"
+            label="Currently live"
             value={summary.top_level_alias_run_id || 'Unavailable'}
             detail={`Candidates: ${(summary.top_level_alias_candidate_ids || []).join(', ') || 'none'}`}
             tone="good"
           />
           <MetricCard
-            label="Latest successful run"
+            label="Most recent run"
             value={latestRun?.latest_successful_run_id || 'Unavailable'}
             detail={latestRun?.run_manifest_path || ''}
             tone="warn"
           />
           <MetricCard
-            label="Review recommendation"
+            label="Recommended pick"
             value={latestReview?.recommended_run_id || 'Unavailable'}
             detail={latestReview?.review_id || ''}
             tone="warn"
           />
           <MetricCard
-            label="Latest package run"
+            label="Packaged & ready"
             value={latestPackage?.run_id || 'Unavailable'}
             detail={latestPackage?.package_id || ''}
             tone="good"
           />
           <MetricCard
-            label="Latest batch review"
+            label="Batch review"
             value={latestBatch?.review_id || 'Unavailable'}
             detail={`${latestBatch?.included_run_ids?.length || 0} included runs`}
           />
@@ -247,7 +325,7 @@ function OverviewPage({ index, datasets }) {
       </section>
 
       <section className="panel">
-        <h2>Review-bound package state</h2>
+        <h2>Package integrity</h2>
         <KeyValueTable
           rows={[
             { label: 'Run ID', value: latestPackage?.run_id || 'Unavailable' },
@@ -259,7 +337,7 @@ function OverviewPage({ index, datasets }) {
       </section>
 
       <section className="panel">
-        <h2>Batch state</h2>
+        <h2>Batch snapshot</h2>
         <KeyValueTable
           rows={[
             { label: 'Batch ID', value: latestBatch?.batch_id || 'Unavailable' },
@@ -370,14 +448,17 @@ function StrategyPage({ datasets }) {
       </section>
 
       <section className="panel span-2">
-        <h2>Platform selections</h2>
+        <h2>Platform properties</h2>
         {selection?.platforms ? (
           <div className="split-grid">
             {Object.entries(selection.platforms).map(([platform, detail]) => (
               <article className="surface-card" key={platform}>
                 <div className="surface-heading">
                   <h3>{platform}</h3>
-                  <StatusBadge tone="good">selected</StatusBadge>
+                  <div className="badge-row">
+                    <span className="property-chip">Property</span>
+                    <StatusBadge tone="good">selected</StatusBadge>
+                  </div>
                 </div>
                 <p>{detail.selection_reason}</p>
                 <p className="muted">Cards: {(detail.selected_card_ids || []).join(', ') || 'Unavailable'}</p>
@@ -390,13 +471,62 @@ function StrategyPage({ datasets }) {
       </section>
 
       <section className="panel">
-        <h2>Adaptations</h2>
-        {adaptations ? <JsonCode value={adaptations} /> : <EmptyState title="Unavailable" detail="Adaptation data is missing." />}
+        <h2>Execution playbook</h2>
+        {adaptations?.tiers?.length ? (
+          <div className="split-grid">
+            {adaptations.tiers.map((tier) => (
+              <article className="surface-card" key={tier.tier_id}>
+                <div className="surface-heading">
+                  <h3>{tier.tier_label}</h3>
+                  <StatusBadge tone="neutral">{tier.tier_id}</StatusBadge>
+                </div>
+                <p>{tier.description}</p>
+                {tier.per_platform?.length ? (
+                  <ul className="tight-list">
+                    {tier.per_platform.map((pp) => (
+                      <li key={pp.platform}>
+                        <strong>{pp.platform}</strong>
+                        <p className="muted">{pp.format_shift}</p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        ) : adaptations ? (
+          <JsonCode value={adaptations} />
+        ) : (
+          <EmptyState title="Unavailable" detail="Adaptation data is missing." />
+        )}
       </section>
 
       <section className="panel">
-        <h2>Experiment plan</h2>
-        {experiment ? <JsonCode value={experiment} /> : <EmptyState title="Unavailable" detail="Experiment plan data is missing." />}
+        <h2>Test hypotheses</h2>
+        {experiment?.hypotheses?.length ? (
+          <div className="split-grid">
+            {experiment.hypotheses.map((h) => (
+              <article className="surface-card" key={h.platform}>
+                <div className="surface-heading">
+                  <h3>{h.platform}</h3>
+                  <StatusBadge tone="warn">hypothesis</StatusBadge>
+                </div>
+                <p>{h.hypothesis}</p>
+                {h.success_checks?.length ? (
+                  <ul className="tight-list">
+                    {h.success_checks.map((check) => (
+                      <li key={check} className="muted">{check}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        ) : experiment ? (
+          <JsonCode value={experiment} />
+        ) : (
+          <EmptyState title="Unavailable" detail="Experiment plan data is missing." />
+        )}
       </section>
     </div>
   );
@@ -406,11 +536,14 @@ function ReviewPage({ datasets }) {
   const recommendation = datasets.promotion_recommendation;
   const scorecard = datasets.run_comparison_scorecard;
   const reviewIndex = datasets.run_review_index;
+  const maxScore = scorecard?.ranked_runs?.length
+    ? Math.max(...scorecard.ranked_runs.map((r) => r.total_score || 0), 1)
+    : 1;
 
   return (
     <div className="page-grid">
       <section className="panel span-2 hero-panel">
-        <p className="panel-kicker">Manual promotion surface</p>
+        <p className="panel-kicker">Make your call</p>
         <h2>Latest review recommendation</h2>
         {recommendation ? (
           <>
@@ -439,23 +572,33 @@ function ReviewPage({ datasets }) {
                 <tr>
                   <th>Rank</th>
                   <th>Run</th>
-                  <th>Total</th>
-                  <th>Platforms</th>
+                  <th>Score</th>
+                  <th>Properties</th>
                   <th>Cards</th>
-                  <th>Promoted</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {scorecard.ranked_runs.map((run) => (
-                  <tr key={run.run_id}>
+                  <tr key={run.run_id} className={run.promoted_canonical ? 'tr--promoted' : ''}>
                     <td>{run.rank}</td>
                     <td>{run.run_id}</td>
-                    <td>{run.total_score}</td>
                     <td>
-                      {run.selected_platform_count}/{run.target_platform_count}
+                      <div className="score-cell">
+                        <span>{run.total_score}</span>
+                        <div
+                          className="score-bar"
+                          style={{ width: `${Math.round(((run.total_score || 0) / maxScore) * 100)}%` }}
+                        />
+                      </div>
                     </td>
+                    <td>{run.selected_platform_count}/{run.target_platform_count}</td>
                     <td>{run.selected_card_count}</td>
-                    <td>{run.promoted_canonical ? 'yes' : 'no'}</td>
+                    <td>
+                      {run.promoted_canonical
+                        ? <StatusBadge tone="good">✓ live</StatusBadge>
+                        : <span className="muted">—</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -495,7 +638,7 @@ function PackagePage({ datasets }) {
   return (
     <div className="page-grid">
       <section className="panel">
-        <h2>Latest package</h2>
+        <h2>Package summary</h2>
         {latestPackage ? (
           <KeyValueTable
             rows={[
@@ -511,7 +654,7 @@ function PackagePage({ datasets }) {
       </section>
 
       <section className="panel">
-        <h2>Package manifest facts</h2>
+        <h2>How it was built</h2>
         {manifest ? (
           <KeyValueTable
             rows={[
@@ -527,14 +670,17 @@ function PackagePage({ datasets }) {
       </section>
 
       <section className="panel span-2">
-        <h2>Selected signal cards</h2>
+        <h2>Cards selected by property</h2>
         {selectedCards?.platforms ? (
           <div className="split-grid">
             {Object.entries(selectedCards.platforms).map(([platform, detail]) => (
               <article className="surface-card" key={platform}>
                 <div className="surface-heading">
                   <h3>{platform}</h3>
-                  <StatusBadge tone="good">{(detail.selected_card_ids || []).length} cards</StatusBadge>
+                  <div className="badge-row">
+                    <span className="property-chip">Property</span>
+                    <StatusBadge tone="good">{(detail.selected_card_ids || []).length} cards selected</StatusBadge>
+                  </div>
                 </div>
                 <p className="muted">{(detail.selected_card_ids || []).join(', ') || 'Unavailable'}</p>
                 <ul className="tight-list">
@@ -563,7 +709,7 @@ function BatchPage({ datasets }) {
   return (
     <div className="page-grid">
       <section className="panel">
-        <h2>Latest batch</h2>
+        <h2>Batch facts</h2>
         {latestBatch ? (
           <KeyValueTable
             rows={[
@@ -579,7 +725,7 @@ function BatchPage({ datasets }) {
       </section>
 
       <section className="panel">
-        <h2>Batch manifest facts</h2>
+        <h2>How the batch was assembled</h2>
         {batchManifest ? (
           <KeyValueTable
             rows={[
@@ -595,7 +741,7 @@ function BatchPage({ datasets }) {
       </section>
 
       <section className="panel span-2">
-        <h2>Included run packages</h2>
+        <h2>Runs in this collection</h2>
         {runPackageIndex?.packages?.length ? (
           <div className="table-scroll">
             <table>
@@ -637,13 +783,13 @@ function HandoffPage({ index }) {
   return (
     <div className="page-grid">
       <section className="panel span-2">
-        <h2>Canonical handoff set</h2>
+        <h2>Files ready to download</h2>
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
                 <th>Artifact</th>
-                <th>SHA</th>
+                <th>SHA-256</th>
                 <th>Size</th>
                 <th>Download</th>
               </tr>
@@ -659,11 +805,11 @@ function HandoffPage({ index }) {
                   <td>{formatNumber(item.size_bytes)}</td>
                   <td>
                     {item.bundled && item.public_path ? (
-                      <a href={`${base}${item.public_path}`} download={item.filename}>
-                        {item.filename}
+                      <a href={`${base}${item.public_path}`} download={item.filename} className="btn-download">
+                        ↓ {item.filename}
                       </a>
                     ) : (
-                      'Unavailable'
+                      <span className="muted">Unavailable</span>
                     )}
                   </td>
                 </tr>
@@ -792,8 +938,12 @@ function App() {
   }
 
   const activePageMeta = pageDefinitions.find((page) => page.id === activePage);
+  const pageIndex = pageDefinitions.findIndex((page) => page.id === activePage);
   const summary = index.summary || {};
-  const authorityEntries = Object.values(index.ui_contract?.design_authority || {});
+  const propertyCount = Object.keys(datasets.selected_signal_cards?.platforms || {}).length;
+
+  const displayLabel = PAGE_DISPLAY[activePage]?.label || activePageMeta?.label || 'Dashboard';
+  const displaySubtitle = PAGE_DISPLAY[activePage]?.subtitle || activePageMeta?.subtitle || '';
 
   const renderPage = () => {
     switch (activePage) {
@@ -815,17 +965,23 @@ function App() {
   return (
     <div className="shell">
       <aside className="sidebar">
+        <AccountSelector title={index.app?.title} />
+
         <div className="brand-block">
-          <p className="eyebrow">Lane B static review</p>
+          <p className="eyebrow">Lane B · Internal review</p>
           <h1>{index.app?.title || 'Strategy Dashboard'}</h1>
-          <p className="sidebar-copy">{index.app?.description}</p>
+          <div className="pill-row">
+            <StatusBadge tone="good">{index.app?.data_mode || 'static_json'}</StatusBadge>
+            <StatusBadge tone="warn">{index.app?.handoff_mode || 'replit_ui_packet'}</StatusBadge>
+            <StatusBadge tone="neutral">no backend</StatusBadge>
+          </div>
         </div>
 
-        <div className="pill-row">
-          <StatusBadge tone="good">{index.app?.data_mode || 'static_json'}</StatusBadge>
-          <StatusBadge tone="warn">{index.app?.handoff_mode || 'replit_ui_packet'}</StatusBadge>
-          <StatusBadge tone="neutral">no backend</StatusBadge>
-        </div>
+        <PipelineStrip
+          pages={pageDefinitions}
+          activePage={activePage}
+          onNavigate={setActivePage}
+        />
 
         <nav className="nav-list" aria-label="Dashboard sections">
           {pageDefinitions.map((page) => (
@@ -835,76 +991,93 @@ function App() {
               className={page.id === activePage ? 'nav-item active' : 'nav-item'}
               onClick={() => setActivePage(page.id)}
             >
-              <span>{page.label}</span>
-              <small>{page.subtitle}</small>
+              <span>{PAGE_DISPLAY[page.id]?.label || page.label}</span>
+              <small>{PAGE_DISPLAY[page.id]?.subtitle || page.subtitle}</small>
             </button>
           ))}
         </nav>
 
-        <section className="sidebar-section">
-          <p className="section-label">Design authority</p>
-          <div className="authority-list">
-            {authorityEntries.map((entry) => (
-              <div className="authority-item" key={entry.source + entry.applies_to}>
-                <strong>{entry.source}</strong>
-                <small>{entry.applies_to}</small>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <div className="sidebar-meta">
+        <div className="sidebar-meta sidebar-meta--compact">
           <p>
-            <strong>Generated:</strong> {formatDate(index.generated_at)}
+            {'Generated '}
+            <span>{formatDateShort(index.generated_at)}</span>
+            {propertyCount > 0 && (
+              <>
+                {' · '}
+                <button
+                  type="button"
+                  className="sidebar-link"
+                  onClick={() => setActivePage('package')}
+                >
+                  {propertyCount} {propertyCount === 1 ? 'property' : 'properties'}
+                </button>
+              </>
+            )}
+            {index.contract_version && (
+              <>
+                {' · '}
+                <span>v{index.contract_version}</span>
+              </>
+            )}
           </p>
-          <p>
-            <strong>Contract:</strong> {index.contract_version}
-          </p>
-          <p>
-            <strong>Audience:</strong> {index.app?.audience || 'Unavailable'}
-          </p>
+          <button
+            type="button"
+            className="sidebar-link sidebar-link--secondary"
+            onClick={() => setActivePage('handoff')}
+          >
+            Delivery & Downloads →
+          </button>
         </div>
       </aside>
 
       <main className="content">
         <section className="status-strip">
           <div className="strip-card strip-card--promoted">
-            <span>Promoted alias</span>
+            <span>Currently live</span>
             <strong>{summary.top_level_alias_run_id || 'Unavailable'}</strong>
           </div>
           <div className="strip-card strip-card--latest">
-            <span>Latest success</span>
+            <span>Most recent run</span>
             <strong>{summary.latest_successful_run_id || 'Unavailable'}</strong>
           </div>
           <div className="strip-card strip-card--recommended">
-            <span>Review recommendation</span>
+            <span>Recommended pick</span>
             <strong>{summary.latest_review_recommended_run_id || 'Unavailable'}</strong>
           </div>
           <div className="strip-card strip-card--package">
-            <span>Latest package</span>
+            <span>Packaged & ready</span>
             <strong>{summary.latest_package_run_id || 'Unavailable'}</strong>
           </div>
+          {propertyCount > 0 && (
+            <div className="strip-card strip-card--properties">
+              <span>Active properties</span>
+              <strong>{propertyCount}</strong>
+            </div>
+          )}
         </section>
 
         <header className="content-header">
           <div className="header-stack">
-            <p className="eyebrow">Replit handoff shell</p>
-            <h2>{activePageMeta?.label || 'Overview'}</h2>
-            <p className="page-lede">{PAGE_LEADS[activePage]}</p>
-          </div>
-          <div className="header-side">
-            <div className="header-badges">
-              <StatusBadge tone="good">{index.status || 'PASS'}</StatusBadge>
-              <StatusBadge tone="good">review bound</StatusBadge>
-              {Object.keys(optionalErrors).length ? <StatusBadge tone="warn">Optional gaps</StatusBadge> : null}
+            <p className="eyebrow">
+              Stage {pageIndex + 1} of {pageDefinitions.length} · {displaySubtitle}
+            </p>
+            <div className="header-title-row">
+              <h2>{displayLabel}</h2>
+              <div className="header-badges-inline">
+                <StatusBadge tone="good">{index.status || 'PASS'}</StatusBadge>
+                <StatusBadge tone="good">review bound</StatusBadge>
+                {Object.keys(optionalErrors).length ? (
+                  <StatusBadge tone="warn">Optional gaps</StatusBadge>
+                ) : null}
+              </div>
             </div>
-            <p className="header-note">Bundled JSON only. No live API. No raw repo-path reads.</p>
           </div>
+          <p className="header-note muted">Bundled JSON only · No live API · No raw repo reads</p>
         </header>
 
         {Object.keys(optionalErrors).length ? (
           <section className="panel warning-panel">
-            <h2>Optional data unavailable</h2>
+            <h2>Some optional data is unavailable</h2>
             <ul className="stack-list">
               {Object.entries(optionalErrors).map(([id, error]) => (
                 <li key={id}>
@@ -915,7 +1088,9 @@ function App() {
           </section>
         ) : null}
 
-        {renderPage()}
+        <div key={activePage} className="page-transition">
+          {renderPage()}
+        </div>
       </main>
     </div>
   );
