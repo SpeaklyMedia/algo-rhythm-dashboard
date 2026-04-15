@@ -68,6 +68,26 @@ html[data-theme="light"] body {
     linear-gradient(180deg, #edf2ff 0%, #f5f7fc 40%, #ffffff 100%);
 }
 
+html[data-theme="light"] .pipeline-brand {
+  border-right-color: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .pipeline-brand__wordmark {
+  color: rgba(10, 13, 22, 0.60);
+}
+
+html[data-theme="light"] .brand-header__logo {
+  color: var(--accent);
+}
+
+html[data-theme="light"] .brand-header__wordmark {
+  color: #0a0d16;
+}
+
+html[data-theme="light"] .brand-header__context {
+  color: rgba(10, 13, 22, 0.44);
+}
+
 html[data-theme="light"] .pipeline-bar {
   background: rgba(250, 251, 255, 0.95);
   border-bottom-color: rgba(0, 0, 0, 0.08);
@@ -477,6 +497,34 @@ code, pre {
 }
 
 /* ============================================================
+   PIPELINE BRAND — logo + wordmark on left of pipeline bar
+   ============================================================ */
+
+.pipeline-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  flex-shrink: 0;
+  padding-right: 0.9rem;
+  margin-right: 0.1rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pipeline-brand__icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.pipeline-brand__wordmark {
+  font-family: var(--font-display);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+}
+
+/* ============================================================
    SIDEBAR — 220px, off-canvas drawer at ≤ 860px
    ============================================================ */
 
@@ -636,9 +684,40 @@ code, pre {
    BRAND TEXT & MODE LABELS — no card border
    ============================================================ */
 
-.brand-text {
-  margin-top: 0.8rem;
-  padding: 0 0.15rem;
+.brand-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  padding: 0 0.1rem;
+}
+
+.brand-header__row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.brand-header__logo {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.brand-header__wordmark {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.brand-header__context {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
 }
 
 .mode-labels {
@@ -1649,6 +1728,10 @@ tbody tr:hover td {
 @media (max-width: 860px) {
   .pipeline-bar__hamburger {
     display: flex;
+  }
+
+  .pipeline-brand__wordmark {
+    display: none;
   }
 
   .shell-body {

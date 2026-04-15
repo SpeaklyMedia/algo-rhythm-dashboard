@@ -16,16 +16,18 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
-## Strategy Dashboard Artifact
+## Strategy Dashboard Artifact (Algo-Rhythm)
 
-Located at `artifacts/strategy-dashboard/`. Static-only React + Vite dashboard.
+Located at `artifacts/strategy-dashboard/`. Static-only React + Vite dashboard. App title: **Algo-Rhythm**.
 
-- **Design system**: Dark premium theme — bg `#0b0f14`, accent cyan `#68d6ff`, warm amber `#ffa347`; fonts: Plus Jakarta Sans, League Spartan (display), IBM Plex Mono
+- **Design system**: Dark-default + Light mode toggle. Dark: bg `#0c0f18`, accent cyan `#68d6ff`; Light: bg `#f5f7fc`, accent `#0a8fb8`; fonts: Plus Jakarta Sans, League Spartan (display), IBM Plex Mono
+- **Logo**: `AlgoRhythmLogo` SVG component (beamed music noteheads + algorithm diamond vertex on beam); inline React JSX, uses `currentColor`
+- **Brand**: `BrandHeader` component in sidebar (logo + "Algo-Rhythm" wordmark + context labels); `pipeline-brand` in pipeline bar (icon + wordmark at ≥860px, icon-only at ≤860px)
 - **Pages (6)**: Health Check, Content Strategy, Promotion Review, What's in the Package, Run Collection, Delivery & Downloads
 - **Data**: All from `public/data/*.json` — no backend, no live API
-- **Shell**: AccountSelector (multi-account shell, "Coming soon" affordance), PipelineStrip numbered breadcrumb, 260px sidebar, active nav left-border accent
-- **Human-centric naming**: `PAGE_DISPLAY` map overrides all navigation and header labels
-- **Sub-properties**: `property-chip` on platform cards, active property count in status strip and sidebar footer
+- **Shell**: BrandHeader in sidebar-top, PipelineBar with pipeline-brand zone, 220px sidebar (off-canvas drawer at ≤860px), active nav left-border accent
+- **Responsive**: hamburger+drawer at ≤860px; numbers-only pipeline at ≤780px; full-screen sidebar at ≤640px; short rail labels at ≤640px
+- **Theme**: localStorage + prefers-color-scheme; ThemeToggle in pipeline bar; no-flash init in index.html
 - **Key files**: `src/App.tsx`, `src/index.css`, `public/data/dashboard_index.json`
 
 ## Key Commands

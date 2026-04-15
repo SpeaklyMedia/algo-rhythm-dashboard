@@ -164,35 +164,40 @@ function JsonCode({ value }) {
   return <pre className="json-block">{JSON.stringify(value, null, 2)}</pre>;
 }
 
-function AccountSelector({ title }) {
-  const [open, setOpen] = useState(false);
+function AlgoRhythmLogo({ size = 28, className = '' }) {
   return (
-    <div className="account-selector">
-      <button
-        className="account-selector__trigger"
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
-        <span className="account-selector__icon">▣</span>
-        <span className="account-selector__name">{title || 'Account'}</span>
-        <span className="account-selector__chevron">{open ? '∧' : '∨'}</span>
-      </button>
-      {open && (
-        <div className="account-selector__dropdown" role="listbox">
-          <div className="account-selector__item account-selector__item--active" role="option" aria-selected="true">
-            <span className="account-selector__item-dot">▣</span>
-            <span>{title || 'Account'}</span>
-            <span className="account-selector__item-check">✓</span>
-          </div>
-          <div className="account-selector__divider" />
-          <div className="account-selector__item account-selector__item--soon" role="option" aria-selected="false">
-            <span>+ Add account</span>
-            <span className="account-selector__soon-chip">Coming soon</span>
-          </div>
-        </div>
-      )}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className={className}
+    >
+      <ellipse cx="6" cy="25" rx="4" ry="2.8" fill="currentColor" transform="rotate(-18 6 25)" />
+      <ellipse cx="21" cy="21.5" rx="4" ry="2.8" fill="currentColor" transform="rotate(-18 21 21.5)" />
+      <line x1="9.5" y1="8" x2="9.5" y2="23.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="24.5" y1="6" x2="24.5" y2="20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="9.5" y1="8" x2="24.5" y2="6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M17 5 L19.4 7 L17 9 L14.6 7 Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function BrandHeader({ dataMode }) {
+  return (
+    <div className="brand-header">
+      <div className="brand-header__row">
+        <AlgoRhythmLogo size={30} className="brand-header__logo" />
+        <span className="brand-header__wordmark">Algo-Rhythm</span>
+      </div>
+      <p className="brand-header__context">Lane B · Internal review</p>
+      <div className="mode-labels">
+        <span className="mode-label">{dataMode || 'static_json'}</span>
+        <span className="mode-label-sep">·</span>
+        <span className="mode-label">no backend</span>
+      </div>
     </div>
   );
 }
@@ -234,6 +239,10 @@ function ThemeToggle() {
 function PipelineBar({ pages, activePage, onNavigate, datasets, onHamburger }) {
   return (
     <header className="pipeline-bar" role="navigation" aria-label="Pipeline stages">
+      <div className="pipeline-brand" aria-hidden="true">
+        <AlgoRhythmLogo size={22} className="pipeline-brand__icon" />
+        <span className="pipeline-brand__wordmark">Algo-Rhythm</span>
+      </div>
       <button
         type="button"
         className="pipeline-bar__hamburger"
@@ -1032,8 +1041,8 @@ function App() {
     return (
       <div className="shell centered">
         <div className="loading-panel">
-          <p className="eyebrow">Lane B review shell</p>
-          <h1>Loading frozen dashboard contract…</h1>
+          <p className="eyebrow">Algo-Rhythm</p>
+          <h1>Loading review dashboard…</h1>
           <p>Reading static seeded data from the bundled handoff surface.</p>
         </div>
       </div>
@@ -1098,15 +1107,7 @@ function App() {
 
         <aside className={isSidebarOpen ? 'sidebar sidebar--open' : 'sidebar'}>
           <div className="sidebar-top">
-            <AccountSelector title={index.app?.title} />
-            <div className="brand-text">
-              <p className="eyebrow">Lane B · Internal review</p>
-              <div className="mode-labels">
-                <span className="mode-label">{index.app?.data_mode || 'static_json'}</span>
-                <span className="mode-label-sep">·</span>
-                <span className="mode-label">no backend</span>
-              </div>
-            </div>
+            <BrandHeader dataMode={index.app?.data_mode} />
           </div>
 
           <nav className="nav-list" aria-label="Dashboard sections">
