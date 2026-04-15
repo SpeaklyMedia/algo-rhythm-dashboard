@@ -513,8 +513,8 @@ function StrategyPage({ datasets }) {
           if (!tiers.length) return <EmptyState title="Unavailable" detail="No tiers found in adaptation data." />;
           return (
             <div className="split-grid">
-              {tiers.map((tier) => (
-                <article className="surface-card" key={tier.tier_id || tier.id || tier.tier_label || String(Math.random())}>
+              {tiers.map((tier, i) => (
+                <article className="surface-card" key={tier.tier_id || tier.id || tier.tier_label || i}>
                   <div className="surface-heading">
                     <h3>{tier.tier_label || tier.label || tier.tier_id || 'Tier'}</h3>
                     {tier.tier_id && <StatusBadge tone="neutral">{tier.tier_id}</StatusBadge>}
@@ -1073,7 +1073,7 @@ function App() {
             className="sidebar-link sidebar-link--secondary"
             onClick={() => setActivePage('handoff')}
           >
-            Delivery & Downloads →
+            Design authority →
           </button>
         </div>
       </aside>
@@ -1122,7 +1122,7 @@ function App() {
         <header className="content-header">
           <div className="header-stack">
             <p className="eyebrow">
-              Stage {pageIndex + 1} of {pageDefinitions.length} · {displaySubtitle}
+              {pageIndex + 1} / {pageDefinitions.length} · {displaySubtitle}
             </p>
             <div className="header-title-row">
               <h2>{displayLabel}</h2>

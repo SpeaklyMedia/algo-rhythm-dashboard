@@ -281,7 +281,7 @@ pre {
 .strip-card strong {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 500;
   line-height: 1.5;
   overflow-wrap: anywhere;
