@@ -266,6 +266,10 @@ function AlgoRhythmLogo({ size = 28, className = '' }) {
       aria-hidden="true"
       className={className}
     >
+      {/* Input markers: incoming signal / data flowing into the left vertex */}
+      <line x1="1" y1="17" x2="5" y2="17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="1" y1="21" x2="5" y2="21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="1" y1="25" x2="5" y2="25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       {/* Diamond: flowchart decision node = music notehead. Vertices: top(16,13) right(24,21) bottom(16,29) left(8,21) */}
       <polygon points="16,13 24,21 16,29 8,21" fill="currentColor" />
       {/* Stem: rises from top vertex — music stem + algorithm flow line */}
