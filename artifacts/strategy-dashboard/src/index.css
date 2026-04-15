@@ -340,6 +340,8 @@ a {
 
 code, pre {
   font-family: var(--font-mono);
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 /* ============================================================
@@ -1541,6 +1543,8 @@ html[data-theme="light"] .score-dim__bar {
   font-size: 0.84rem;
   line-height: 1.5;
   margin: 0.2rem 0 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .lede {
@@ -2114,5 +2118,41 @@ html[data-theme="light"] .home-lane-card__num {
 
   .content--home {
     padding: 1rem 1rem 2.5rem;
+  }
+
+  .kv-row {
+    grid-template-columns: 1fr;
+    gap: 0.18rem;
+  }
+
+  .kv-row dt {
+    padding-top: 0;
+  }
+
+  .kv-row dd {
+    word-break: break-all;
+  }
+
+  .stat-value {
+    white-space: normal;
+    word-break: break-all;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .stat-detail {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+  }
+
+  .table-scroll table {
+    min-width: 520px;
+  }
+
+  .surface-card p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }
