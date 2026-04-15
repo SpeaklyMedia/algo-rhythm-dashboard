@@ -1029,6 +1029,69 @@ html[data-theme="light"] .panel:hover {
   line-height: 1.4;
 }
 
+.stat-chip {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: lowercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-item--promoted {
+  border-left: 2px solid var(--accent);
+  padding-left: calc(1rem - 2px);
+}
+.stat-item--promoted .stat-value {
+  color: var(--accent);
+}
+.stat-chip--promoted {
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+.stat-item--latest {
+  border-left: 2px solid transparent;
+}
+
+.stat-item--pick {
+  border-left: 2px solid var(--warm);
+  padding-left: calc(1rem - 2px);
+}
+.stat-item--pick .stat-value {
+  color: var(--warm);
+}
+.stat-chip--pick {
+  color: var(--warm);
+  opacity: 0.85;
+}
+
+.stat-item--pkg {
+  border-left: 2px solid var(--success);
+  padding-left: calc(1rem - 2px);
+}
+.stat-item--pkg .stat-value {
+  color: var(--success);
+}
+.stat-chip--pkg {
+  color: var(--success);
+  opacity: 0.85;
+}
+
+.rail-cell--promoted {
+  border-left: 2px solid var(--accent);
+  padding-left: calc(1rem - 2px);
+}
+.rail-icon--promoted {
+  color: var(--accent);
+  font-weight: 700;
+}
+.rail-value--promoted {
+  color: var(--accent);
+}
+
 /* ============================================================
    PAGE GRID
    ============================================================ */
@@ -1310,6 +1373,46 @@ html[data-theme="light"] .panel:hover {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 0.85rem;
   color: #ffd19a;
+  line-height: 1.5;
+}
+
+.ledger-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  background: var(--glass-bg);
+  border: var(--glass-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.75rem;
+}
+
+.ledger-entry:last-child {
+  margin-bottom: 0;
+}
+
+.ledger-entry__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ledger-entry__id {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ledger-entry__action {
+  font-size: 0.83rem;
+  color: var(--text-soft);
+  border-left: 2px solid var(--accent-soft);
+  padding-left: 0.7rem;
+  margin: 0;
   line-height: 1.5;
 }
 

@@ -5,10 +5,10 @@ const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'hando
 
 const PAGE_DATA_KEYS = {
   overview: ['latest_run', 'latest_review', 'latest_package', 'latest_batch'],
-  strategy: ['content_object', 'trend_shortlist', 'viability_scorecard'],
-  review: ['promotion_recommendation', 'run_comparison_scorecard'],
-  package: ['latest_package', 'selected_signal_cards'],
-  batch: ['latest_batch', 'run_package_index'],
+  strategy: ['content_object', 'trend_shortlist', 'platform_signal_selection', 'viability_scorecard', 'four_tier_adaptations', 'experiment_plan', 'campaign_ledger_seed'],
+  review: ['promotion_recommendation', 'run_comparison_scorecard', 'run_review_index'],
+  package: ['latest_package', 'package_manifest'],
+  batch: ['latest_batch', 'batch_manifest'],
   handoff: [],
 };
 
@@ -19,81 +19,81 @@ function pageHasData(pageId, datasets) {
 }
 
 const STRIP_ICONS = {
-  promoted: '↑ P',
-  latest: '✓ L',
-  recommended: '⊙ R',
-  package: '▣ K',
-  properties: '◈ X',
+  promoted: 'LIVE',
+  latest: 'LATEST',
+  recommended: 'PICK',
+  package: 'PKG',
+  properties: 'PROPS',
 };
 
 const HOME_LANES = [
   {
     id: 'overview',
-    label: 'Health Check',
-    desc: "See what's running, what's promoted, and whether anything needs attention before you proceed.",
+    label: 'Overview',
+    desc: "Promoted alias, latest successful run, review recommendation, and package/batch pointers at a glance.",
   },
   {
     id: 'strategy',
-    label: 'Content Strategy',
-    desc: 'Understand the topics, trends, and platform allocations driving the content plan for this run.',
+    label: 'Strategy',
+    desc: 'Content object, trend shortlist, viability scorecard, platform decisions, and experiment hypotheses.',
   },
   {
     id: 'review',
-    label: 'Promotion Review',
-    desc: 'Compare all runs in the cycle and confirm which one should advance to packaging.',
+    label: 'Review',
+    desc: 'Promotion recommendation, ranked run scorecard, and excluded-candidate breakdown.',
   },
   {
     id: 'package',
-    label: "What's in the Package",
-    desc: 'Inspect every card bundled, the signals picked, and how the package was constructed.',
+    label: 'Package',
+    desc: 'Latest package facts, manifest integrity, and signal cards selected by property.',
   },
   {
     id: 'batch',
-    label: 'Run Collection',
-    desc: 'Review all runs included in this cycle — modes, counts, and SHA integrity checks.',
+    label: 'Batch',
+    desc: 'Reviewed run cohort — modes, card counts, and SHA verification for the full batch.',
   },
   {
     id: 'handoff',
-    label: 'Delivery & Downloads',
-    desc: 'Verify artifact integrity, download files, and confirm the canonical handoff is complete.',
+    label: 'Handoff',
+    desc: 'Canonical downloads, contract metadata, design authority, and handoff packet contents.',
   },
 ];
 
 const PAGE_DISPLAY = {
   overview: {
-    label: 'Health Check',
-    shortLabel: 'Health',
-    subtitle: "See what's running, what's promoted, and whether anything needs attention",
-    kicker: 'Pipeline status',
+    label: 'Overview',
+    shortLabel: 'Overview',
+    subtitle: 'Promoted alias · latest successful run · review recommendation · package and batch pointers',
+    kicker: 'Lane B delivery posture',
   },
   strategy: {
-    label: 'Content Strategy',
+    label: 'Strategy',
     shortLabel: 'Strategy',
-    subtitle: 'Understand the plan behind this run — topics, trends, platforms, and scores',
+    subtitle: 'Content object · trends · viability scorecard · platform decisions · experiment plan',
     kicker: 'Strategic substrate',
   },
   review: {
-    label: 'Promotion Review',
+    label: 'Review',
     shortLabel: 'Review',
-    subtitle: 'Compare all the runs and confirm which one should move forward',
-    kicker: 'Make your call',
+    subtitle: 'Promotion recommendation · ranked runs · excluded candidates',
+    kicker: 'Review recommendation',
   },
   package: {
-    label: "What's in the Package",
+    label: 'Package',
     shortLabel: 'Package',
-    subtitle: 'See exactly what got bundled, which cards were picked, and how it was built',
-    kicker: 'Package contents',
+    subtitle: 'Latest package facts · manifest integrity · selected signal cards by property',
+    kicker: 'Latest package',
   },
   batch: {
-    label: 'Run Collection',
+    label: 'Batch',
     shortLabel: 'Batch',
-    subtitle: 'All runs included in this review cycle — modes, counts, and SHA verification',
-    kicker: 'Batch cohort',
+    subtitle: 'Reviewed run cohort · modes · card counts · SHA verification',
+    kicker: 'Latest batch',
   },
   handoff: {
-    label: 'Delivery & Downloads',
-    shortLabel: 'Delivery',
-    subtitle: 'Get your files, verify artifact integrity, and confirm handoff is complete',
+    label: 'Handoff',
+    shortLabel: 'Handoff',
+    subtitle: 'Canonical downloads · contract metadata · design authority · handoff packet',
     kicker: 'Canonical handoff',
   },
 };
@@ -478,39 +478,39 @@ function OverviewPage({ index, datasets }) {
   return (
     <div className="page-grid">
       <section className="panel span-2 hero-panel">
-        <p className="panel-kicker">Pipeline status</p>
-        <h2>Lane B delivery posture</h2>
+        <p className="panel-kicker">Lane B delivery posture</p>
+        <h2>Overview</h2>
         <p className="lede">
-          The promoted alias, latest successful run, current review recommendation, and package/batch pointers are
-          frozen into the static contract. All data below reads from bundled JSON only.
+          Promoted canonical alias, latest successful run, review recommendation, and package/batch pointers —
+          frozen into the static contract. All data reads from bundled JSON only.
         </p>
         <div className="stat-row">
-          <div className="stat-item stat-item--good">
-            <span className="stat-label">Currently live</span>
+          <div className="stat-item stat-item--promoted">
+            <span className="stat-chip stat-chip--promoted">↑ promoted alias</span>
             <code className="stat-value">{summary.top_level_alias_run_id || '—'}</code>
             <span className="stat-detail">{(summary.top_level_alias_candidate_ids || []).join(', ') || 'No candidates'}</span>
           </div>
           <div className="stat-divider" />
-          <div className="stat-item stat-item--warn">
-            <span className="stat-label">Most recent run</span>
+          <div className="stat-item stat-item--latest">
+            <span className="stat-chip stat-chip--latest">latest successful run</span>
             <code className="stat-value">{latestRun?.latest_successful_run_id || '—'}</code>
             <span className="stat-detail">{latestRun?.run_manifest_path || 'No path'}</span>
           </div>
           <div className="stat-divider" />
-          <div className="stat-item stat-item--warn">
-            <span className="stat-label">Recommended pick</span>
+          <div className="stat-item stat-item--pick">
+            <span className="stat-chip stat-chip--pick">⊙ review recommendation</span>
             <code className="stat-value">{latestReview?.recommended_run_id || '—'}</code>
             <span className="stat-detail">{latestReview?.review_id || 'No review ID'}</span>
           </div>
           <div className="stat-divider" />
-          <div className="stat-item stat-item--good">
-            <span className="stat-label">Packaged & ready</span>
+          <div className="stat-item stat-item--pkg">
+            <span className="stat-chip stat-chip--pkg">▣ latest package</span>
             <code className="stat-value">{latestPackage?.run_id || '—'}</code>
             <span className="stat-detail">{latestPackage?.package_id || 'No package ID'}</span>
           </div>
           <div className="stat-divider" />
           <div className="stat-item">
-            <span className="stat-label">Batch review</span>
+            <span className="stat-chip">latest batch</span>
             <code className="stat-value">{latestBatch?.review_id || '—'}</code>
             <span className="stat-detail">{`${latestBatch?.included_run_ids?.length || 0} included runs`}</span>
           </div>
@@ -577,6 +577,7 @@ function StrategyPage({ datasets }) {
   const scorecard = datasets.viability_scorecard;
   const adaptations = datasets.four_tier_adaptations;
   const experiment = datasets.experiment_plan;
+  const ledger = datasets.campaign_ledger_seed;
 
   return (
     <div className="page-grid">
@@ -745,6 +746,39 @@ function StrategyPage({ datasets }) {
           );
         })() : (
           <EmptyState title="Unavailable" detail="Experiment plan data is missing." />
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>Campaign ledger seed</h2>
+        {ledger?.entries?.length ? (
+          <>
+            {ledger.entries.map((entry) => (
+              <div key={entry.entry_id} className="ledger-entry">
+                <div className="ledger-entry__head">
+                  <code className="ledger-entry__id">{entry.entry_id}</code>
+                  <StatusBadge tone={statusTone(entry.status)}>{entry.status}</StatusBadge>
+                </div>
+                <KeyValueTable
+                  rows={[
+                    { label: 'Content ref', value: entry.content_object_ref || 'Unavailable' },
+                    { label: 'Viability', value: entry.viability_recommendation || 'Unavailable' },
+                    { label: 'Assumptions', value: entry.assumption_count ?? 'Unavailable' },
+                    { label: 'Platforms', value: (entry.target_platforms || []).join(', ') || 'Unavailable' },
+                    { label: 'Trend refs', value: (entry.trend_refs || []).length + ' trends' },
+                    { label: 'Selected cards', value: (entry.selected_card_ids || []).length + ' cards' },
+                  ]}
+                />
+                {entry.next_operator_action && (
+                  <p className="ledger-entry__action">
+                    <strong>Next action:</strong> {entry.next_operator_action}
+                  </p>
+                )}
+              </div>
+            ))}
+          </>
+        ) : (
+          <EmptyState title="Unavailable" detail="Campaign ledger seed data is missing." />
         )}
       </section>
     </div>
@@ -1135,7 +1169,7 @@ function HomePage({ onNavigate }) {
             className="btn btn-primary"
             onClick={() => onNavigate('overview')}
           >
-            Begin at Health Check →
+            Begin at Overview →
           </button>
         </div>
       </section>
@@ -1325,21 +1359,21 @@ function App() {
         <main className={activePage === 'home' ? 'content content--home' : 'content'}>
           {activePage !== 'home' && <>
           <div className="data-rail">
-            <div className="rail-cell">
+            <div className="rail-cell rail-cell--promoted">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Currently live</span>
-                  <span className="rail-label__short">LIVE</span>
+                  <span className="rail-label__full">Promoted alias</span>
+                  <span className="rail-label__short">ALIAS</span>
                 </span>
-                <span className="rail-icon">{STRIP_ICONS.promoted}</span>
+                <span className="rail-icon rail-icon--promoted">{STRIP_ICONS.promoted}</span>
               </div>
-              <code className="rail-value">{summary.top_level_alias_run_id || '—'}</code>
+              <code className="rail-value rail-value--promoted">{summary.top_level_alias_run_id || '—'}</code>
             </div>
             <div className="rail-divider" />
             <div className="rail-cell">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Most recent run</span>
+                  <span className="rail-label__full">Latest successful run</span>
                   <span className="rail-label__short">LATEST</span>
                 </span>
                 <span className="rail-icon">{STRIP_ICONS.latest}</span>
@@ -1350,7 +1384,7 @@ function App() {
             <div className="rail-cell">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Recommended pick</span>
+                  <span className="rail-label__full">Review recommendation</span>
                   <span className="rail-label__short">PICK</span>
                 </span>
                 <span className="rail-icon">{STRIP_ICONS.recommended}</span>
@@ -1361,7 +1395,7 @@ function App() {
             <div className="rail-cell">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Packaged & ready</span>
+                  <span className="rail-label__full">Latest package</span>
                   <span className="rail-label__short">PKG</span>
                 </span>
                 <span className="rail-icon">{STRIP_ICONS.package}</span>
