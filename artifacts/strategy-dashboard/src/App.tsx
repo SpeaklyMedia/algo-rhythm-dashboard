@@ -232,12 +232,13 @@ function AlgoRhythmLogo({ size = 28, className = '' }) {
       aria-hidden="true"
       className={className}
     >
-      <ellipse cx="6" cy="25" rx="4" ry="2.8" fill="currentColor" transform="rotate(-18 6 25)" />
-      <ellipse cx="21" cy="21.5" rx="4" ry="2.8" fill="currentColor" transform="rotate(-18 21 21.5)" />
-      <line x1="9.5" y1="8" x2="9.5" y2="23.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="24.5" y1="6" x2="24.5" y2="20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="9.5" y1="8" x2="24.5" y2="6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-      <path d="M17 5 L19.4 7 L17 9 L14.6 7 Z" fill="currentColor" />
+      {/* EQ waveform bars — algorithmic element (left) */}
+      <line x1="3.5" y1="24" x2="3.5" y2="17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="8.5" y1="24" x2="8.5" y2="10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="13.5" y1="24" x2="13.5" y2="15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      {/* Single quarter note — music element (right) */}
+      <ellipse cx="23.5" cy="24" rx="4" ry="2.8" fill="currentColor" transform="rotate(-15 23.5 24)" />
+      <line x1="27.2" y1="23" x2="27.2" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
