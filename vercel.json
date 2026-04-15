@@ -1,8 +1,8 @@
 {
+  "framework": "vite",
   "buildCommand": "pnpm --filter @workspace/strategy-dashboard run build",
   "outputDirectory": "artifacts/strategy-dashboard/dist",
   "installCommand": "pnpm install --frozen-lockfile",
-  "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],

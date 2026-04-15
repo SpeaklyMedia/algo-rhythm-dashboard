@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # push-to-github.sh
-# Run this script once you have a GitHub personal access token.
-# It creates the repo (if not exists) and pushes the project.
+# Creates the GitHub repo (if not exists) and pushes the project.
+# Uses git credential.helper — token is never embedded in the remote URL.
 #
 # Usage:
 #   export GITHUB_TOKEN=ghp_your_token_here
@@ -10,38 +10,51 @@
 set -euo pipefail
 
 REPO_NAME="${REPO_NAME:-algo-rhythm-dashboard}"
-GITHUB_USER="${GITHUB_USER:-}"
 
-if [ -z "$GITHUB_TOKEN" ]; then
+if [ -z "${GITHUB_TOKEN:-}" ]; then
   echo "ERROR: Set GITHUB_TOKEN before running this script."
   echo "  export GITHUB_TOKEN=ghp_your_token_here"
   exit 1
 fi
 
-if [ -z "$GITHUB_USER" ]; then
-  GITHUB_USER=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-    https://api.github.com/user | python3 -c "import sys,json; print(json.load(sys.stdin)['login'])")
-  echo "GitHub user: $GITHUB_USER"
-fi
+# Get GitHub username from the API
+GITHUB_USER=$(curl -sf -H "Authorization: Bearer $GITHUB_TOKEN" \
+  https://api.github.com/user | python3 -c "import sys,json; print(json.load(sys.stdin)['login'])")
+echo "GitHub user: $GITHUB_USER"
 
-# Create repo if it doesn't exist
-echo "Creating GitHub repo: $GITHUB_USER/$REPO_NAME ..."
-curl -s -X POST \
+# Create repo (idempotent — ignores 422 if it already exists)
+HTTP_STATUS=$(curl -so /dev/null -w "%{http_code}" \
+  -X POST \
   -H "Authorization: Bearer $GITHUB_TOKEN" \
   -H "Accept: application/vnd.github.v3+json" \
   https://api.github.com/user/repos \
-  -d "{\"name\": \"$REPO_NAME\", \"private\": false, \"description\": \"Algo-Rhythm Lane B Strategy Review Dashboard\"}" \
-  | python3 -c "import sys,json; r=json.load(sys.stdin); print('Repo:', r.get('html_url', r.get('errors', r)))"
+  -d "{\"name\": \"$REPO_NAME\", \"private\": false, \"description\": \"Algo-Rhythm Lane B Strategy Review Dashboard\"}")
 
-# Set remote and push
+if [ "$HTTP_STATUS" = "201" ]; then
+  echo "Repository created: https://github.com/$GITHUB_USER/$REPO_NAME"
+elif [ "$HTTP_STATUS" = "422" ]; then
+  echo "Repository already exists: https://github.com/$GITHUB_USER/$REPO_NAME"
+else
+  echo "ERROR: Unexpected status $HTTP_STATUS creating repo. Check your token and try again."
+  exit 1
+fi
+
+# Configure credential helper (no token in remote URL)
+git config credential.helper "!f() { echo username=$GITHUB_USER; echo password=$GITHUB_TOKEN; }; f"
+
+REMOTE_URL="https://github.com/$GITHUB_USER/$REPO_NAME.git"
+
 git remote remove github 2>/dev/null || true
-git remote add github "https://$GITHUB_USER:$GITHUB_TOKEN@github.com/$GITHUB_USER/$REPO_NAME.git"
+git remote add github "$REMOTE_URL"
 
 git add -A
-git commit -m "feat: Vercel deployment configuration + Algo-Rhythm rebrand" --allow-empty
+git commit -m "feat: Vercel deployment configuration + Algo-Rhythm dashboard" --allow-empty
 
-git push github HEAD:main --force
+git push github HEAD:main
+
+# Clean up credential helper after push
+git config --unset credential.helper 2>/dev/null || true
 
 echo ""
-echo "Done! Repo: https://github.com/$GITHUB_USER/$REPO_NAME"
-echo "Now import it into Vercel — see VERCEL_DEPLOY.md for full instructions."
+echo "Done. Repo: https://github.com/$GITHUB_USER/$REPO_NAME"
+echo "Next: import it in Vercel — see VERCEL_DEPLOY.md"
