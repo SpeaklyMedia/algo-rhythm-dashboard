@@ -340,8 +340,6 @@ a {
 
 code, pre {
   font-family: var(--font-mono);
-  word-break: break-all;
-  overflow-wrap: anywhere;
 }
 
 /* ============================================================
@@ -2129,8 +2127,10 @@ html[data-theme="light"] .home-lane-card__num {
     padding-top: 0;
   }
 
-  .kv-row dd {
+  .kv-row dd,
+  .kv-row dd code {
     word-break: break-all;
+    overflow-wrap: anywhere;
   }
 
   .stat-value {
@@ -2149,6 +2149,11 @@ html[data-theme="light"] .home-lane-card__num {
 
   .table-scroll table {
     min-width: 520px;
+  }
+
+  .table-scroll table td code {
+    word-break: break-all;
+    overflow-wrap: anywhere;
   }
 
   .surface-card p {
