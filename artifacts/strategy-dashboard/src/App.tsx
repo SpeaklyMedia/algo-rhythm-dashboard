@@ -266,13 +266,15 @@ function AlgoRhythmLogo({ size = 28, className = '' }) {
       aria-hidden="true"
       className={className}
     >
-      {/* EQ waveform bars — algorithmic element (left) */}
-      <line x1="3.5" y1="24" x2="3.5" y2="17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="8.5" y1="24" x2="8.5" y2="10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="13.5" y1="24" x2="13.5" y2="15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      {/* Single quarter note — music element (right) */}
-      <ellipse cx="23.5" cy="24" rx="4" ry="2.8" fill="currentColor" transform="rotate(-15 23.5 24)" />
-      <line x1="27.2" y1="23" x2="27.2" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      {/* Diamond: flowchart decision node = music notehead. Vertices: top(16,13) right(24,21) bottom(16,29) left(8,21) */}
+      <polygon points="16,13 24,21 16,29 8,21" fill="currentColor" />
+      {/* Stem: rises from top vertex — music stem + algorithm flow line */}
+      <line x1="16" y1="13" x2="16" y2="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* Flag: eighth-note curl from stem top — makes the music note unmistakable */}
+      <path d="M 16,4 Q 26,7 22,15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* Algorithm branches from left and right diamond vertices — "yes / no" decision paths */}
+      <line x1="8" y1="21" x2="2" y2="29" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line x1="24" y1="21" x2="30" y2="29" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
