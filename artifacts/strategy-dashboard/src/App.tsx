@@ -26,6 +26,39 @@ const STRIP_ICONS = {
   properties: '◈ X',
 };
 
+const HOME_LANES = [
+  {
+    id: 'overview',
+    label: 'Health Check',
+    desc: "See what's running, what's promoted, and whether anything needs attention before you proceed.",
+  },
+  {
+    id: 'strategy',
+    label: 'Content Strategy',
+    desc: 'Understand the topics, trends, and platform allocations driving the content plan for this run.',
+  },
+  {
+    id: 'review',
+    label: 'Promotion Review',
+    desc: 'Compare all runs in the cycle and confirm which one should advance to packaging.',
+  },
+  {
+    id: 'package',
+    label: "What's in the Package",
+    desc: 'Inspect every card bundled, the signals picked, and how the package was constructed.',
+  },
+  {
+    id: 'batch',
+    label: 'Run Collection',
+    desc: 'Review all runs included in this cycle — modes, counts, and SHA integrity checks.',
+  },
+  {
+    id: 'handoff',
+    label: 'Delivery & Downloads',
+    desc: 'Verify artifact integrity, download files, and confirm the canonical handoff is complete.',
+  },
+];
+
 const PAGE_DISPLAY = {
   overview: {
     label: 'Health Check',
@@ -236,13 +269,18 @@ function ThemeToggle() {
   );
 }
 
-function PipelineBar({ pages, activePage, onNavigate, datasets, onHamburger }) {
+function PipelineBar({ pages, activePage, onNavigate, onHome, datasets, onHamburger }) {
   return (
     <header className="pipeline-bar" role="navigation" aria-label="Pipeline stages">
-      <div className="pipeline-brand" aria-hidden="true">
+      <button
+        type="button"
+        className={`pipeline-brand${activePage === 'home' ? ' pipeline-brand--active' : ''}`}
+        onClick={onHome}
+        aria-label="Algo-Rhythm home"
+      >
         <AlgoRhythmLogo size={22} className="pipeline-brand__icon" />
         <span className="pipeline-brand__wordmark">Algo-Rhythm</span>
-      </div>
+      </button>
       <button
         type="button"
         className="pipeline-bar__hamburger"
@@ -1008,9 +1046,68 @@ function HandoffPage({ index }) {
   );
 }
 
+function HomePage({ onNavigate }) {
+  return (
+    <div className="home-page">
+      <section className="home-hero panel">
+        <div className="home-hero__logo-wrap" aria-hidden="true">
+          <AlgoRhythmLogo size={64} className="home-hero__logo" />
+        </div>
+        <div className="home-hero__copy">
+          <p className="eyebrow">Internal review tool</p>
+          <h1 className="home-hero__title">Algo-Rhythm</h1>
+          <p className="home-hero__pitch">
+            A frozen, static review dashboard for the Lane B algorithmic content pipeline.
+            Inspect the full delivery cycle — from strategic substrate to canonical handoff —
+            using a bundled snapshot. All data is embedded at build time.
+            No live API. No backend dependencies.
+          </p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => onNavigate('overview')}
+          >
+            Begin at Health Check →
+          </button>
+        </div>
+      </section>
+
+      <section className="home-lanes">
+        <h2 className="home-lanes__heading">Six stages of the review cycle</h2>
+        <div className="home-lanes__grid">
+          {HOME_LANES.map((lane, i) => (
+            <article className="home-lane-card surface-card" key={lane.id}>
+              <div className="home-lane-card__num">{i + 1}</div>
+              <div className="home-lane-card__body">
+                <h3 className="home-lane-card__title">{lane.label}</h3>
+                <p className="home-lane-card__desc">{lane.desc}</p>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  onClick={() => onNavigate(lane.id)}
+                >
+                  Go to →
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <footer className="home-footer">
+        <p>
+          This dashboard reads from a static bundled contract — a frozen snapshot of the Lane B
+          pipeline seeded at review time. No network calls are made after initial page load.
+          All data is read-only and cannot be modified from this interface.
+        </p>
+      </footer>
+    </div>
+  );
+}
+
 function App() {
   const { loading, fatalError, index, datasets, optionalErrors } = useDashboardData();
-  const [activePage, setActivePage] = useState('overview');
+  const [activePage, setActivePage] = useState('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -1027,8 +1124,8 @@ function App() {
 
   useEffect(() => {
     if (!pageDefinitions.length) return;
-    if (!pageDefinitions.some((page) => page.id === activePage)) {
-      setActivePage(pageDefinitions[0].id);
+    if (activePage !== 'home' && !pageDefinitions.some((page) => page.id === activePage)) {
+      setActivePage('home');
     }
   }, [activePage, pageDefinitions]);
 
@@ -1071,6 +1168,8 @@ function App() {
 
   const renderPage = () => {
     switch (activePage) {
+      case 'home':
+        return <HomePage onNavigate={handleNavigate} />;
       case 'strategy':
         return <StrategyPage datasets={datasets} />;
       case 'review':
@@ -1092,6 +1191,7 @@ function App() {
         pages={pageDefinitions}
         activePage={activePage}
         onNavigate={handleNavigate}
+        onHome={() => handleNavigate('home')}
         datasets={datasets}
         onHamburger={() => setIsSidebarOpen((o) => !o)}
       />
@@ -1111,6 +1211,14 @@ function App() {
           </div>
 
           <nav className="nav-list" aria-label="Dashboard sections">
+            <button
+              type="button"
+              className={activePage === 'home' ? 'nav-item nav-item--home active' : 'nav-item nav-item--home'}
+              onClick={() => handleNavigate('home')}
+            >
+              <span>Home</span>
+              <small>Welcome · orientation · stage overview</small>
+            </button>
             {pageDefinitions.map((page) => (
               <button
                 key={page.id}
@@ -1146,7 +1254,8 @@ function App() {
           </div>
         </aside>
 
-        <main className="content">
+        <main className={activePage === 'home' ? 'content content--home' : 'content'}>
+          {activePage !== 'home' && <>
           <div className="data-rail">
             <div className="rail-cell">
               <div className="rail-label-row">
@@ -1239,6 +1348,7 @@ function App() {
               </ul>
             </details>
           )}
+          </>}
 
           <div key={activePage}>
             {renderPage()}

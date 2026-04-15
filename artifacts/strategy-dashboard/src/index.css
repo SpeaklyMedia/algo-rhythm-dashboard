@@ -1562,6 +1562,226 @@ tbody tr:hover td {
 }
 
 /* ============================================================
+   HOME PAGE — hero, lane cards, footer
+   ============================================================ */
+
+.content--home {
+  padding: 2rem 2.5rem 3rem;
+}
+
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  max-width: 960px;
+}
+
+/* Hero */
+
+.home-hero {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.home-hero__logo-wrap {
+  flex-shrink: 0;
+  color: var(--accent);
+  opacity: 0.92;
+}
+
+.home-hero__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.home-hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--text);
+}
+
+.home-hero__pitch {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-soft);
+  max-width: 56ch;
+}
+
+/* Primary CTA button */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #0c0f18;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent-soft);
+}
+
+.btn-outline:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.78rem;
+}
+
+/* Lane card grid */
+
+.home-lanes {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.home-lanes__heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.home-lanes__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.home-lane-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.1rem 1.2rem;
+  cursor: default;
+}
+
+.home-lane-card__num {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.55;
+  line-height: 1;
+  flex-shrink: 0;
+  padding-top: 0.05rem;
+  letter-spacing: -0.04em;
+}
+
+.home-lane-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.home-lane-card__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.home-lane-card__desc {
+  margin: 0;
+  font-size: 0.81rem;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+/* Home footer note */
+
+.home-footer {
+  padding-top: 1rem;
+  border-top: var(--glass-border);
+}
+
+.home-footer p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+  max-width: 64ch;
+}
+
+/* Pipeline brand as button */
+
+button.pipeline-brand {
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.9rem 0.2rem 0.2rem;
+  transition: opacity 130ms ease;
+}
+
+button.pipeline-brand:hover {
+  opacity: 0.8;
+}
+
+button.pipeline-brand.pipeline-brand--active .pipeline-brand__wordmark {
+  color: var(--accent);
+}
+
+/* Home nav item in sidebar */
+
+.nav-item--home {
+  border-bottom: var(--glass-border);
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.1rem;
+}
+
+/* Light mode home overrides */
+
+html[data-theme="light"] .home-hero__logo-wrap {
+  color: var(--accent);
+}
+
+html[data-theme="light"] .btn-primary {
+  color: #fff;
+}
+
+html[data-theme="light"] .home-lane-card__num {
+  color: var(--accent);
+  opacity: 0.6;
+}
+
+/* ============================================================
    RESPONSIVE — 1100px: abbreviated stage names
    ============================================================ */
 
@@ -1672,6 +1892,20 @@ tbody tr:hover td {
   .stat-divider {
     display: none;
   }
+
+  .home-lanes__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .home-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+
+  .content--home {
+    padding: 1.5rem 1.75rem 2.5rem;
+  }
 }
 
 /* ============================================================
@@ -1755,5 +1989,17 @@ tbody tr:hover td {
 
   .split-grid {
     grid-template-columns: 1fr;
+  }
+
+  .home-lanes__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero__title {
+    font-size: 1.9rem;
+  }
+
+  .content--home {
+    padding: 1rem 1rem 2.5rem;
   }
 }
