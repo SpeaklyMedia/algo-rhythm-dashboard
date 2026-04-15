@@ -266,17 +266,17 @@ function AlgoRhythmLogo({ size = 28, className = '' }) {
       aria-hidden="true"
       className={className}
     >
-      {/* Input markers: incoming signal / data flowing into the left vertex */}
+      {/* input ticks */}
       <line x1="1" y1="17" x2="5" y2="17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       <line x1="1" y1="21" x2="5" y2="21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       <line x1="1" y1="25" x2="5" y2="25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      {/* Diamond: flowchart decision node = music notehead. Vertices: top(16,13) right(24,21) bottom(16,29) left(8,21) */}
+      {/* diamond notehead / decision node */}
       <polygon points="16,13 24,21 16,29 8,21" fill="currentColor" />
-      {/* Stem: rises from top vertex — music stem + algorithm flow line */}
+      {/* stem */}
       <line x1="16" y1="13" x2="16" y2="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      {/* Flag: eighth-note curl from stem top — makes the music note unmistakable */}
+      {/* eighth-note flag */}
       <path d="M 16,4 Q 26,7 22,15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-      {/* Algorithm branches from left and right diamond vertices — "yes / no" decision paths */}
+      {/* yes/no branches */}
       <line x1="8" y1="21" x2="2" y2="29" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       <line x1="24" y1="21" x2="30" y2="29" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
