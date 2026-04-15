@@ -1541,8 +1541,6 @@ html[data-theme="light"] .score-dim__bar {
   font-size: 0.84rem;
   line-height: 1.5;
   margin: 0.2rem 0 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 .lede {
@@ -2156,7 +2154,8 @@ html[data-theme="light"] .home-lane-card__num {
     overflow-wrap: anywhere;
   }
 
-  .surface-card p {
+  .surface-card p,
+  .muted {
     overflow-wrap: anywhere;
     word-break: break-word;
   }
