@@ -201,6 +201,40 @@ function EmptyState({ title, detail }) {
   );
 }
 
+function CopyButton({ value }) {
+  const [copied, setCopied] = useState(false);
+  if (!value || value === 'Unavailable') return null;
+  const canCopy = typeof navigator !== 'undefined' && typeof navigator?.clipboard?.writeText === 'function';
+  if (!canCopy) return null;
+  function handleCopy() {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  }
+  return (
+    <button
+      type="button"
+      className={`copy-btn${copied ? ' copy-btn--copied' : ''}`}
+      onClick={handleCopy}
+      title={copied ? 'Copied!' : 'Copy to clipboard'}
+    >
+      {copied ? '✓' : 'copy'}
+    </button>
+  );
+}
+
+function ShaField({ hash, note }) {
+  if (!hash || hash === 'Unavailable') return <span className="muted">Unavailable</span>;
+  return (
+    <span className="sha-field">
+      <code className="sha-field__hash">{hash}</code>
+      <CopyButton value={hash} />
+      {note ? <p className="muted sha-field__note">{note}</p> : null}
+    </span>
+  );
+}
+
 function ErrorPanel({ title, detail, items = [] }) {
   return (
     <section className="panel error-panel">
@@ -483,8 +517,8 @@ function OverviewPage({ index, datasets }) {
           rows={[
             { label: 'Run ID', value: latestPackage?.run_id || 'Unavailable' },
             { label: 'Package ID', value: latestPackage?.package_id || 'Unavailable' },
-            { label: 'Manifest SHA', value: latestPackage?.package_manifest_sha256 || 'Unavailable' },
-            { label: 'Package SHA', value: latestPackage?.package_zip_sha256 || 'Unavailable' },
+            { label: 'Manifest SHA', value: <ShaField hash={latestPackage?.package_manifest_sha256} /> },
+            { label: 'Package SHA', value: <ShaField hash={latestPackage?.package_zip_sha256} /> },
           ]}
         />
       </section>
@@ -496,7 +530,7 @@ function OverviewPage({ index, datasets }) {
             { label: 'Batch ID', value: latestBatch?.batch_id || 'Unavailable' },
             { label: 'Review ID', value: latestBatch?.review_id || 'Unavailable' },
             { label: 'Included runs', value: (latestBatch?.included_run_ids || []).join(', ') || 'Unavailable' },
-            { label: 'Batch ZIP SHA', value: latestBatch?.batch_zip_sha256 || 'Unavailable' },
+            { label: 'Batch ZIP SHA', value: <ShaField hash={latestBatch?.batch_zip_sha256} /> },
           ]}
         />
       </section>
@@ -823,7 +857,7 @@ function PackagePage({ datasets }) {
               { label: 'Run ID', value: latestPackage.run_id },
               { label: 'Package ID', value: latestPackage.package_id },
               { label: 'Review ID', value: latestPackage.review_id },
-              { label: 'Package SHA', value: latestPackage.package_zip_sha256 },
+              { label: 'Package SHA', value: <ShaField hash={latestPackage.package_zip_sha256} /> },
             ]}
           />
         ) : (
@@ -838,8 +872,8 @@ function PackagePage({ datasets }) {
             rows={[
               { label: 'Package mode', value: manifest.package_mode },
               { label: 'Selected cards', value: manifest.selected_cards?.selected_card_count || 'Unavailable' },
-              { label: 'Run manifest SHA', value: manifest.run?.run_manifest_sha256 || 'Unavailable' },
-              { label: 'Package ZIP SHA', value: manifest.package_zip?.sha256 || 'Unavailable' },
+              { label: 'Run manifest SHA', value: <ShaField hash={manifest.run?.run_manifest_sha256} /> },
+              { label: 'Package ZIP SHA', value: <ShaField hash={manifest.package_zip?.sha256} /> },
             ]}
           />
         ) : (
@@ -894,7 +928,7 @@ function BatchPage({ datasets }) {
               { label: 'Batch ID', value: latestBatch.batch_id },
               { label: 'Review ID', value: latestBatch.review_id },
               { label: 'Included runs', value: (latestBatch.included_run_ids || []).join(', ') || 'Unavailable' },
-              { label: 'Batch ZIP SHA', value: latestBatch.batch_zip_sha256 || 'Unavailable' },
+              { label: 'Batch ZIP SHA', value: <ShaField hash={latestBatch.batch_zip_sha256} /> },
             ]}
           />
         ) : (
@@ -909,7 +943,7 @@ function BatchPage({ datasets }) {
             rows={[
               { label: 'Run package count', value: batchManifest.run_package_count },
               { label: 'Review path', value: batchManifest.review_path },
-              { label: 'Batch manifest SHA', value: batchManifest.batch_zip?.sha256 || 'Unavailable' },
+              { label: 'Batch manifest SHA', value: <ShaField hash={batchManifest.batch_zip?.sha256} /> },
               { label: 'Generated at', value: formatDate(batchManifest.generated_at) },
             ]}
           />
@@ -937,7 +971,7 @@ function BatchPage({ datasets }) {
                     <td>{item.run_id}</td>
                     <td>{item.package_mode}</td>
                     <td>{item.selected_card_count}</td>
-                    <td>{item.package_zip?.sha256 || 'Unavailable'}</td>
+                    <td><ShaField hash={item.package_zip?.sha256} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -977,17 +1011,16 @@ function HandoffPage({ index }) {
                 <tr key={item.id}>
                   <td>{item.label}</td>
                   <td>
-                    <code>{item.sha256 || 'Unavailable'}</code>
-                    {item.hash_note ? <p className="muted">{item.hash_note}</p> : null}
+                    <ShaField hash={item.sha256} note={item.hash_note} />
                   </td>
                   <td>{formatNumber(item.size_bytes)}</td>
                   <td>
                     {item.bundled && item.public_path ? (
                       <a href={`${base}${item.public_path}`} download={item.filename} className="btn-download">
-                        → {item.filename}
+                        ↓ Download
                       </a>
                     ) : (
-                      <span className="muted">Unavailable</span>
+                      <span className="btn-not-bundled" title={item.source_path || ''}>Not bundled</span>
                     )}
                   </td>
                 </tr>
