@@ -1,0 +1,62 @@
+# Vercel Deployment Workflow
+  #
+  # MANUAL TRIGGER ONLY until secrets are configured.
+  #
+  # SETUP REQUIRED before enabling push-based auto-deploy:
+  # 1. Create a Vercel project connected to this GitHub repo (see VERCEL_DEPLOY.md)
+  # 2. Add the following secrets in GitHub → Settings → Secrets → Actions:
+  #    - VERCEL_TOKEN    (from Vercel → Settings → Tokens)
+  #    - VERCEL_ORG_ID   (vercel.com → Settings → General → Team/Personal account ID)
+  #    - VERCEL_PROJECT_ID (vercel.com → Project → Settings → General → Project ID)
+  #
+  # HOW TO FIND VERCEL IDs:
+  #   Run `vercel link` in the project root locally → check .vercel/project.json
+  #   OR visit your Vercel project dashboard → Settings → General
+  #
+  # ENABLING AUTO-DEPLOY ON PUSH:
+  #   After adding secrets, uncomment the `push` trigger block below.
+
+  name: Deploy to Vercel
+
+  on:
+    # Uncomment this block after secrets are configured:
+    # push:
+    #   branches:
+    #     - main
+    workflow_dispatch:
+
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Setup pnpm
+          uses: pnpm/action-setup@v4
+          with:
+            version: 10
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: 22
+            cache: pnpm
+
+        - name: Install dependencies
+          run: pnpm install --frozen-lockfile
+
+        - name: Build
+          run: pnpm --filter @workspace/strategy-dashboard run build
+          env:
+            NODE_ENV: production
+
+        - name: Deploy to Vercel
+          uses: amondnet/vercel-action@v25
+          with:
+            vercel-token: ${{ secrets.VERCEL_TOKEN }}
+            vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+            vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+            vercel-args: '--prod'
+            working-directory: ./
+  
