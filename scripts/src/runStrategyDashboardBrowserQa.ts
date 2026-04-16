@@ -203,6 +203,7 @@ async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.getByRole("heading", { name: "Sign in to Algo-Rhythm", exact: true }).waitFor({ timeout: 15_000 });
   await page.getByText("Clerk UI gate", { exact: false }).first().waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Continue with Google", exact: true }).waitFor({ timeout: 10_000 });
 
   const dashboardHeadingVisible = await page.getByRole("heading", { name: "Overview", exact: true }).isVisible().catch(() => false);
   if (dashboardHeadingVisible) {

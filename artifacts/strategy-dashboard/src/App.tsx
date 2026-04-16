@@ -1,12 +1,13 @@
 // @ts-nocheck
-import { ClerkLoaded, ClerkLoading, ClerkProvider, Show, SignIn, SignUp, UserButton } from '@clerk/react';
+import { ClerkLoaded, ClerkLoading, ClerkProvider, HandleSSOCallback, Show, SignIn, SignUp, UserButton, useSignIn } from '@clerk/react';
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'handoff'];
-const AUTH_PATHS = ['/sign-in', '/sign-up'];
+const AUTH_PATHS = ['/sign-in', '/sign-up', '/sso-callback'];
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 const homeRedirectUrl = `${basePath || ''}/`;
+const ssoCallbackUrl = `${basePath || ''}/sso-callback`;
 
 const PAGE_PATHS = {
   overview: '/',
@@ -2026,16 +2027,95 @@ function AuthBrandPanel({ mode }) {
   );
 }
 
+function clerkErrorMessage(error) {
+  const first = error?.errors?.[0];
+  return first?.longMessage || first?.message || error?.longMessage || error?.message || 'Google sign-in is not available from Clerk right now.';
+}
+
+function GoogleOAuthButton() {
+  const { signIn, fetchStatus } = useSignIn();
+  const [error, setError] = useState('');
+  const [isStarting, setIsStarting] = useState(false);
+  const disabled = !signIn || fetchStatus === 'fetching' || isStarting;
+
+  async function handleGoogleSignIn() {
+    if (!signIn || disabled) return;
+
+    setError('');
+    setIsStarting(true);
+    try {
+      const result = await signIn.sso({
+        strategy: 'oauth_google',
+        redirectUrl: homeRedirectUrl,
+        redirectCallbackUrl: ssoCallbackUrl,
+      });
+      if (result?.error) {
+        setError(clerkErrorMessage(result.error));
+        setIsStarting(false);
+      }
+    } catch (caught) {
+      setError(clerkErrorMessage(caught));
+      setIsStarting(false);
+    }
+  }
+
+  return (
+    <div className="auth-google-panel">
+      <button
+        type="button"
+        className="auth-google-button"
+        onClick={handleGoogleSignIn}
+        disabled={disabled}
+      >
+        <span className="auth-google-button__mark" aria-hidden="true">G</span>
+        <span>{isStarting ? 'Opening Google…' : 'Continue with Google'}</span>
+      </button>
+      {error ? <p className="auth-google-error" role="alert">{error}</p> : null}
+    </div>
+  );
+}
+
 function SignInPage() {
   return (
     <main className="auth-page">
       <AuthBrandPanel mode="sign-in" />
       <div className="auth-clerk-card">
+        <GoogleOAuthButton />
         <SignIn
           routing="path"
           path={`${basePath}/sign-in`}
           signUpUrl={`${basePath}/sign-up`}
           fallbackRedirectUrl={homeRedirectUrl}
+        />
+      </div>
+    </main>
+  );
+}
+
+function navigateToAuthDestination(destination, callbackArgs) {
+  const decorateUrl = callbackArgs?.decorateUrl;
+  const next = decorateUrl ? decorateUrl(destination) : destination;
+  if (next.startsWith('http')) {
+    window.location.href = next;
+    return;
+  }
+  pushAppPath(stripBase(next), true);
+}
+
+function SsoCallbackPage() {
+  return (
+    <main className="auth-page">
+      <AuthBrandPanel mode="sign-in" />
+      <div className="auth-clerk-card auth-sso-card">
+        <div className="auth-sso-status">
+          <p className="eyebrow">Google OAuth</p>
+          <h2>Completing sign-in…</h2>
+          <p>Clerk is validating the OAuth callback.</p>
+        </div>
+        <HandleSSOCallback
+          navigateToApp={(callbackArgs) => navigateToAuthDestination(homeRedirectUrl, callbackArgs)}
+          navigateToSignIn={() => pushAppPath('/sign-in', true)}
+          navigateToSignUp={() => pushAppPath('/sign-up', true)}
         />
       </div>
     </main>
@@ -2071,6 +2151,7 @@ function SignedInRoute({ routePath }) {
 }
 
 function SignedOutRoute({ routePath }) {
+  if (routePath.startsWith('/sso-callback')) return <SsoCallbackPage />;
   if (routePath.startsWith('/sign-up')) return <SignUpPage />;
   return <SignInPage />;
 }
