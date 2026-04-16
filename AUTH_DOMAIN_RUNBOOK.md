@@ -62,6 +62,21 @@ Type: CNAME
 Name: accounts.algo
 Target: accounts.clerk.services
 Proxy: DNS only
+
+Type: CNAME
+Name: clkmail.algo
+Target: mail.qr0siahe8a42.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: clk._domainkey.algo
+Target: dkim1.qr0siahe8a42.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: clk2._domainkey.algo
+Target: dkim2.qr0siahe8a42.clerk.services
+Proxy: DNS only
 ```
 
 Do not reuse `clerk.mrksylvstr.com` or `accounts.mrksylvstr.com` for this app.
@@ -135,8 +150,9 @@ pnpm --filter @workspace/scripts run qa:clerk:production-ready
 ```
 
 Run this before switching Vercel to the dedicated Algo production `pk_live_...`.
-It exits non-zero while Clerk DNS, TLS, Vercel env presence, or the live dashboard
-contract is not ready. It prints status only and does not print secret values.
+It exits non-zero while Clerk DNS, Clerk auth endpoint TLS, Vercel env presence,
+or the live dashboard contract is not ready. It prints status only and does not
+print secret values.
 
 Local preview with the configured Clerk key must use an allowed app host. Run
 Vite preview locally, then map the host inside Chromium:

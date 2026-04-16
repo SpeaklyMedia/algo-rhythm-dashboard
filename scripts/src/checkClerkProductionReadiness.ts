@@ -13,10 +13,27 @@ const clerkHosts = [
   {
     host: "clerk.algo.mrksylvstr.com",
     expectedCname: "frontend-api.clerk.services",
+    requireTls: true,
   },
   {
     host: "accounts.algo.mrksylvstr.com",
     expectedCname: "accounts.clerk.services",
+    requireTls: true,
+  },
+  {
+    host: "clkmail.algo.mrksylvstr.com",
+    expectedCname: "mail.qr0siahe8a42.clerk.services",
+    requireTls: false,
+  },
+  {
+    host: "clk._domainkey.algo.mrksylvstr.com",
+    expectedCname: "dkim1.qr0siahe8a42.clerk.services",
+    requireTls: false,
+  },
+  {
+    host: "clk2._domainkey.algo.mrksylvstr.com",
+    expectedCname: "dkim2.qr0siahe8a42.clerk.services",
+    requireTls: false,
   },
 ];
 
@@ -136,9 +153,11 @@ function checkVercelEnv(): CheckResult {
 async function main() {
   const results: Record<string, CheckResult> = {};
 
-  for (const { host, expectedCname } of clerkHosts) {
+  for (const { host, expectedCname, requireTls } of clerkHosts) {
     results[`dns:${host}`] = await checkCname(host, expectedCname);
-    results[`tls:${host}`] = await checkTls(host);
+    if (requireTls) {
+      results[`tls:${host}`] = await checkTls(host);
+    }
   }
 
   results["vercel:env"] = checkVercelEnv();

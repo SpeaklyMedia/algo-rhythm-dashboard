@@ -67,6 +67,9 @@ Algo-Rhythm Clerk production CNAMEs resolve publicly:
 ```text
 clerk.algo.mrksylvstr.com -> frontend-api.clerk.services
 accounts.algo.mrksylvstr.com -> accounts.clerk.services
+clkmail.algo.mrksylvstr.com -> mail.qr0siahe8a42.clerk.services
+clk._domainkey.algo.mrksylvstr.com -> dkim1.qr0siahe8a42.clerk.services
+clk2._domainkey.algo.mrksylvstr.com -> dkim2.qr0siahe8a42.clerk.services
 ```
 
 Non-blocking follow-up:

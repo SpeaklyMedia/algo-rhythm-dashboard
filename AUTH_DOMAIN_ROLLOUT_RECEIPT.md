@@ -48,6 +48,21 @@ Type: CNAME
 Name: accounts.algo
 Value: accounts.clerk.services
 Proxy: DNS only
+
+Type: CNAME
+Name: clkmail.algo
+Value: mail.qr0siahe8a42.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: clk._domainkey.algo
+Value: dkim1.qr0siahe8a42.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: clk2._domainkey.algo
+Value: dkim2.qr0siahe8a42.clerk.services
+Proxy: DNS only
 ```
 
 Vercel API checks reported the project domain as verified and the domain config as not

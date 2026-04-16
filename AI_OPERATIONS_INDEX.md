@@ -98,6 +98,21 @@ Type: CNAME
 Name: accounts.algo
 Value: accounts.clerk.services
 Proxy: DNS only
+
+Type: CNAME
+Name: clkmail.algo
+Value: mail.qr0siahe8a42.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: clk._domainkey.algo
+Value: dkim1.qr0siahe8a42.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: clk2._domainkey.algo
+Value: dkim2.qr0siahe8a42.clerk.services
+Proxy: DNS only
 ```
 
 Do not reuse root-level `clerk.mrksylvstr.com` or `accounts.mrksylvstr.com`
@@ -143,10 +158,11 @@ Clerk production readiness check:
 pnpm --filter @workspace/scripts run qa:clerk:production-ready
 ```
 
-This check is intentionally fail-closed. It only returns success after both
-Algo-Rhythm Clerk CNAMEs resolve, both Clerk HTTPS endpoints complete TLS, Vercel
-lists `VITE_CLERK_PUBLISHABLE_KEY`, and the live dashboard contract still
-matches `multi_run_review 4 20260414T232200Z`. It does not print secret values.
+This check is intentionally fail-closed. It only returns success after all
+Algo-Rhythm Clerk CNAMEs resolve, the two Clerk HTTPS auth endpoints complete
+TLS, Vercel lists `VITE_CLERK_PUBLISHABLE_KEY`, and the live dashboard contract
+still matches `multi_run_review 4 20260414T232200Z`. It does not print secret
+values.
 
 The browser QA checks desktop, tablet, mobile, and narrow-mobile viewports. It
 fails on document-level horizontal overflow and only allows wide table content
