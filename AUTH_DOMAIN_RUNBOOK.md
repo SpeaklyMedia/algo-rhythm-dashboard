@@ -11,7 +11,8 @@ and `BETA_OPERATOR_INTAKE_R36.md`.
 `algo.mrksylvstr.com` uses a Clerk UI gate in front of the static Algo-Rhythm dashboard.
 
 - Hosting: existing Vercel project for `SpeaklyMedia/algo-rhythm-dashboard`
-- Auth: existing `mrksylvstr.com` Clerk production instance
+- Auth: dedicated Algo-Rhythm Clerk instance configured by the Vercel
+  `VITE_CLERK_PUBLISHABLE_KEY` environment variable
 - Domain: `algo.mrksylvstr.com`
 - Static runtime: bundled `/data/*.json` and `/downloads/*`
 
@@ -22,21 +23,26 @@ This is not full asset secrecy. Clerk prevents normal dashboard use unless signe
 Set this on the Algo-Rhythm Vercel project:
 
 ```text
-VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+VITE_CLERK_PUBLISHABLE_KEY=pk_...
 ```
 
 Do not configure or commit `CLERK_SECRET_KEY` for this static UI-gate pass.
 
-## Clerk Production Expectations
+## Clerk Instance Expectations
 
-Reuse the existing `mrksylvstr.com` Clerk production setup:
+Use the Clerk project dedicated to the Algo-Rhythm app. Do not reuse the
+ThetaFrame Clerk project or assume `mrksylvstr.com` production Clerk credentials
+are correct for this app.
 
-- Frontend API domain: `clerk.mrksylvstr.com`
-- Accounts portal: `accounts.mrksylvstr.com`
+- Clerk sign-in branding should show Algo-Rhythm, not ThetaFrame.
+- Vercel should hold only `VITE_CLERK_PUBLISHABLE_KEY` for the frontend UI gate.
+- The publishable key may be `pk_live_...` for production or `pk_test_...` for a
+  Clerk development/test instance during supervised beta.
 - Allowed application URL: `https://algo.mrksylvstr.com`
 - Optional fallback/debug URL: `https://algo-rhythm-dashboard.vercel.app`
 
-Do not force `VITE_CLERK_PROXY_URL` unless Clerk production configuration explicitly requires it.
+Do not force `VITE_CLERK_PROXY_URL` unless the dedicated Algo-Rhythm Clerk
+configuration explicitly requires it.
 
 ## Vercel and Cloudflare Domain Steps
 
@@ -93,7 +99,8 @@ Signed-out production browser gate:
 DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard
 ```
 
-Local preview with the production Clerk key must use an allowed `mrksylvstr.com` host. Run Vite preview locally, then map the host inside Chromium:
+Local preview with the configured Clerk key must use an allowed app host. Run
+Vite preview locally, then map the host inside Chromium:
 
 ```sh
 DASHBOARD_QA_BASE_URL=http://algo.mrksylvstr.com:3004 \

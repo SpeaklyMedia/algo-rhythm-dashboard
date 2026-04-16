@@ -65,10 +65,12 @@ for the UI login gate:
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `VITE_CLERK_PUBLISHABLE_KEY` | Yes | Clerk publishable key for the `mrksylvstr.com` production Clerk instance |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes | Clerk publishable key for the dedicated Algo-Rhythm Clerk instance |
 
 Do not configure `CLERK_SECRET_KEY` for this static UI-gate pass. The backend
 Clerk secret key is not required because this app does not run server-side auth.
+Do not reuse ThetaFrame Clerk credentials; sign-in branding should identify
+Algo-Rhythm.
 
 The Replit-specific env vars (`PORT`, `BASE_PATH`, `REPL_ID`) are optional in the updated `vite.config.ts` and are simply absent in Vercel, which is fine — the build will use defaults (`BASE_PATH=/`, `PORT=3000`).
 

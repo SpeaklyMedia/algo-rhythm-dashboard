@@ -48,7 +48,7 @@ async function main() {
     process.stdout.write("Complete login in the browser window. This script will save storage state after the dashboard loads.\n");
 
     await page.goto(urlFor("/sign-in"), { waitUntil: "domcontentloaded" });
-    await page.getByRole("heading", { name: "Overview", exact: true }).waitFor({ timeout: 5 * 60_000 });
+    await page.getByRole("heading", { name: "Overview", exact: true }).first().waitFor({ timeout: 5 * 60_000 });
     await page.goto(urlFor("/review"), { waitUntil: "domcontentloaded" });
     await page.getByRole("heading", { name: "Make the beta review usable", exact: true }).waitFor({ timeout: 30_000 });
 

@@ -15,7 +15,8 @@ state, or Cloudflare zone IDs to this public repository.
 - Live custom domain: `https://algo.mrksylvstr.com`
 - Vercel fallback domain: `https://algo-rhythm-dashboard.vercel.app`
 - Hosting: existing Vercel project `algo-rhythm-dashboard`
-- Auth: Clerk UI gate using the existing `mrksylvstr.com` Clerk production setup
+- Auth: Clerk UI gate using the dedicated Algo-Rhythm Clerk instance configured
+  by Vercel `VITE_CLERK_PUBLISHABLE_KEY`
 - Auth boundary: UI gate only; direct `/data/*` and `/downloads/*` assets remain public if known
 - Signed-in workflow: `/review` reviewer workspace with local draft persistence and downloadable JSON/Markdown receipts
 - Static app package: `artifacts/strategy-dashboard`
@@ -53,6 +54,8 @@ state, or Cloudflare zone IDs to this public repository.
 Vercel project environment:
 
 - `VITE_CLERK_PUBLISHABLE_KEY`: required for the Clerk UI gate.
+  This must point at the Algo-Rhythm Clerk project. Do not reuse ThetaFrame
+  Clerk credentials.
 
 GitHub Actions repository secrets:
 
@@ -176,6 +179,9 @@ gh run list --repo SpeaklyMedia/algo-rhythm-dashboard --limit 5 \
 - Do not add a backend or runtime API dependency for this app.
 - Do not change page IDs or route meanings without an explicit contract update.
 - Do not hardcode Clerk publishable keys; keep them in Vercel env vars.
+- Do not assume another `mrksylvstr.com` app's Clerk project is valid for this
+  app. Verify `/sign-in` shows Algo-Rhythm branding before recording signed-in
+  Playwright state.
 - Do not make Cloudflare records proxied until Vercel validation and app behavior are intentionally retested behind Cloudflare.
 - Do not treat signed-out browser QA as proof of signed-in functionality. Signed-in QA requires a local, untracked Playwright storage state file.
 - Do not write Playwright storage state inside the Git checkout. Use the default private path or another explicit path outside the repo.

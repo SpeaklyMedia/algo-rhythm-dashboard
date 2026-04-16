@@ -2457,7 +2457,7 @@ html[data-theme="light"] .home-lane-card__num {
   }
 
   .shell-body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .sidebar {
@@ -2500,7 +2500,7 @@ html[data-theme="light"] .home-lane-card__num {
   }
 
   .page-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .content-header {

@@ -4,13 +4,15 @@
 
 - Domain: `algo.mrksylvstr.com`
 - Hosting project: existing Algo-Rhythm Vercel project
-- Auth provider: existing `mrksylvstr.com` Clerk production instance
+- Auth provider: dedicated Algo-Rhythm Clerk instance from Vercel
+  `VITE_CLERK_PUBLISHABLE_KEY`
 - Auth boundary: Clerk UI gate only
 
 ## Status As Of 2026-04-16
 
 - Clerk UI gate: implemented in the static React shell
-- Vercel env var `VITE_CLERK_PUBLISHABLE_KEY`: configured for Production
+- Vercel env var `VITE_CLERK_PUBLISHABLE_KEY`: configured for Production and
+  verified to render Algo-Rhythm Clerk branding
 - Vercel custom domain: `algo.mrksylvstr.com` added to the Algo-Rhythm project
 - Cloudflare DNS record: active, DNS-only `A` record to Vercel
 - Vercel domain verification: passed
@@ -19,6 +21,7 @@
 - Static data verification: passed on `https://algo.mrksylvstr.com/data/dashboard_index.json`
 - Signed-out browser QA: passed on `https://algo.mrksylvstr.com`
 - Signed-in browser QA: requires local non-repo Playwright storage state
+- Clerk project guardrail: do not reuse ThetaFrame Clerk credentials for this app
 
 ## DNS Configuration
 

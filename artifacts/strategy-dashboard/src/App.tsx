@@ -1996,7 +1996,7 @@ function AuthConfigError() {
         detail="VITE_CLERK_PUBLISHABLE_KEY is required before the protected dashboard can render."
         items={[
           'Set VITE_CLERK_PUBLISHABLE_KEY in Vercel production env vars.',
-          'Use the existing mrksylvstr.com Clerk production instance.',
+          'Use the dedicated Algo-Rhythm Clerk instance, not ThetaFrame credentials.',
           'Do not commit raw Clerk, Vercel, or Cloudflare secrets.',
         ]}
       />
