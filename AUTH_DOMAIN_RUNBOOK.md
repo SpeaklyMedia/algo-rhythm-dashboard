@@ -3,6 +3,9 @@
 Read `AI_OPERATIONS_INDEX.md` first for the current safe source-of-truth map,
 verification commands, and secret-handling rules.
 
+For the first supervised collaborator beta, use `BETA_COLLABORATOR_HANDOFF_R36.md`
+and `BETA_OPERATOR_INTAKE_R36.md`.
+
 ## Current Model
 
 `algo.mrksylvstr.com` uses a Clerk UI gate in front of the static Algo-Rhythm dashboard.

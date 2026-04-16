@@ -22,6 +22,8 @@ state, or Cloudflare zone IDs to this public repository.
 - Runtime data: bundled `artifacts/strategy-dashboard/public/data/*.json`
 - Runtime downloads: bundled `artifacts/strategy-dashboard/public/downloads/*`
 - Browser QA harness: `scripts/src/runStrategyDashboardBrowserQa.ts`
+- Active first-collaborator handoff: `BETA_COLLABORATOR_HANDOFF_R36.md`
+- Operator intake guide: `BETA_OPERATOR_INTAKE_R36.md`
 
 ## Source-Of-Truth Files
 
@@ -34,6 +36,8 @@ state, or Cloudflare zone IDs to this public repository.
 - Dashboard styles: `artifacts/strategy-dashboard/src/index.css`
 - Dashboard data contract: `artifacts/strategy-dashboard/public/data/dashboard_index.json`
 - Reviewer workflow implementation: `artifacts/strategy-dashboard/src/App.tsx`
+- First collaborator beta handoff: `BETA_COLLABORATOR_HANDOFF_R36.md`
+- Operator receipt intake: `BETA_OPERATOR_INTAKE_R36.md`
 
 ## Required Environment And Secrets
 
@@ -139,3 +143,4 @@ gh run list --repo SpeaklyMedia/algo-rhythm-dashboard --limit 5 \
 - Do not make Cloudflare records proxied until Vercel validation and app behavior are intentionally retested behind Cloudflare.
 - Do not treat signed-out browser QA as proof of signed-in functionality. Signed-in QA requires a local, untracked Playwright storage state file.
 - Do not treat local reviewer receipts as submitted feedback. They are downloaded operator-intake artifacts until a later persistence layer exists.
+- Do not invite collaborator 2 until collaborator 1 exports usable receipts with no unresolved `contract_gap`, `handoff_packet_gap`, or `operational_regression`.
