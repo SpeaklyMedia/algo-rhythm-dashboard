@@ -1,5 +1,8 @@
 # Vercel Deployment Guide
 
+Read `AI_OPERATIONS_INDEX.md` first for the current production target, auth
+state, domain state, and safe verification commands.
+
 ## What this is
 Static-only React + Vite dashboard — no backend, no live API.
 All data is bundled from `artifacts/strategy-dashboard/public/data/*.json`.
@@ -57,7 +60,15 @@ These are configured in `vercel.json` at the repo root — Vercel reads them aut
 
 ## Step 4 — Environment variables
 
-No environment variables are needed for production. The app is fully static.
+The app is still static, but production now needs one frontend Clerk variable
+for the UI login gate:
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes | Clerk publishable key for the `mrksylvstr.com` production Clerk instance |
+
+Do not configure `CLERK_SECRET_KEY` for this static UI-gate pass. The backend
+Clerk secret key is not required because this app does not run server-side auth.
 
 The Replit-specific env vars (`PORT`, `BASE_PATH`, `REPL_ID`) are optional in the updated `vite.config.ts` and are simply absent in Vercel, which is fine — the build will use defaults (`BASE_PATH=/`, `PORT=3000`).
 

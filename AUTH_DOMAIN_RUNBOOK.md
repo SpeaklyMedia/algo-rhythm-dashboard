@@ -1,5 +1,8 @@
 # Algo-Rhythm Clerk Auth and Custom Domain Runbook
 
+Read `AI_OPERATIONS_INDEX.md` first for the current safe source-of-truth map,
+verification commands, and secret-handling rules.
+
 ## Current Model
 
 `algo.mrksylvstr.com` uses a Clerk UI gate in front of the static Algo-Rhythm dashboard.
