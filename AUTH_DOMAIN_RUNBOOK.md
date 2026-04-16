@@ -107,6 +107,10 @@ DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com \
 pnpm --filter @workspace/scripts run qa:dashboard
 ```
 
+In signed-in mode, the QA script verifies the `/review` reviewer workspace by filling
+the decision controls, checklist, issue intake, notes, and JSON/Markdown receipt
+downloads.
+
 Never commit browser storage state files.
 
 ## Secret Handling

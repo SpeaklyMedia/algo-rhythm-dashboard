@@ -17,6 +17,7 @@ state, or Cloudflare zone IDs to this public repository.
 - Hosting: existing Vercel project `algo-rhythm-dashboard`
 - Auth: Clerk UI gate using the existing `mrksylvstr.com` Clerk production setup
 - Auth boundary: UI gate only; direct `/data/*` and `/downloads/*` assets remain public if known
+- Signed-in workflow: `/review` reviewer workspace with local draft persistence and downloadable JSON/Markdown receipts
 - Static app package: `artifacts/strategy-dashboard`
 - Runtime data: bundled `artifacts/strategy-dashboard/public/data/*.json`
 - Runtime downloads: bundled `artifacts/strategy-dashboard/public/downloads/*`
@@ -32,6 +33,7 @@ state, or Cloudflare zone IDs to this public repository.
 - Dashboard app: `artifacts/strategy-dashboard/src/App.tsx`
 - Dashboard styles: `artifacts/strategy-dashboard/src/index.css`
 - Dashboard data contract: `artifacts/strategy-dashboard/public/data/dashboard_index.json`
+- Reviewer workflow implementation: `artifacts/strategy-dashboard/src/App.tsx`
 
 ## Required Environment And Secrets
 
@@ -101,6 +103,15 @@ Signed-out browser QA:
 DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard
 ```
 
+Signed-in reviewer workflow QA requires a local Playwright storage state file outside the repo:
+
+```sh
+DASHBOARD_QA_AUTH_MODE=signed-in \
+DASHBOARD_QA_STORAGE_STATE=/path/outside/repo/algo-clerk-storage-state.json \
+DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com \
+pnpm --filter @workspace/scripts run qa:dashboard
+```
+
 GitHub Actions status:
 
 ```sh
@@ -127,4 +138,4 @@ gh run list --repo SpeaklyMedia/algo-rhythm-dashboard --limit 5 \
 - Do not hardcode Clerk publishable keys; keep them in Vercel env vars.
 - Do not make Cloudflare records proxied until Vercel validation and app behavior are intentionally retested behind Cloudflare.
 - Do not treat signed-out browser QA as proof of signed-in functionality. Signed-in QA requires a local, untracked Playwright storage state file.
-
+- Do not treat local reviewer receipts as submitted feedback. They are downloaded operator-intake artifacts until a later persistence layer exists.

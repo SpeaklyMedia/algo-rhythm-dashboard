@@ -26,6 +26,29 @@ const PAGE_DATA_KEYS = {
   handoff: [],
 };
 
+const REVIEW_DECISIONS = [
+  { id: 'accept_recommended', label: 'Accept recommended run' },
+  { id: 'accept_with_notes', label: 'Accept with notes' },
+  { id: 'reject_recommendation', label: 'Reject recommendation' },
+  { id: 'needs_operator_review', label: 'Needs operator review' },
+];
+
+const ISSUE_CATEGORIES = [
+  'usability_feedback',
+  'content_quality_feedback',
+  'contract_gap',
+  'handoff_packet_gap',
+  'operational_regression',
+];
+
+const REVIEW_CHECKLIST = [
+  ['state_model_understood', 'State model understood'],
+  ['recommendation_understood', 'Recommendation understood'],
+  ['package_reviewed', 'Package reviewed'],
+  ['batch_reviewed', 'Batch reviewed'],
+  ['handoff_chain_trusted', 'Handoff/download chain trusted'],
+];
+
 function pageHasData(pageId, datasets) {
   const keys = PAGE_DATA_KEYS[pageId] || [];
   if (keys.length === 0) return true;
@@ -242,6 +265,128 @@ function EmptyState({ title, detail }) {
       <p>{detail}</p>
     </div>
   );
+}
+
+function safeFilenamePart(value) {
+  return String(value || 'unavailable').replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/(^-|-$)/g, '') || 'unavailable';
+}
+
+function downloadTextFile(filename, content, type) {
+  if (typeof document === 'undefined') return;
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+function getAppUrl() {
+  if (typeof window === 'undefined') return 'static-build';
+  return window.location.origin + window.location.pathname;
+}
+
+function buildReviewContext(index, datasets, reviewMode) {
+  const latestReview = datasets.latest_review || {};
+  const latestPackage = datasets.latest_package || {};
+  const latestBatch = datasets.latest_batch || {};
+  const recommendation = datasets.promotion_recommendation || {};
+  return {
+    review_id: latestReview.review_id || recommendation.review_id || latestBatch.review_id || null,
+    review_mode: reviewMode?.review_mode || null,
+    review_scope: reviewMode?.review_scope || null,
+    cohort_size: reviewMode?.cohort_size || null,
+    recommended_run_id: reviewMode?.recommended_run_id || recommendation.recommended_run_id || null,
+    included_run_ids: reviewMode?.included_run_ids || latestBatch.included_run_ids || [],
+    package_id: latestPackage.package_id || null,
+    package_run_id: latestPackage.run_id || null,
+    batch_id: latestBatch.batch_id || null,
+    freshness: index.freshness || null,
+  };
+}
+
+function initialChecklistState() {
+  return Object.fromEntries(REVIEW_CHECKLIST.map(([id]) => [id, false]));
+}
+
+function buildInitialReviewerDraft(context) {
+  return {
+    reviewer_alias: '',
+    decision: 'accept_recommended',
+    selected_run_id: context.recommended_run_id || '',
+    confidence: 'medium',
+    checklist: initialChecklistState(),
+    issues: [],
+    notes: '',
+  };
+}
+
+function buildReviewerReceipt(context, draft) {
+  return {
+    schema_version: 'reviewer_session_v1',
+    generated_at: new Date().toISOString(),
+    app_url: getAppUrl(),
+    review_context: context,
+    reviewer: {
+      alias: draft.reviewer_alias || 'anonymous_reviewer',
+    },
+    decision: draft.decision,
+    selected_run_id: draft.selected_run_id || context.recommended_run_id || null,
+    confidence: draft.confidence,
+    checklist: draft.checklist,
+    issues: draft.issues.filter((issue) => issue.category || issue.summary || issue.detail),
+    notes: draft.notes || '',
+  };
+}
+
+function buildReviewerMarkdown(receipt) {
+  const ctx = receipt.review_context || {};
+  const issues = receipt.issues || [];
+  const checklistRows = Object.entries(receipt.checklist || {})
+    .map(([key, value]) => `- ${value ? '[x]' : '[ ]'} ${key.replace(/_/g, ' ')}`)
+    .join('\n');
+  const issueRows = issues.length
+    ? issues.map((issue, index) => `- ${index + 1}. \`${issue.category || 'uncategorized'}\` ${issue.summary || 'No summary'}${issue.detail ? ` — ${issue.detail}` : ''}`).join('\n')
+    : '- No issues logged.';
+  return `# Algo-Rhythm Reviewer Session Receipt
+
+- Schema: \`${receipt.schema_version}\`
+- Generated at: \`${receipt.generated_at}\`
+- App URL: ${receipt.app_url}
+- Reviewer: ${receipt.reviewer?.alias || 'anonymous_reviewer'}
+
+## Review Context
+
+- Review ID: \`${ctx.review_id || 'Unavailable'}\`
+- Review mode: \`${ctx.review_mode || 'Unavailable'}\`
+- Review scope: \`${ctx.review_scope || 'Unavailable'}\`
+- Cohort size: \`${ctx.cohort_size ?? 'Unavailable'}\`
+- Recommended run: \`${ctx.recommended_run_id || 'Unavailable'}\`
+- Included runs: ${(ctx.included_run_ids || []).map((runId) => `\`${runId}\``).join(', ') || 'Unavailable'}
+- Package ID: \`${ctx.package_id || 'Unavailable'}\`
+- Batch ID: \`${ctx.batch_id || 'Unavailable'}\`
+
+## Reviewer Decision
+
+- Decision: \`${receipt.decision}\`
+- Selected run: \`${receipt.selected_run_id || 'Unavailable'}\`
+- Confidence: \`${receipt.confidence}\`
+
+## Checklist
+
+${checklistRows}
+
+## Issues
+
+${issueRows}
+
+## Notes
+
+${receipt.notes || 'No notes.'}
+`;
 }
 
 function CopyButton({ value }) {
@@ -866,6 +1011,297 @@ function StrategyPage({ datasets }) {
   );
 }
 
+function useReviewerDraft(context) {
+  const storageKey = `algo-rhythm:reviewer-session:v1:${context.review_id || 'unversioned'}`;
+  const [draft, setDraft] = useState(() => {
+    const initial = buildInitialReviewerDraft(context);
+    if (typeof window === 'undefined') return initial;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return initial;
+      const parsed = JSON.parse(saved);
+      return {
+        ...initial,
+        ...parsed,
+        checklist: { ...initial.checklist, ...(parsed.checklist || {}) },
+        issues: Array.isArray(parsed.issues) ? parsed.issues : [],
+      };
+    } catch {
+      return initial;
+    }
+  });
+
+  useEffect(() => {
+    const initial = buildInitialReviewerDraft(context);
+    if (!draft.selected_run_id && context.recommended_run_id) {
+      setDraft((current) => ({ ...initial, ...current, selected_run_id: context.recommended_run_id }));
+    }
+  }, [context.recommended_run_id]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+    } catch {}
+  }, [draft, storageKey]);
+
+  function resetDraft() {
+    setDraft(buildInitialReviewerDraft(context));
+  }
+
+  function clearDraft() {
+    if (typeof window !== 'undefined') {
+      try { localStorage.removeItem(storageKey); } catch {}
+    }
+    setDraft(buildInitialReviewerDraft(context));
+  }
+
+  return { draft, setDraft, resetDraft, clearDraft, storageKey };
+}
+
+function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
+  const context = buildReviewContext(index, datasets, reviewMode);
+  const { draft, setDraft, resetDraft, clearDraft, storageKey } = useReviewerDraft(context);
+  const receipt = buildReviewerReceipt(context, draft);
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const downloads = index.downloads || [];
+  const packageDownload = downloads.find((item) => item.id === 'latest_package_zip');
+  const batchDownload = downloads.find((item) => item.id === 'latest_batch_zip');
+  const selectableRuns = scorecard?.ranked_runs?.length
+    ? scorecard.ranked_runs.map((run) => run.run_id)
+    : context.included_run_ids || [];
+
+  function updateField(field, value) {
+    setDraft((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateChecklist(id, value) {
+    setDraft((current) => ({
+      ...current,
+      checklist: { ...current.checklist, [id]: value },
+    }));
+  }
+
+  function addIssue() {
+    setDraft((current) => ({
+      ...current,
+      issues: [
+        ...current.issues,
+        { id: `issue_${Date.now()}`, category: 'usability_feedback', summary: '', detail: '' },
+      ],
+    }));
+  }
+
+  function updateIssue(id, field, value) {
+    setDraft((current) => ({
+      ...current,
+      issues: current.issues.map((issue) => (
+        issue.id === id ? { ...issue, [field]: value } : issue
+      )),
+    }));
+  }
+
+  function removeIssue(id) {
+    setDraft((current) => ({
+      ...current,
+      issues: current.issues.filter((issue) => issue.id !== id),
+    }));
+  }
+
+  function downloadJson() {
+    const filename = `ALGO_REVIEWER_SESSION__${safeFilenamePart(context.review_id)}__${safeFilenamePart(receipt.reviewer.alias)}.json`;
+    downloadTextFile(filename, `${JSON.stringify(receipt, null, 2)}\n`, 'application/json');
+  }
+
+  function downloadMarkdown() {
+    const filename = `ALGO_REVIEWER_SESSION__${safeFilenamePart(context.review_id)}__${safeFilenamePart(receipt.reviewer.alias)}.md`;
+    downloadTextFile(filename, buildReviewerMarkdown(receipt), 'text/markdown');
+  }
+
+  return (
+    <section className="panel span-2 reviewer-workspace">
+      <div className="reviewer-workspace__header">
+        <div>
+          <p className="panel-kicker">Reviewer task</p>
+          <h2>Make the beta review usable</h2>
+          <p className="lede">
+            Work through the reviewed cohort, record your decision, classify feedback, then export an
+            operator-ready receipt. Nothing is submitted automatically.
+          </p>
+        </div>
+        <div className="reviewer-workspace__actions">
+          <button type="button" className="btn btn-outline" onClick={resetDraft}>Reset to current review</button>
+          <button type="button" className="btn btn-outline" onClick={clearDraft}>Clear draft</button>
+        </div>
+      </div>
+
+      <div className="reviewer-grid">
+        <div className="reviewer-card">
+          <h3>Review context</h3>
+          <KeyValueTable
+            rows={[
+              { label: 'Review ID', value: context.review_id || 'Unavailable' },
+              { label: 'Mode', value: reviewModeLabel(reviewMode) },
+              { label: 'Cohort size', value: context.cohort_size || 'Unavailable' },
+              { label: 'Recommended run', value: context.recommended_run_id || 'Unavailable' },
+              { label: 'Package', value: context.package_id || 'Unavailable' },
+              { label: 'Batch', value: context.batch_id || 'Unavailable' },
+            ]}
+          />
+          <div className="reviewer-downloads">
+            {packageDownload?.public_path ? (
+              <a className="btn-download" href={`${base}${packageDownload.public_path}`} download={packageDownload.filename}>
+                Download package
+              </a>
+            ) : null}
+            {batchDownload?.public_path ? (
+              <a className="btn-download" href={`${base}${batchDownload.public_path}`} download={batchDownload.filename}>
+                Download batch
+              </a>
+            ) : null}
+          </div>
+        </div>
+
+        <form className="reviewer-form">
+          <label className="field">
+            <span>Reviewer alias</span>
+            <input
+              type="text"
+              value={draft.reviewer_alias}
+              onChange={(event) => updateField('reviewer_alias', event.target.value)}
+              placeholder="operator, collaborator, reviewer-1"
+            />
+          </label>
+
+          <div className="field">
+            <span>Decision</span>
+            <div className="choice-grid">
+              {REVIEW_DECISIONS.map((decision) => (
+                <label key={decision.id} className="choice-card">
+                  <input
+                    type="radio"
+                    name="reviewer-decision"
+                    value={decision.id}
+                    checked={draft.decision === decision.id}
+                    onChange={(event) => updateField('decision', event.target.value)}
+                  />
+                  <span>{decision.label}</span>
+                  <code>{decision.id}</code>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-row">
+            <label className="field">
+              <span>Selected run</span>
+              <select value={draft.selected_run_id} onChange={(event) => updateField('selected_run_id', event.target.value)}>
+                {selectableRuns.map((runId) => (
+                  <option key={runId} value={runId}>{runId}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>Confidence</span>
+              <select value={draft.confidence} onChange={(event) => updateField('confidence', event.target.value)}>
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="field">
+            <span>Reviewer checklist</span>
+            <div className="checklist-grid">
+              {REVIEW_CHECKLIST.map(([id, label]) => (
+                <label key={id} className="check-row">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(draft.checklist[id])}
+                    onChange={(event) => updateChecklist(id, event.target.checked)}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div className="issue-intake">
+        <div className="section-head">
+          <div>
+            <h3>Issue intake</h3>
+            <p className="muted">Classify feedback before any local action is considered.</p>
+          </div>
+          <button type="button" className="btn btn-outline" onClick={addIssue}>Add issue</button>
+        </div>
+        {draft.issues.length ? (
+          <div className="issue-list">
+            {draft.issues.map((issue, index) => (
+              <div className="issue-row" key={issue.id}>
+                <label className="field">
+                  <span>Category {index + 1}</span>
+                  <select value={issue.category} onChange={(event) => updateIssue(issue.id, 'category', event.target.value)}>
+                    {ISSUE_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Summary</span>
+                  <input
+                    type="text"
+                    value={issue.summary}
+                    onChange={(event) => updateIssue(issue.id, 'summary', event.target.value)}
+                    placeholder="What happened?"
+                  />
+                </label>
+                <label className="field issue-row__detail">
+                  <span>Detail</span>
+                  <textarea
+                    value={issue.detail}
+                    onChange={(event) => updateIssue(issue.id, 'detail', event.target.value)}
+                    placeholder="Why it matters, affected page, missing artifact, or reproduction note."
+                    rows={3}
+                  />
+                </label>
+                <button type="button" className="btn btn-outline btn-sm" onClick={() => removeIssue(issue.id)}>
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState title="No issues logged" detail="Add usability feedback, content-quality feedback, or a real trigger only if the review exposes one." />
+        )}
+      </div>
+
+      <label className="field">
+        <span>Reviewer notes</span>
+        <textarea
+          value={draft.notes}
+          onChange={(event) => updateField('notes', event.target.value)}
+          placeholder="What did you understand immediately? What required operator explanation?"
+          rows={5}
+        />
+      </label>
+
+      <div className="receipt-actions">
+        <div>
+          <h3>Export operator receipt</h3>
+          <p className="muted">Draft key: <code>{storageKey}</code></p>
+        </div>
+        <div className="reviewer-workspace__actions">
+          <button type="button" className="btn btn-primary" onClick={downloadJson}>Download JSON receipt</button>
+          <button type="button" className="btn btn-outline" onClick={downloadMarkdown}>Download Markdown summary</button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ReviewPage({ index, datasets }) {
   const recommendation = datasets.promotion_recommendation;
   const scorecard = datasets.run_comparison_scorecard;
@@ -895,6 +1331,13 @@ function ReviewPage({ index, datasets }) {
           <EmptyState title="Unavailable" detail="Promotion recommendation data is missing." />
         )}
       </section>
+
+      <ReviewerWorkspace
+        index={index}
+        datasets={datasets}
+        reviewMode={reviewMode}
+        scorecard={scorecard}
+      />
 
       <section className="panel span-2">
         <h2>{singleRun ? 'Published snapshot' : 'Ranked runs in reviewed cohort'}</h2>
@@ -1258,6 +1701,29 @@ function HandoffPage({ index }) {
   );
 }
 
+function ReviewerTaskCallout({ activePage, onNavigate }) {
+  return (
+    <section className="reviewer-task-callout" aria-label="Reviewer task">
+      <div>
+        <p className="panel-kicker">Reviewer task</p>
+        <h3>After login, your usable workflow is the reviewer workspace.</h3>
+        <p>
+          Review the cohort, make a decision, classify feedback, and export an operator-ready
+          receipt from the Review page. This app still cannot generate new runs, submit feedback
+          to a server, autonomously promote a run, or protect direct static asset URLs.
+        </p>
+      </div>
+      {activePage !== 'review' ? (
+        <button type="button" className="btn btn-primary" onClick={() => onNavigate('review')}>
+          Open reviewer workspace
+        </button>
+      ) : (
+        <StatusBadge tone="good">workspace active</StatusBadge>
+      )}
+    </section>
+  );
+}
+
 function App() {
   const { loading, fatalError, index, datasets, optionalErrors } = useDashboardData();
   const [activePage, setActivePage] = useState(currentPageFromLocation);
@@ -1485,6 +1951,8 @@ function App() {
               </div>
             </div>
           </header>
+
+          <ReviewerTaskCallout activePage={activePage} onNavigate={handleNavigate} />
 
           {Object.keys(optionalErrors).length > 0 && (
             <details className="optional-errors">

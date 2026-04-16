@@ -169,6 +169,72 @@ async function assertDownloadEndpoints(context: BrowserContext) {
   }
 }
 
+async function runReviewerWorkspaceCheck(page: Page) {
+  await page.goto(urlFor("/review"), { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("heading", { name: "Make the beta review usable", exact: true }).waitFor({ timeout: 10_000 });
+
+  await page.getByLabel("Reviewer alias").fill("browser-qa-reviewer");
+  await page.getByLabel("Accept with notes").check();
+  await page.getByLabel("Selected run").selectOption("20260414T232200Z");
+  await page.getByLabel("Confidence").selectOption("high");
+
+  for (const label of [
+    "State model understood",
+    "Recommendation understood",
+    "Package reviewed",
+    "Batch reviewed",
+    "Handoff/download chain trusted",
+  ]) {
+    await page.getByLabel(label).check();
+  }
+
+  await page.getByRole("button", { name: "Add issue" }).click();
+  await page.getByLabel("Category 1").selectOption("usability_feedback");
+  await page.getByLabel("Summary").fill("Browser QA confirms reviewer workspace is usable");
+  await page.getByLabel("Detail").fill("The signed-in reviewer can classify feedback and export a local receipt without network writes.");
+  await page.getByLabel("Reviewer notes").fill("Signed-in QA completed the R35 reviewer workflow.");
+
+  const [jsonDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Download JSON receipt" }).click(),
+  ]);
+  if (!jsonDownload.suggestedFilename().endsWith(".json")) {
+    throw new Error(`Expected JSON receipt download, received ${jsonDownload.suggestedFilename()}`);
+  }
+  const jsonPath = await jsonDownload.path();
+  if (!jsonPath) throw new Error("JSON receipt download did not produce a local path.");
+  const receipt = JSON.parse(await fs.promises.readFile(jsonPath, "utf8"));
+  if (receipt.schema_version !== "reviewer_session_v1") {
+    throw new Error(`Unexpected receipt schema ${receipt.schema_version}`);
+  }
+  if (receipt.review_context?.review_mode !== "multi_run_review") {
+    throw new Error(`Unexpected receipt review_mode ${receipt.review_context?.review_mode}`);
+  }
+  if (receipt.review_context?.cohort_size !== 4) {
+    throw new Error(`Unexpected receipt cohort_size ${receipt.review_context?.cohort_size}`);
+  }
+  if (receipt.review_context?.recommended_run_id !== "20260414T232200Z") {
+    throw new Error(`Unexpected receipt recommended_run_id ${receipt.review_context?.recommended_run_id}`);
+  }
+  for (const runId of ["20260414T232200Z", "20260414T232000Z", "20260414T232500Z", "20260416T124500Z"]) {
+    if (!receipt.review_context?.included_run_ids?.includes(runId)) {
+      throw new Error(`Receipt missing included run ${runId}`);
+    }
+  }
+  if (receipt.issues?.[0]?.category !== "usability_feedback") {
+    throw new Error("Receipt did not include the browser QA issue category.");
+  }
+
+  const [markdownDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Download Markdown summary" }).click(),
+  ]);
+  if (!markdownDownload.suggestedFilename().endsWith(".md")) {
+    throw new Error(`Expected Markdown receipt download, received ${markdownDownload.suggestedFilename()}`);
+  }
+}
+
 async function main() {
   ensureDir(outputDir);
   const browserPath = resolveAutomationBrowserPath();
@@ -191,6 +257,7 @@ async function main() {
     ]) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
+        acceptDownloads: true,
         ...(storageState ? { storageState } : {}),
       });
       const page = await context.newPage();
@@ -205,6 +272,9 @@ async function main() {
       } else {
         for (const route of routes) {
           screenshots.push(await runRouteCheck(page, route, viewport.label));
+        }
+        if (viewport.label === "desktop") {
+          await runReviewerWorkspaceCheck(page);
         }
       }
 

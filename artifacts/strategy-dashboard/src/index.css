@@ -1756,6 +1756,225 @@ html[data-theme="light"] .score-dim__bar {
 }
 
 /* ============================================================
+   REVIEWER WORKSPACE — client-only beta review workflow
+   ============================================================ */
+
+.reviewer-task-callout,
+.reviewer-workspace {
+  border-color: rgba(104, 214, 255, 0.18);
+  background:
+    radial-gradient(circle at 4% 0%, rgba(104, 214, 255, 0.08), transparent 34%),
+    var(--glass-bg);
+}
+
+.reviewer-task-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.1rem;
+  margin-bottom: 1.25rem;
+  padding: 1.05rem 1.2rem;
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+}
+
+.reviewer-task-callout h3 {
+  margin: 0.15rem 0 0.35rem;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.reviewer-task-callout p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  max-width: 86ch;
+}
+
+.reviewer-workspace__header,
+.receipt-actions,
+.section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.reviewer-workspace__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.reviewer-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(360px, 1.18fr);
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+
+.reviewer-card,
+.reviewer-form,
+.issue-intake {
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 1.1rem;
+}
+
+.reviewer-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.reviewer-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.42rem;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+.field > span {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.field input[type="text"],
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--line-mid);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  font: 500 0.86rem/1.5 var(--font-ui);
+  padding: 0.64rem 0.72rem;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+
+.field input[type="text"]:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.choice-grid,
+.checklist-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.choice-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choice-card,
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.58rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 0.72rem;
+  cursor: pointer;
+}
+
+.choice-card {
+  flex-direction: column;
+  gap: 0.42rem;
+}
+
+.choice-card input,
+.check-row input {
+  accent-color: var(--accent);
+}
+
+.choice-card span {
+  color: var(--text-soft);
+  font-weight: 650;
+}
+
+.choice-card code {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  white-space: normal;
+}
+
+.issue-intake {
+  margin-top: 1.2rem;
+}
+
+.issue-list {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.issue-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.55fr) minmax(220px, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+  padding: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.issue-row__detail {
+  grid-column: 1 / -1;
+}
+
+.receipt-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+html[data-theme="light"] .reviewer-card,
+html[data-theme="light"] .reviewer-form,
+html[data-theme="light"] .issue-intake,
+html[data-theme="light"] .choice-card,
+html[data-theme="light"] .check-row {
+  background: rgba(255, 255, 255, 0.64);
+}
+
+html[data-theme="light"] .field input[type="text"],
+html[data-theme="light"] .field select,
+html[data-theme="light"] .field textarea {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+/* ============================================================
    COPY BUTTON & SHA FIELD
    ============================================================ */
 
@@ -2257,6 +2476,26 @@ html[data-theme="light"] .home-lane-card__num {
     gap: 1rem;
   }
 
+  .reviewer-task-callout,
+  .reviewer-workspace__header,
+  .receipt-actions,
+  .section-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reviewer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .issue-row {
+    grid-template-columns: 1fr;
+  }
+
   .header-right {
     padding-top: 0;
   }
@@ -2386,6 +2625,10 @@ html[data-theme="light"] .home-lane-card__num {
 
   .metrics.compact {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
   }
 
   .split-grid {
