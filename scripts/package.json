@@ -6,7 +6,9 @@
   "scripts": {
     "hello": "tsx ./src/hello.ts",
     "qa:dashboard": "tsx ./src/runStrategyDashboardBrowserQa.ts",
+    "qa:dashboard:auth:record": "tsx ./src/recordClerkDashboardAuthState.ts",
     "qa:dashboard:headed": "tsx ./src/runStrategyDashboardBrowserQa.ts --headed",
+    "qa:dashboard:signed-in": "DASHBOARD_QA_AUTH_MODE=signed-in DASHBOARD_QA_BASE_URL=${DASHBOARD_QA_BASE_URL:-https://algo.mrksylvstr.com} tsx ./src/runStrategyDashboardBrowserQa.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

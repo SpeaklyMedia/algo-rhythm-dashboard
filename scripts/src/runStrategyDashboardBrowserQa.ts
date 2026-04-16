@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 import { chromium, type BrowserContext, type Page } from "playwright";
 import { resolveAutomationBrowserPath } from "./browserPaths";
 
@@ -24,9 +25,18 @@ type ViewportCheck = {
 };
 
 const headed = process.argv.includes("--headed");
+const currentFile = fileURLToPath(import.meta.url);
+const repoRoot = path.resolve(path.dirname(currentFile), "../..");
 const baseUrl = process.env.DASHBOARD_QA_BASE_URL ?? "http://127.0.0.1:4173";
-const storageState = process.env.DASHBOARD_QA_STORAGE_STATE;
-const authMode = process.env.DASHBOARD_QA_AUTH_MODE ?? (storageState ? "signed-in" : "signed-out");
+const defaultStorageState = path.join(
+  process.env.HOME ?? process.cwd(),
+  ".local/state/algo-rhythm-dashboard/playwright/algo-clerk-storage-state.json",
+);
+const explicitStorageState = process.env.DASHBOARD_QA_STORAGE_STATE;
+const authMode = process.env.DASHBOARD_QA_AUTH_MODE ?? (explicitStorageState ? "signed-in" : "signed-out");
+const storageState =
+  explicitStorageState ??
+  (authMode === "signed-in" && fs.existsSync(defaultStorageState) ? defaultStorageState : undefined);
 const hostResolverRules = process.env.DASHBOARD_QA_HOST_RESOLVER_RULES;
 const outputDir =
   process.env.DASHBOARD_QA_OUTPUT_DIR ??
@@ -97,6 +107,11 @@ function sanitizeLabel(label: string): string {
 
 function urlFor(pathname: string): string {
   return new URL(pathname, baseUrl).toString();
+}
+
+function isInside(childPath: string, parentPath: string): boolean {
+  const relative = path.relative(parentPath, childPath);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
 async function assertNoRequiredDataFailure(page: Page, route: RouteCheck) {
@@ -310,20 +325,28 @@ async function runReviewerWorkspaceCheck(page: Page) {
 
 async function main() {
   ensureDir(outputDir);
+  if (authMode === "signed-in" && !storageState) {
+    throw new Error(
+      `DASHBOARD_QA_STORAGE_STATE is required when DASHBOARD_QA_AUTH_MODE=signed-in, ` +
+        `or create the default private state with qa:dashboard:auth:record at ${defaultStorageState}.`,
+    );
+  }
+  if (storageState && isInside(path.resolve(storageState), repoRoot)) {
+    throw new Error(`Refusing to use Playwright storage state inside the Git checkout: ${storageState}`);
+  }
+
   const browserPath = resolveAutomationBrowserPath();
+  const baseOrigin = new URL(baseUrl).origin;
   const browser = await chromium.launch({
     headless: !headed,
     executablePath: browserPath,
     args: hostResolverRules ? [`--host-resolver-rules=${hostResolverRules}`] : [],
   });
   const consoleErrors: string[] = [];
+  const appWriteRequests: string[] = [];
   const screenshots: ScreenshotReceipt[] = [];
 
   try {
-    if (authMode === "signed-in" && !storageState) {
-      throw new Error("DASHBOARD_QA_STORAGE_STATE is required when DASHBOARD_QA_AUTH_MODE=signed-in.");
-    }
-
     for (const viewport of viewports) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
@@ -331,6 +354,18 @@ async function main() {
         ...(storageState ? { storageState } : {}),
       });
       const page = await context.newPage();
+      page.on("request", (request) => {
+        const method = request.method().toUpperCase();
+        if (method === "GET" || method === "HEAD" || method === "OPTIONS") return;
+        const requestUrl = request.url();
+        try {
+          if (new URL(requestUrl).origin === baseOrigin) {
+            appWriteRequests.push(`[${viewport.label}] ${method} ${requestUrl}`);
+          }
+        } catch {
+          appWriteRequests.push(`[${viewport.label}] ${method} ${requestUrl}`);
+        }
+      });
       page.on("console", (message) => {
         if (message.type() === "error") consoleErrors.push(`[${viewport.label}] ${message.text()}`);
       });
@@ -363,6 +398,10 @@ async function main() {
     throw new Error(`Browser console errors detected:\n${consoleErrors.join("\n")}`);
   }
 
+  if (appWriteRequests.length > 0) {
+    throw new Error(`Unexpected write requests to the dashboard origin:\n${appWriteRequests.join("\n")}`);
+  }
+
   const receipt = {
     generated_at: new Date().toISOString(),
     base_url: baseUrl,
@@ -370,10 +409,16 @@ async function main() {
     host_resolver_rules_used: Boolean(hostResolverRules),
     auth_mode: authMode,
     storage_state_used: Boolean(storageState),
+    storage_state_source:
+      storageState === defaultStorageState ? "default-private-path" : storageState ? "explicit-env" : "none",
     viewports,
     responsive_checks: {
       document_level_horizontal_overflow: "blocked",
       table_overflow_policy: "internal .table-scroll overflow only",
+    },
+    network_write_check: {
+      dashboard_origin: baseOrigin,
+      write_requests_to_dashboard_origin: appWriteRequests.length,
     },
     review_mode: "multi_run_review",
     routes: authMode === "signed-out" ? signedOutPaths : routes.map((route) => route.path),

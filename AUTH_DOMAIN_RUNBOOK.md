@@ -104,17 +104,46 @@ pnpm --filter @workspace/scripts run qa:dashboard
 Signed-in browser gate requires a local Playwright storage state file created outside the repo:
 
 ```sh
-DASHBOARD_QA_AUTH_MODE=signed-in \
-DASHBOARD_QA_STORAGE_STATE=/path/outside/repo/algo-clerk-storage-state.json \
-DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com \
-pnpm --filter @workspace/scripts run qa:dashboard
+pnpm --filter @workspace/scripts run qa:dashboard:auth:record
+pnpm --filter @workspace/scripts run qa:dashboard:signed-in
 ```
 
 In signed-in mode, the QA script verifies the `/review` reviewer workspace by filling
 the decision controls, checklist, issue intake, notes, and JSON/Markdown receipt
 downloads.
 
+The default storage-state path is:
+
+```text
+/home/mark/.local/state/algo-rhythm-dashboard/playwright/algo-clerk-storage-state.json
+```
+
+To override the path, use:
+
+```sh
+DASHBOARD_QA_AUTH_MODE=signed-in \
+DASHBOARD_QA_STORAGE_STATE=/path/outside/repo/algo-clerk-storage-state.json \
+DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com \
+pnpm --filter @workspace/scripts run qa:dashboard
+```
+
 Never commit browser storage state files.
+
+## Share Preview
+
+The public URL preview uses static metadata in `artifacts/strategy-dashboard/index.html`
+and the public image `/opengraph.jpg`.
+
+After deploy, verify:
+
+```sh
+curl -sS https://algo.mrksylvstr.com/ | rg 'og:image|twitter:image|canonical'
+curl -I https://algo.mrksylvstr.com/opengraph.jpg
+```
+
+The preview image is intentionally public so text, social, Slack, and iMessage
+link unfurlers can display it. It does not protect or expose additional app
+data beyond the existing public static asset model.
 
 ## Secret Handling
 

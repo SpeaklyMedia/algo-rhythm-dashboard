@@ -22,6 +22,8 @@ state, or Cloudflare zone IDs to this public repository.
 - Runtime data: bundled `artifacts/strategy-dashboard/public/data/*.json`
 - Runtime downloads: bundled `artifacts/strategy-dashboard/public/downloads/*`
 - Browser QA harness: `scripts/src/runStrategyDashboardBrowserQa.ts`
+- Clerk auth-state recorder: `scripts/src/recordClerkDashboardAuthState.ts`
+- Share preview image: `artifacts/strategy-dashboard/public/opengraph.jpg`
 - Active first-collaborator handoff: `BETA_COLLABORATOR_HANDOFF_R36.md`
 - Operator intake guide: `BETA_OPERATOR_INTAKE_R36.md`
 - First-collaborator session receipt: `BETA_COLLABORATOR_SESSION_RECEIPT_R37.md`
@@ -37,6 +39,7 @@ state, or Cloudflare zone IDs to this public repository.
 - GitHub Actions workflow: `.github/workflows/vercel-preview.yml`
 - Dashboard app: `artifacts/strategy-dashboard/src/App.tsx`
 - Dashboard styles: `artifacts/strategy-dashboard/src/index.css`
+- Dashboard HTML/share metadata: `artifacts/strategy-dashboard/index.html`
 - Dashboard data contract: `artifacts/strategy-dashboard/public/data/dashboard_index.json`
 - Reviewer workflow implementation: `artifacts/strategy-dashboard/src/App.tsx`
 - First collaborator beta handoff: `BETA_COLLABORATOR_HANDOFF_R36.md`
@@ -120,11 +123,34 @@ to scroll inside `.table-scroll` containers.
 Signed-in reviewer workflow QA requires a local Playwright storage state file outside the repo:
 
 ```sh
+pnpm --filter @workspace/scripts run qa:dashboard:auth:record
+pnpm --filter @workspace/scripts run qa:dashboard:signed-in
+```
+
+The default private storage-state path is:
+
+```text
+/home/mark/.local/state/algo-rhythm-dashboard/playwright/algo-clerk-storage-state.json
+```
+
+You can still override it explicitly:
+
+```sh
 DASHBOARD_QA_AUTH_MODE=signed-in \
 DASHBOARD_QA_STORAGE_STATE=/path/outside/repo/algo-clerk-storage-state.json \
 DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com \
 pnpm --filter @workspace/scripts run qa:dashboard
 ```
+
+Share preview check:
+
+```sh
+curl -sS https://algo.mrksylvstr.com/ | rg 'og:image|twitter:image|canonical'
+curl -I https://algo.mrksylvstr.com/opengraph.jpg
+```
+
+The share preview image and metadata are public. They do not imply protection
+for direct `/data/*`, `/downloads/*`, or `/opengraph.jpg` URLs.
 
 GitHub Actions status:
 
@@ -152,6 +178,7 @@ gh run list --repo SpeaklyMedia/algo-rhythm-dashboard --limit 5 \
 - Do not hardcode Clerk publishable keys; keep them in Vercel env vars.
 - Do not make Cloudflare records proxied until Vercel validation and app behavior are intentionally retested behind Cloudflare.
 - Do not treat signed-out browser QA as proof of signed-in functionality. Signed-in QA requires a local, untracked Playwright storage state file.
+- Do not write Playwright storage state inside the Git checkout. Use the default private path or another explicit path outside the repo.
 - Do not treat local reviewer receipts as submitted feedback. They are downloaded operator-intake artifacts until a later persistence layer exists.
 - Do not invite collaborator 2 until collaborator 1 exports usable receipts with no unresolved `contract_gap`, `handoff_packet_gap`, or `operational_regression`.
 - Do not commit raw R37 collaborator receipts or screenshots with account data; summarize them in the sanitized R37 files only.
