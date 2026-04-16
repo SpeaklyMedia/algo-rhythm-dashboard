@@ -17,6 +17,12 @@ type ScreenshotReceipt = {
   screenshot: string;
 };
 
+type ViewportCheck = {
+  label: string;
+  width: number;
+  height: number;
+};
+
 const headed = process.argv.includes("--headed");
 const baseUrl = process.env.DASHBOARD_QA_BASE_URL ?? "http://127.0.0.1:4173";
 const storageState = process.env.DASHBOARD_QA_STORAGE_STATE;
@@ -74,6 +80,13 @@ const downloadPaths = [
 
 const signedOutPaths = ["/", "/strategy", "/review", "/package", "/batch", "/handoff"];
 
+const viewports: ViewportCheck[] = [
+  { label: "desktop", width: 1440, height: 960 },
+  { label: "tablet", width: 768, height: 1024 },
+  { label: "mobile", width: 390, height: 844 },
+  { label: "narrow-mobile", width: 360, height: 740 },
+];
+
 function ensureDir(dir: string) {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -97,6 +110,62 @@ async function assertNoRequiredDataFailure(page: Page, route: RouteCheck) {
   if (unavailable) throw new Error(`${route.label} rendered a missing required-data empty state.`);
 }
 
+async function assertResponsiveSizing(page: Page, routeLabel: string, viewportLabel: string) {
+  const result = await page.evaluate(() => {
+    const runtime = globalThis as unknown as {
+      innerWidth: number;
+      document: {
+        documentElement: { scrollWidth: number };
+        body: { scrollWidth: number };
+        querySelectorAll: (selector: string) => ArrayLike<{
+          clientWidth: number;
+          scrollWidth: number;
+          getBoundingClientRect: () => { width: number };
+        }>;
+      };
+      getComputedStyle: (element: unknown) => { overflowX: string };
+    };
+    const tolerancePx = 2;
+    const viewportWidth = runtime.innerWidth;
+    const documentWidth = Math.max(runtime.document.documentElement.scrollWidth, runtime.document.body.scrollWidth);
+    const bodyOverflowPx = documentWidth - viewportWidth;
+    const tableFailures: string[] = [];
+    const tableScrolls = Array.from(runtime.document.querySelectorAll(".table-scroll"));
+
+    tableScrolls.forEach((container, index) => {
+      const rect = container.getBoundingClientRect();
+      const style = runtime.getComputedStyle(container);
+      const hasInternalOverflow = container.scrollWidth > container.clientWidth + tolerancePx;
+      const canScrollInternally = style.overflowX === "auto" || style.overflowX === "scroll";
+
+      if (rect.width > viewportWidth + tolerancePx) {
+        tableFailures.push(`table-scroll[${index}] container width ${Math.round(rect.width)} exceeds viewport ${viewportWidth}`);
+      }
+      if (hasInternalOverflow && !canScrollInternally) {
+        tableFailures.push(`table-scroll[${index}] has horizontal overflow without internal scrolling`);
+      }
+    });
+
+    return {
+      bodyOverflowPx,
+      tableFailures,
+      viewportWidth,
+      documentWidth,
+    };
+  });
+
+  if (result.bodyOverflowPx > 2) {
+    throw new Error(
+      `${routeLabel} at ${viewportLabel} has document-level horizontal overflow: ` +
+        `${Math.round(result.bodyOverflowPx)}px (${result.documentWidth}px document / ${result.viewportWidth}px viewport).`,
+    );
+  }
+
+  if (result.tableFailures.length > 0) {
+    throw new Error(`${routeLabel} at ${viewportLabel} has table sizing failures:\n${result.tableFailures.join("\n")}`);
+  }
+}
+
 async function runRouteCheck(page: Page, route: RouteCheck, viewportLabel: string): Promise<ScreenshotReceipt> {
   await page.goto(urlFor(route.path), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
@@ -106,6 +175,8 @@ async function runRouteCheck(page: Page, route: RouteCheck, viewportLabel: strin
   for (const text of route.requiredText) {
     await page.getByText(text, { exact: false }).first().waitFor({ timeout: 10_000 });
   }
+
+  await assertResponsiveSizing(page, route.label, viewportLabel);
 
   const screenshot = path.join(outputDir, `${viewportLabel}-${sanitizeLabel(route.label)}.png`);
   await page.screenshot({ path: screenshot, fullPage: true });
@@ -122,6 +193,8 @@ async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel
   if (dashboardHeadingVisible) {
     throw new Error(`${pathname} rendered dashboard content while signed out.`);
   }
+
+  await assertResponsiveSizing(page, pathname, viewportLabel);
 
   const screenshot = path.join(outputDir, `${viewportLabel}-signed-out-${sanitizeLabel(pathname === "/" ? "root" : pathname)}.png`);
   await page.screenshot({ path: screenshot, fullPage: true });
@@ -251,10 +324,7 @@ async function main() {
       throw new Error("DASHBOARD_QA_STORAGE_STATE is required when DASHBOARD_QA_AUTH_MODE=signed-in.");
     }
 
-    for (const viewport of [
-      { label: "desktop", width: 1440, height: 960 },
-      { label: "mobile", width: 390, height: 844 },
-    ]) {
+    for (const viewport of viewports) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         acceptDownloads: true,
@@ -300,6 +370,11 @@ async function main() {
     host_resolver_rules_used: Boolean(hostResolverRules),
     auth_mode: authMode,
     storage_state_used: Boolean(storageState),
+    viewports,
+    responsive_checks: {
+      document_level_horizontal_overflow: "blocked",
+      table_overflow_policy: "internal .table-scroll overflow only",
+    },
     review_mode: "multi_run_review",
     routes: authMode === "signed-out" ? signedOutPaths : routes.map((route) => route.path),
     downloads: downloadPaths,

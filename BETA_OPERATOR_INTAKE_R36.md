@@ -67,6 +67,12 @@ Invite collaborator 2 only if:
 If a real trigger appears, pause cohort expansion and run the smallest
 trigger-driven local pass.
 
+Record the sanitized R37 session state in:
+
+- `BETA_COLLABORATOR_SESSION_RECEIPT_R37.md`
+- `BETA_COLLABORATOR_SYNTHESIS_R37.md`
+- `BETA_COLLABORATOR2_GO_NO_GO_R37.md`
+
 ## Signed-In QA Closure
 
 If a local Clerk Playwright storage state exists outside the repo, run:
@@ -83,4 +89,3 @@ collaborator session and record the receipt files as session evidence.
 
 Never commit Clerk browser storage state, cookies, screenshots containing
 account data, or receipt files containing private collaborator identity.
-

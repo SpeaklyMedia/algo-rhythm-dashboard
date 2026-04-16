@@ -24,6 +24,9 @@ state, or Cloudflare zone IDs to this public repository.
 - Browser QA harness: `scripts/src/runStrategyDashboardBrowserQa.ts`
 - Active first-collaborator handoff: `BETA_COLLABORATOR_HANDOFF_R36.md`
 - Operator intake guide: `BETA_OPERATOR_INTAKE_R36.md`
+- First-collaborator session receipt: `BETA_COLLABORATOR_SESSION_RECEIPT_R37.md`
+- First-collaborator synthesis: `BETA_COLLABORATOR_SYNTHESIS_R37.md`
+- Collaborator 2 expansion gate: `BETA_COLLABORATOR2_GO_NO_GO_R37.md`
 
 ## Source-Of-Truth Files
 
@@ -38,6 +41,9 @@ state, or Cloudflare zone IDs to this public repository.
 - Reviewer workflow implementation: `artifacts/strategy-dashboard/src/App.tsx`
 - First collaborator beta handoff: `BETA_COLLABORATOR_HANDOFF_R36.md`
 - Operator receipt intake: `BETA_OPERATOR_INTAKE_R36.md`
+- R37 first collaborator receipt: `BETA_COLLABORATOR_SESSION_RECEIPT_R37.md`
+- R37 first collaborator synthesis: `BETA_COLLABORATOR_SYNTHESIS_R37.md`
+- R37 collaborator 2 go/no-go: `BETA_COLLABORATOR2_GO_NO_GO_R37.md`
 
 ## Required Environment And Secrets
 
@@ -107,6 +113,10 @@ Signed-out browser QA:
 DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard
 ```
 
+The browser QA checks desktop, tablet, mobile, and narrow-mobile viewports. It
+fails on document-level horizontal overflow and only allows wide table content
+to scroll inside `.table-scroll` containers.
+
 Signed-in reviewer workflow QA requires a local Playwright storage state file outside the repo:
 
 ```sh
@@ -144,3 +154,4 @@ gh run list --repo SpeaklyMedia/algo-rhythm-dashboard --limit 5 \
 - Do not treat signed-out browser QA as proof of signed-in functionality. Signed-in QA requires a local, untracked Playwright storage state file.
 - Do not treat local reviewer receipts as submitted feedback. They are downloaded operator-intake artifacts until a later persistence layer exists.
 - Do not invite collaborator 2 until collaborator 1 exports usable receipts with no unresolved `contract_gap`, `handoff_packet_gap`, or `operational_regression`.
+- Do not commit raw R37 collaborator receipts or screenshots with account data; summarize them in the sanitized R37 files only.

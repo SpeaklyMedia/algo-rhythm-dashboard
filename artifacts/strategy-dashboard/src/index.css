@@ -324,6 +324,7 @@ html[data-theme="light"] .loading-panel p {
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -335,6 +336,7 @@ body {
     radial-gradient(ellipse at 0% 0%, rgba(104, 214, 255, 0.055) 0%, transparent 38%),
     radial-gradient(ellipse at 100% 0%, rgba(61, 157, 255, 0.04) 0%, transparent 32%),
     linear-gradient(180deg, #10141f 0%, var(--bg) 40%, var(--bg-deep) 100%);
+  overflow-x: clip;
 }
 
 a {
@@ -1527,14 +1529,20 @@ html[data-theme="light"] .panel:hover {
    ============================================================ */
 
 .table-scroll {
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-gutter: stable;
 }
 
 table {
   width: 100%;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: 0.87rem;
+  table-layout: auto;
 }
 
 thead {
@@ -1550,6 +1558,7 @@ th {
   letter-spacing: 0.1em;
   color: var(--text-muted);
   white-space: nowrap;
+  overflow-wrap: normal;
 }
 
 td {
@@ -1559,7 +1568,9 @@ td {
   font-size: 0.83rem;
   color: var(--text-soft);
   vertical-align: middle;
+  min-width: 0;
   overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 tbody tr:last-child td {
@@ -1588,6 +1599,7 @@ tbody tr:hover td {
   flex-direction: column;
   gap: 0.38rem;
   min-width: 80px;
+  max-width: 180px;
 }
 
 .score-cell > span {
@@ -1739,6 +1751,7 @@ html[data-theme="light"] .score-dim__bar {
   cursor: pointer;
   transition: background 140ms ease, box-shadow 140ms ease;
   white-space: nowrap;
+  max-width: 100%;
 }
 
 .btn-download:hover {
@@ -1761,6 +1774,7 @@ html[data-theme="light"] .score-dim__bar {
 
 .reviewer-task-callout,
 .reviewer-workspace {
+  min-width: 0;
   border-color: rgba(104, 214, 255, 0.18);
   background:
     radial-gradient(circle at 4% 0%, rgba(104, 214, 255, 0.08), transparent 34%),
@@ -1800,6 +1814,7 @@ html[data-theme="light"] .score-dim__bar {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  min-width: 0;
 }
 
 .reviewer-workspace__actions {
@@ -1808,6 +1823,7 @@ html[data-theme="light"] .score-dim__bar {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 0.6rem;
+  min-width: 0;
 }
 
 .reviewer-grid {
@@ -1815,11 +1831,13 @@ html[data-theme="light"] .score-dim__bar {
   grid-template-columns: minmax(280px, 0.82fr) minmax(360px, 1.18fr);
   gap: 1.2rem;
   margin-top: 1.2rem;
+  min-width: 0;
 }
 
 .reviewer-card,
 .reviewer-form,
 .issue-intake {
+  min-width: 0;
   border: var(--glass-border);
   border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.025);
@@ -1831,6 +1849,7 @@ html[data-theme="light"] .score-dim__bar {
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-top: 1rem;
+  min-width: 0;
 }
 
 .reviewer-form {
@@ -1843,6 +1862,7 @@ html[data-theme="light"] .score-dim__bar {
   gap: 0.42rem;
   color: var(--text-soft);
   font-size: 0.82rem;
+  min-width: 0;
 }
 
 .field > span {
@@ -1857,6 +1877,7 @@ html[data-theme="light"] .score-dim__bar {
 .field select,
 .field textarea {
   width: 100%;
+  min-width: 0;
   border: 1px solid var(--line-mid);
   border-radius: var(--radius-sm);
   background: rgba(0, 0, 0, 0.2);
@@ -1884,12 +1905,14 @@ html[data-theme="light"] .score-dim__bar {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.9rem;
+  min-width: 0;
 }
 
 .choice-grid,
 .checklist-grid {
   display: grid;
   gap: 0.65rem;
+  min-width: 0;
 }
 
 .choice-grid {
@@ -1906,6 +1929,7 @@ html[data-theme="light"] .score-dim__bar {
   background: rgba(255, 255, 255, 0.025);
   padding: 0.72rem;
   cursor: pointer;
+  min-width: 0;
 }
 
 .choice-card {
@@ -1921,12 +1945,15 @@ html[data-theme="light"] .score-dim__bar {
 .choice-card span {
   color: var(--text-soft);
   font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
 .choice-card code {
   color: var(--text-muted);
   font-size: 0.68rem;
   white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .issue-intake {
@@ -1937,6 +1964,7 @@ html[data-theme="light"] .score-dim__bar {
   display: grid;
   gap: 0.85rem;
   margin-top: 1rem;
+  min-width: 0;
 }
 
 .issue-row {
@@ -1948,6 +1976,7 @@ html[data-theme="light"] .score-dim__bar {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: rgba(0, 0, 0, 0.12);
+  min-width: 0;
 }
 
 .issue-row__detail {
@@ -1958,6 +1987,7 @@ html[data-theme="light"] .score-dim__bar {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--line);
+  min-width: 0;
 }
 
 html[data-theme="light"] .reviewer-card,
@@ -2020,6 +2050,8 @@ html[data-theme="light"] .field textarea {
 .sha-field__hash {
   flex-shrink: 1;
   min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .sha-field__note {
@@ -2485,15 +2517,15 @@ html[data-theme="light"] .home-lane-card__num {
   }
 
   .reviewer-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .choice-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .issue-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .header-right {
@@ -2615,24 +2647,25 @@ html[data-theme="light"] .home-lane-card__num {
 
   .panel,
   .loading-panel {
-    padding: 1.1rem 1.2rem;
+    padding: 1.05rem;
     border-radius: var(--radius-lg);
+    max-width: 100%;
   }
 
   .metrics {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .metrics.compact {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .form-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .split-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .home-lanes__grid {
@@ -2676,13 +2709,48 @@ html[data-theme="light"] .home-lane-card__num {
     word-break: break-word;
   }
 
+  .table-scroll {
+    margin-inline: -0.2rem;
+    padding-inline: 0.2rem;
+    max-width: calc(100% + 0.4rem);
+  }
+
   .table-scroll table {
-    min-width: 520px;
+    min-width: min(560px, calc(100vw - 2rem));
   }
 
   .table-scroll table td code {
     word-break: break-all;
     overflow-wrap: anywhere;
+  }
+
+  .reviewer-task-callout {
+    padding: 1rem;
+  }
+
+  .reviewer-workspace__actions,
+  .receipt-actions,
+  .reviewer-downloads {
+    align-items: stretch;
+  }
+
+  .reviewer-workspace__actions .btn,
+  .receipt-actions .btn,
+  .reviewer-downloads .btn-download {
+    justify-content: center;
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .issue-row {
+    padding: 0.8rem;
+  }
+
+  .field select,
+  .field input[type="text"],
+  .field textarea {
+    font-size: 16px;
   }
 
   .surface-card p,
