@@ -13,7 +13,9 @@
 - Vercel env var `VITE_CLERK_PUBLISHABLE_KEY`: configured for Production
 - Vercel custom domain: `algo.mrksylvstr.com` added to the Algo-Rhythm project
 - Cloudflare DNS record: pending zone update
-- Signed-out browser QA: pending verification
+- GitHub Actions deployment: passed on run `24520601622`
+- Static data verification: passed on `https://algo-rhythm-dashboard.vercel.app/data/dashboard_index.json`
+- Signed-out browser QA: pending `algo.mrksylvstr.com` DNS activation
 - Signed-in browser QA: requires local non-repo Playwright storage state
 
 ## DNS Action Required
@@ -30,6 +32,14 @@ Proxy: DNS only until Vercel validates HTTPS
 The local Cloudflare token discovered on this machine is active, but it does not expose the
 `mrksylvstr.com` zone through zone-list lookup. Do not guess the zone ID. Complete the DNS
 record through Cloudflare dashboard access or a zone-scoped token plus the exact zone ID.
+
+## Verified Static Contract
+
+- `review_mode`: `multi_run_review`
+- `cohort_size`: `4`
+- `recommended_run_id`: `20260414T232200Z`
+- `latest_batch_review_id`: `20260416T134500Z`
+- Representative batch download returned HTTP 200 from the Vercel app alias.
 
 ## Security Notes
 
