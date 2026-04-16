@@ -4,15 +4,15 @@
 
 - Domain: `algo.mrksylvstr.com`
 - Hosting project: existing Algo-Rhythm Vercel project
-- Auth provider: dedicated Algo-Rhythm Clerk instance from Vercel
+- Auth provider: dedicated Algo-Rhythm Clerk production instance from Vercel
   `VITE_CLERK_PUBLISHABLE_KEY`
 - Auth boundary: Clerk UI gate only
 
 ## Status As Of 2026-04-16
 
 - Clerk UI gate: implemented in the static React shell
-- Vercel env var `VITE_CLERK_PUBLISHABLE_KEY`: configured for Production and
-  verified to render Algo-Rhythm Clerk branding
+- Vercel env var `VITE_CLERK_PUBLISHABLE_KEY`: configured for Production with
+  the dedicated Algo Clerk production publishable key
 - Vercel custom domain: `algo.mrksylvstr.com` added to the Algo-Rhythm project
 - Cloudflare DNS record: active, DNS-only `A` record to Vercel
 - Vercel domain verification: passed
@@ -20,10 +20,12 @@
 - GitHub Actions deployment: passed on runs `24520601622`, `24520678802`, and `24522697119`
 - Static data verification: passed on `https://algo.mrksylvstr.com/data/dashboard_index.json`
 - Signed-out browser QA: passed on `https://algo.mrksylvstr.com`
-- Signed-in browser QA: requires local non-repo Playwright storage state
+- Signed-in browser QA: requires refreshed local non-repo Playwright storage
+  state after the production Clerk key switch
 - Clerk project guardrail: do not reuse ThetaFrame Clerk credentials for this app
-- Algo-Rhythm Clerk production CNAMEs: created in Cloudflare and waiting on
-  Clerk-side domain verification/certificate completion
+- Algo-Rhythm Clerk production CNAMEs: created in Cloudflare
+- Algo-Rhythm Clerk production TLS: verified for both auth subdomains
+- Production redeploy after Clerk key switch: `dpl_FaYxg6h2z8GpGw65Pgu68A1aT9RR`
 
 ## DNS Configuration
 
@@ -85,7 +87,12 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
 - Command: `DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard`
 - Auth mode: signed out
 - Routes checked: `/`, `/strategy`, `/review`, `/package`, `/batch`, `/handoff`
-- Receipt: `scripts/test-results/algo-rhythm-dashboard-browser-qa/2026-04-16T16-49-50-856Z/receipt.json`
+- Latest receipt after production Clerk switch: `test-results/algo-rhythm-dashboard-browser-qa/2026-04-16T22-43-36-146Z/receipt.json`
+
+Signed-in browser QA is pending a refreshed private Clerk Playwright storage
+state for the dedicated production instance. The previous private storage state
+was invalidated by switching from the temporary working test key to the
+production Clerk key.
 
 ## Security Notes
 
