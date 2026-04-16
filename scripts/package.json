@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
+    "qa:clerk:production-ready": "tsx ./src/checkClerkProductionReadiness.ts",
     "qa:dashboard": "tsx ./src/runStrategyDashboardBrowserQa.ts",
     "qa:dashboard:auth:record": "tsx ./src/recordClerkDashboardAuthState.ts",
     "qa:dashboard:headed": "tsx ./src/runStrategyDashboardBrowserQa.ts --headed",

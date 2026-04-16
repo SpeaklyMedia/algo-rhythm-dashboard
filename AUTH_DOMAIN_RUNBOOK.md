@@ -128,6 +128,16 @@ Signed-out production browser gate:
 DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard
 ```
 
+Clerk production readiness gate:
+
+```sh
+pnpm --filter @workspace/scripts run qa:clerk:production-ready
+```
+
+Run this before switching Vercel to the dedicated Algo production `pk_live_...`.
+It exits non-zero while Clerk DNS, TLS, Vercel env presence, or the live dashboard
+contract is not ready. It prints status only and does not print secret values.
+
 Local preview with the configured Clerk key must use an allowed app host. Run
 Vite preview locally, then map the host inside Chromium:
 
