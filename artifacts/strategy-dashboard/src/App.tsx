@@ -1,7 +1,13 @@
 // @ts-nocheck
+import { ClerkLoaded, ClerkLoading, ClerkProvider, Show, SignIn, SignUp, UserButton } from '@clerk/react';
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'handoff'];
+const AUTH_PATHS = ['/sign-in', '/sign-up'];
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+const homeRedirectUrl = `${basePath || ''}/`;
+
 const PAGE_PATHS = {
   overview: '/',
   strategy: '/strategy',
@@ -33,9 +39,34 @@ function pageFromPathname(pathname) {
   return PAGE_ORDER.includes(pageId) ? pageId : 'overview';
 }
 
+function stripBase(path) {
+  return basePath && path.startsWith(basePath)
+    ? path.slice(basePath.length) || '/'
+    : path;
+}
+
+function normalizedLocationPath() {
+  if (typeof window === 'undefined') return '/';
+  return stripBase(window.location.pathname).replace(/\/+$/, '') || '/';
+}
+
 function currentPageFromLocation() {
   if (typeof window === 'undefined') return 'overview';
-  return pageFromPathname(window.location.pathname);
+  return pageFromPathname(normalizedLocationPath());
+}
+
+function isAuthPath(pathname) {
+  return AUTH_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+}
+
+function pushAppPath(pathname, replace = false) {
+  if (typeof window === 'undefined') return;
+  const next = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  const nextPath = `${basePath}${next === '/' ? '/' : next}`;
+  if (window.location.pathname === nextPath) return;
+  const method = replace ? 'replaceState' : 'pushState';
+  window.history[method]({}, '', nextPath);
+  window.dispatchEvent(new PopStateEvent('popstate'));
 }
 
 const STRIP_ICONS = {
@@ -395,7 +426,12 @@ function PipelineBar({ pages, activePage, onNavigate, onHome, datasets, onHambur
           );
         })}
       </div>
-      <ThemeToggle />
+      <div className="pipeline-actions">
+        <div className="auth-user-control" aria-label="Signed-in user controls">
+          <UserButton afterSignOutUrl={`${basePath || ''}/sign-in`} />
+        </div>
+        <ThemeToggle />
+      </div>
     </header>
   );
 }
@@ -1256,9 +1292,7 @@ function App() {
     setActivePage(pageId);
     setIsSidebarOpen(false);
     const nextPath = PAGE_PATHS[pageId] || '/';
-    if (window.location.pathname !== nextPath) {
-      window.history.pushState({}, '', nextPath);
-    }
+    pushAppPath(nextPath);
   }
 
   if (loading) {
@@ -1474,4 +1508,139 @@ function App() {
   );
 }
 
-export default App;
+function LoadingShell({ title = 'Loading review dashboard…', detail = 'Preparing the authenticated static dashboard shell.' }) {
+  return (
+    <div className="shell centered">
+      <div className="loading-panel">
+        <p className="eyebrow">Algo-Rhythm</p>
+        <h1>{title}</h1>
+        <p>{detail}</p>
+      </div>
+    </div>
+  );
+}
+
+function AuthConfigError() {
+  return (
+    <div className="shell centered">
+      <ErrorPanel
+        title="Authentication is not configured"
+        detail="VITE_CLERK_PUBLISHABLE_KEY is required before the protected dashboard can render."
+        items={[
+          'Set VITE_CLERK_PUBLISHABLE_KEY in Vercel production env vars.',
+          'Use the existing mrksylvstr.com Clerk production instance.',
+          'Do not commit raw Clerk, Vercel, or Cloudflare secrets.',
+        ]}
+      />
+    </div>
+  );
+}
+
+function AuthBrandPanel({ mode }) {
+  return (
+    <section className="auth-brand-panel">
+      <div className="auth-brand-panel__mark">
+        <AlgoRhythmLogo size={44} />
+      </div>
+      <div>
+        <p className="eyebrow">Algo-Rhythm</p>
+        <h1>{mode === 'sign-up' ? 'Request dashboard access' : 'Sign in to Algo-Rhythm'}</h1>
+        <p>
+          Internal Lane B review dashboard. Clerk protects the operator UI; static JSON and
+          bundled downloads remain file-based snapshots.
+        </p>
+      </div>
+      <div className="auth-limits">
+        <StatusBadge tone="good">Clerk UI gate</StatusBadge>
+        <StatusBadge tone="warn">static assets remain direct-public</StatusBadge>
+      </div>
+    </section>
+  );
+}
+
+function SignInPage() {
+  return (
+    <main className="auth-page">
+      <AuthBrandPanel mode="sign-in" />
+      <div className="auth-clerk-card">
+        <SignIn
+          routing="path"
+          path={`${basePath}/sign-in`}
+          signUpUrl={`${basePath}/sign-up`}
+          fallbackRedirectUrl={homeRedirectUrl}
+        />
+      </div>
+    </main>
+  );
+}
+
+function SignUpPage() {
+  return (
+    <main className="auth-page">
+      <AuthBrandPanel mode="sign-up" />
+      <div className="auth-clerk-card">
+        <SignUp
+          routing="path"
+          path={`${basePath}/sign-up`}
+          signInUrl={`${basePath}/sign-in`}
+          fallbackRedirectUrl={homeRedirectUrl}
+        />
+      </div>
+    </main>
+  );
+}
+
+function SignedInRoute({ routePath }) {
+  useEffect(() => {
+    if (isAuthPath(routePath)) pushAppPath('/', true);
+  }, [routePath]);
+
+  if (isAuthPath(routePath)) {
+    return <LoadingShell title="Opening dashboard…" detail="Your Clerk session is active." />;
+  }
+
+  return <App />;
+}
+
+function SignedOutRoute({ routePath }) {
+  if (routePath.startsWith('/sign-up')) return <SignUpPage />;
+  return <SignInPage />;
+}
+
+function AuthenticatedApp() {
+  const [routePath, setRoutePath] = useState(normalizedLocationPath);
+
+  useEffect(() => {
+    const handler = () => setRoutePath(normalizedLocationPath());
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []);
+
+  if (!clerkPubKey) return <AuthConfigError />;
+
+  return (
+    <ClerkProvider
+      publishableKey={clerkPubKey}
+      signInUrl={`${basePath}/sign-in`}
+      signUpUrl={`${basePath}/sign-up`}
+      signInFallbackRedirectUrl={homeRedirectUrl}
+      signUpFallbackRedirectUrl={homeRedirectUrl}
+      routerPush={(to) => pushAppPath(stripBase(to))}
+      routerReplace={(to) => pushAppPath(stripBase(to), true)}
+    >
+      <ClerkLoading>
+        <LoadingShell />
+      </ClerkLoading>
+      <ClerkLoaded>
+        <Show when="signed-in">
+          <SignedInRoute routePath={routePath} />
+        </Show>
+        <Show when="signed-out">
+          <SignedOutRoute routePath={routePath} />
+        </Show>
+      </ClerkLoaded>
+    </ClerkProvider>
+  );
+}
+
+export default AuthenticatedApp;

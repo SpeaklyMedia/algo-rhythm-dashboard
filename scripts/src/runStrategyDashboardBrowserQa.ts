@@ -19,6 +19,9 @@ type ScreenshotReceipt = {
 
 const headed = process.argv.includes("--headed");
 const baseUrl = process.env.DASHBOARD_QA_BASE_URL ?? "http://127.0.0.1:4173";
+const storageState = process.env.DASHBOARD_QA_STORAGE_STATE;
+const authMode = process.env.DASHBOARD_QA_AUTH_MODE ?? (storageState ? "signed-in" : "signed-out");
+const hostResolverRules = process.env.DASHBOARD_QA_HOST_RESOLVER_RULES;
 const outputDir =
   process.env.DASHBOARD_QA_OUTPUT_DIR ??
   path.join("test-results", "algo-rhythm-dashboard-browser-qa", new Date().toISOString().replace(/[:.]/g, "-"));
@@ -69,6 +72,8 @@ const downloadPaths = [
   "/downloads/CANONICAL_SHA256__SSOT_LATEST.txt",
 ];
 
+const signedOutPaths = ["/", "/strategy", "/review", "/package", "/batch", "/handoff"];
+
 function ensureDir(dir: string) {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -105,6 +110,22 @@ async function runRouteCheck(page: Page, route: RouteCheck, viewportLabel: strin
   const screenshot = path.join(outputDir, `${viewportLabel}-${sanitizeLabel(route.label)}.png`);
   await page.screenshot({ path: screenshot, fullPage: true });
   return { viewport: viewportLabel, route: route.path, screenshot };
+}
+
+async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel: string): Promise<ScreenshotReceipt> {
+  await page.goto(urlFor(pathname), { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("heading", { name: "Sign in to Algo-Rhythm", exact: true }).waitFor({ timeout: 15_000 });
+  await page.getByText("Clerk UI gate", { exact: false }).first().waitFor({ timeout: 10_000 });
+
+  const dashboardHeadingVisible = await page.getByRole("heading", { name: "Overview", exact: true }).isVisible().catch(() => false);
+  if (dashboardHeadingVisible) {
+    throw new Error(`${pathname} rendered dashboard content while signed out.`);
+  }
+
+  const screenshot = path.join(outputDir, `${viewportLabel}-signed-out-${sanitizeLabel(pathname === "/" ? "root" : pathname)}.png`);
+  await page.screenshot({ path: screenshot, fullPage: true });
+  return { viewport: viewportLabel, route: pathname, screenshot };
 }
 
 async function assertDataContract(context: BrowserContext) {
@@ -151,25 +172,40 @@ async function assertDownloadEndpoints(context: BrowserContext) {
 async function main() {
   ensureDir(outputDir);
   const browserPath = resolveAutomationBrowserPath();
-  const browser = await chromium.launch({ headless: !headed, executablePath: browserPath });
+  const browser = await chromium.launch({
+    headless: !headed,
+    executablePath: browserPath,
+    args: hostResolverRules ? [`--host-resolver-rules=${hostResolverRules}`] : [],
+  });
   const consoleErrors: string[] = [];
   const screenshots: ScreenshotReceipt[] = [];
 
   try {
+    if (authMode === "signed-in" && !storageState) {
+      throw new Error("DASHBOARD_QA_STORAGE_STATE is required when DASHBOARD_QA_AUTH_MODE=signed-in.");
+    }
+
     for (const viewport of [
       { label: "desktop", width: 1440, height: 960 },
       { label: "mobile", width: 390, height: 844 },
     ]) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
+        ...(storageState ? { storageState } : {}),
       });
       const page = await context.newPage();
       page.on("console", (message) => {
         if (message.type() === "error") consoleErrors.push(`[${viewport.label}] ${message.text()}`);
       });
 
-      for (const route of routes) {
-        screenshots.push(await runRouteCheck(page, route, viewport.label));
+      if (authMode === "signed-out") {
+        for (const pathname of signedOutPaths) {
+          screenshots.push(await runSignedOutGateCheck(page, pathname, viewport.label));
+        }
+      } else {
+        for (const route of routes) {
+          screenshots.push(await runRouteCheck(page, route, viewport.label));
+        }
       }
 
       if (viewport.label === "desktop") {
@@ -191,8 +227,11 @@ async function main() {
     generated_at: new Date().toISOString(),
     base_url: baseUrl,
     browser_path: browserPath,
+    host_resolver_rules_used: Boolean(hostResolverRules),
+    auth_mode: authMode,
+    storage_state_used: Boolean(storageState),
     review_mode: "multi_run_review",
-    routes: routes.map((route) => route.path),
+    routes: authMode === "signed-out" ? signedOutPaths : routes.map((route) => route.path),
     downloads: downloadPaths,
     screenshots,
   };
