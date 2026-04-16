@@ -15,7 +15,7 @@
 - Cloudflare DNS record: active, DNS-only `A` record to Vercel
 - Vercel domain verification: passed
 - HTTPS certificate: issued for `algo.mrksylvstr.com`
-- GitHub Actions deployment: passed on runs `24520601622` and `24520678802`
+- GitHub Actions deployment: passed on runs `24520601622`, `24520678802`, and `24522697119`
 - Static data verification: passed on `https://algo.mrksylvstr.com/data/dashboard_index.json`
 - Signed-out browser QA: passed on `https://algo.mrksylvstr.com`
 - Signed-in browser QA: requires local non-repo Playwright storage state
@@ -51,7 +51,7 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
 - Command: `DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard`
 - Auth mode: signed out
 - Routes checked: `/`, `/strategy`, `/review`, `/package`, `/batch`, `/handoff`
-- Receipt: `scripts/test-results/algo-rhythm-dashboard-browser-qa/2026-04-16T16-47-11-550Z/receipt.json`
+- Receipt: `scripts/test-results/algo-rhythm-dashboard-browser-qa/2026-04-16T16-49-50-856Z/receipt.json`
 
 ## Security Notes
 
