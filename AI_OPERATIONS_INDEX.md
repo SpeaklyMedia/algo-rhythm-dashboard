@@ -86,6 +86,24 @@ Value: 76.76.21.21
 Proxy: DNS only
 ```
 
+Algo-Rhythm Clerk production DNS shape:
+
+```text
+Type: CNAME
+Name: clerk.algo
+Value: frontend-api.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: accounts.algo
+Value: accounts.clerk.services
+Proxy: DNS only
+```
+
+Do not reuse root-level `clerk.mrksylvstr.com` or `accounts.mrksylvstr.com`
+for Algo-Rhythm. Those records can belong to another Clerk app on the same root
+domain.
+
 If DNS is valid but HTTPS is not serving, issue the Vercel certificate:
 
 ```sh

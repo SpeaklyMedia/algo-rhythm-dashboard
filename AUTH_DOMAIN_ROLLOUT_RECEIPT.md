@@ -22,6 +22,8 @@
 - Signed-out browser QA: passed on `https://algo.mrksylvstr.com`
 - Signed-in browser QA: requires local non-repo Playwright storage state
 - Clerk project guardrail: do not reuse ThetaFrame Clerk credentials for this app
+- Algo-Rhythm Clerk production CNAMEs: created in Cloudflare and waiting on
+  Clerk-side domain verification/certificate completion
 
 ## DNS Configuration
 
@@ -31,6 +33,20 @@ The active Cloudflare DNS record is:
 Type: A
 Name: algo
 Value: 76.76.21.21
+Proxy: DNS only
+```
+
+The Algo-Rhythm Clerk production DNS records are:
+
+```text
+Type: CNAME
+Name: clerk.algo
+Value: frontend-api.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: accounts.algo
+Value: accounts.clerk.services
 Proxy: DNS only
 ```
 

@@ -44,6 +44,35 @@ are correct for this app.
 Do not force `VITE_CLERK_PROXY_URL` unless the dedicated Algo-Rhythm Clerk
 configuration explicitly requires it.
 
+## Clerk DNS Records For Algo-Rhythm
+
+The Algo-Rhythm Clerk production instance uses DNS below the app subdomain so it
+does not collide with the separate root-level Clerk setup used by other
+`mrksylvstr.com` apps.
+
+Configure these records in Cloudflare as DNS-only CNAMEs:
+
+```text
+Type: CNAME
+Name: clerk.algo
+Target: frontend-api.clerk.services
+Proxy: DNS only
+
+Type: CNAME
+Name: accounts.algo
+Target: accounts.clerk.services
+Proxy: DNS only
+```
+
+Do not reuse `clerk.mrksylvstr.com` or `accounts.mrksylvstr.com` for this app.
+Those records belong to the root-level Clerk setup and caused the app to load
+the wrong product branding.
+
+After Clerk validates the CNAMEs and issues certificates, update the Vercel
+`VITE_CLERK_PUBLISHABLE_KEY` value from the Algo-Rhythm Clerk production
+instance and redeploy. Keep the current working key in place until the Clerk
+production domain is verified.
+
 ## Vercel and Cloudflare Domain Steps
 
 1. Add `algo.mrksylvstr.com` to the existing Algo-Rhythm Vercel project.
