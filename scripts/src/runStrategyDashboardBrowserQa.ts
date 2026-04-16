@@ -201,7 +201,7 @@ async function runRouteCheck(page: Page, route: RouteCheck, viewportLabel: strin
 async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel: string): Promise<ScreenshotReceipt> {
   await page.goto(urlFor(pathname), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Sign in to Algo-Rhythm", exact: true }).waitFor({ timeout: 15_000 });
+  await page.getByRole("heading", { name: "Sign in to Algo-Rhythm", exact: true }).first().waitFor({ timeout: 15_000 });
   await page.getByText("Clerk UI gate", { exact: false }).first().waitFor({ timeout: 10_000 });
   await page.getByRole("button", { name: "Continue with Google", exact: true }).waitFor({ timeout: 10_000 });
 
