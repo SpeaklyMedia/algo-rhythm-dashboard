@@ -2597,6 +2597,7 @@ html[data-theme="light"] .home-lane-card__num {
 
   .content {
     padding: 1rem 1rem 2rem;
+    overflow-x: clip;
   }
 
   .data-rail {
@@ -2754,6 +2755,8 @@ html[data-theme="light"] .home-lane-card__num {
   }
 
   .surface-card p,
+  .stack-list p,
+  .metric-value,
   .muted {
     overflow-wrap: anywhere;
     word-break: break-word;
