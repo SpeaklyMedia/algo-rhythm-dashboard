@@ -28,9 +28,13 @@ node_modules
 !.vscode/extensions.json
 
 # misc
+/.vercel/
 /.sass-cache
 /connect.lock
 /coverage
+.env
+.env.*
+!.env.example
 test-results/
 /libpeerconnection.log
 npm-debug.log

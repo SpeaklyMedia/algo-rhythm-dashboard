@@ -1,13 +1,18 @@
 # Vercel Deployment Workflow
   #
-  # MANUAL TRIGGER ONLY until secrets are configured.
+  # Push deploy is enabled. Keep .github/workflows/vercel-preview.yml and github-workflows/vercel-preview.yml in parity.
   #
   # SETUP REQUIRED before enabling push-based auto-deploy:
   # 1. Create a Vercel project connected to this GitHub repo (see VERCEL_DEPLOY.md)
   # 2. Add the following secrets in GitHub → Settings → Secrets → Actions:
-  #    - VERCEL_TOKEN    (from Vercel → Settings → Tokens)
+  #    - VERCEL_TOKEN    (durable classic token from the Vercel scope that owns this project)
   #    - VERCEL_ORG_ID   (vercel.com → Settings → General → Team/Personal account ID)
   #    - VERCEL_PROJECT_ID (vercel.com → Project → Settings → General → Project ID)
+  # 3. Validate the token before saving it:
+  #    - vercel whoami --token "$TOKEN"
+  #    - VERCEL_ORG_ID=<id> VERCEL_PROJECT_ID=<id> vercel pull --yes --environment=production --token "$TOKEN"
+  # 4. Save with `printf '%s' "$TOKEN" | gh secret set VERCEL_TOKEN ...`
+  #    Do not use printf '%s\n'; Vercel CLI rejects token secrets containing newlines.
   #
   # HOW TO FIND VERCEL IDs:
   #   Run `vercel link` in the project root locally → check .vercel/project.json
@@ -42,6 +47,29 @@
             node-version: 22
             cache: pnpm
 
+        - name: Validate Vercel credentials
+          env:
+            VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+            VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          run: |
+            for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+              if [ -z "${!name}" ]; then
+                echo "::error::$name is not configured in GitHub Actions secrets"
+                exit 1
+              fi
+            done
+
+            case "$VERCEL_TOKEN" in
+              *$'\n'*|*$'\r'*)
+                echo "::error::VERCEL_TOKEN contains a newline; set it with printf '%s', not printf '%s\\n'"
+                exit 1
+                ;;
+            esac
+
+            pnpm dlx vercel@latest whoami --token "$VERCEL_TOKEN" >/dev/null
+            pnpm dlx vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
+
         - name: Install dependencies
           run: pnpm install --frozen-lockfile
 
@@ -56,4 +84,3 @@
             VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
             VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           run: pnpm dlx vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
-  

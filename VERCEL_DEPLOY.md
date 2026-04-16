@@ -70,11 +70,51 @@ To enable auto-deploy on every push to `main`, set these secrets in your GitHub 
 
 | Secret | Where to find it |
 |--------|-----------------|
-| `VERCEL_TOKEN` | vercel.com → Settings → Tokens → Create |
+| `VERCEL_TOKEN` | Vercel dashboard → Account/Team Settings → Tokens → Create a classic token that can access this project |
 | `VERCEL_ORG_ID` | vercel.com → Settings → General → Team ID (or `vercel whoami --json` → `id`) |
 | `VERCEL_PROJECT_ID` | vercel.com → Your Project → Settings → General → Project ID |
 
 The workflow file is at `.github/workflows/vercel-preview.yml` — once secrets are set it fires automatically on push to `main`.
+
+### Vercel token runbook
+
+Use a durable Vercel token that has access to the `algo-rhythm-dashboard` project.
+Do not use a random saved token from another project just because `vercel whoami`
+accepts it. A token can authenticate successfully and still have no access to the
+target project/team.
+
+Known failure modes this repo now guards against:
+
+- Wrong token scope: `vercel whoami --token "$TOKEN"` succeeds, but deploy fails
+  with `You are not authorized` or `Could not retrieve Project Settings`.
+- Newline in GitHub secret: deploy fails with `Must not contain: "\n"`.
+- Expiring local OAuth token: a token from the local Vercel CLI auth file may work
+  temporarily, but it is not a durable GitHub Actions secret.
+
+Before updating `VERCEL_TOKEN`, validate the candidate locally without printing it:
+
+```bash
+TOKEN_FILE=/path/to/local/secret-file
+TOKEN="$(awk -F= '/^VERCEL_TOKEN=|^VERCEL_API_KEY=/{sub(/^[^=]*=/,""); print; exit}' "$TOKEN_FILE" | tr -d '\r\n')"
+
+vercel whoami --token "$TOKEN"
+VERCEL_ORG_ID=<team-or-user-id> \
+VERCEL_PROJECT_ID=<project-id> \
+  vercel pull --yes --environment=production --token "$TOKEN"
+```
+
+Only set the GitHub secret after both commands succeed:
+
+```bash
+printf '%s' "$TOKEN" | gh secret set VERCEL_TOKEN --repo SpeaklyMedia/algo-rhythm-dashboard
+```
+
+Use `printf '%s'`, not `printf '%s\n'`, so the encrypted GitHub secret does not
+include a trailing newline.
+
+If `vercel pull` fails but `vercel whoami` succeeds, the token is valid for some
+Vercel account but not authorized for this project. Create a new classic token
+from the Vercel scope that owns `algo-rhythm-dashboard`, then replace the secret.
 
 ---
 
