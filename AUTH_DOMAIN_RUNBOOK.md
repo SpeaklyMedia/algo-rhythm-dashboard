@@ -39,14 +39,37 @@ Do not force `VITE_CLERK_PROXY_URL` unless Clerk production configuration explic
 3. In Cloudflare DNS for `mrksylvstr.com`, create or update:
 
 ```text
-Type: CNAME
+Type: A
 Name: algo
-Target: Vercel-provided DNS target
+Target: 76.76.21.21
 Proxy: DNS only until Vercel validates TLS
 ```
 
-4. Verify Vercel marks the domain valid and HTTPS is issued.
+4. Verify Vercel marks the domain valid and HTTPS is issued. If DNS is valid but
+   TLS is not serving yet, issue the certificate explicitly:
+
+```sh
+vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
+```
+
 5. Verify `https://algo.mrksylvstr.com` renders Clerk sign-in while signed out.
+
+## Credential Lookup Rules
+
+Use credential material only through local CLI/API calls. Do not paste tokens,
+zone IDs, or raw environment values into docs, commits, receipts, screenshots,
+or shell output.
+
+When Cloudflare DNS work is needed:
+
+- Prefer the Cloudflare dashboard or an already-provisioned local API token with
+  `Zone Read` and `DNS Edit` scoped to `mrksylvstr.com`.
+- Validate capability by checking API success/failure only; print status and
+  masked record IDs, never token values.
+- Do not commit Cloudflare zone IDs. The domain name and DNS record shape are
+  enough for public runbook documentation.
+- Keep Cloudflare records for Vercel custom domains `DNS only` until Vercel has
+  validated the domain and issued HTTPS.
 
 ## QA Commands
 

@@ -12,34 +12,46 @@
 - Clerk UI gate: implemented in the static React shell
 - Vercel env var `VITE_CLERK_PUBLISHABLE_KEY`: configured for Production
 - Vercel custom domain: `algo.mrksylvstr.com` added to the Algo-Rhythm project
-- Cloudflare DNS record: pending zone update
-- GitHub Actions deployment: passed on run `24520601622`
-- Static data verification: passed on `https://algo-rhythm-dashboard.vercel.app/data/dashboard_index.json`
-- Signed-out browser QA: pending `algo.mrksylvstr.com` DNS activation
+- Cloudflare DNS record: active, DNS-only `A` record to Vercel
+- Vercel domain verification: passed
+- HTTPS certificate: issued for `algo.mrksylvstr.com`
+- GitHub Actions deployment: passed on runs `24520601622` and `24520678802`
+- Static data verification: passed on `https://algo.mrksylvstr.com/data/dashboard_index.json`
+- Signed-out browser QA: passed on `https://algo.mrksylvstr.com`
 - Signed-in browser QA: requires local non-repo Playwright storage state
 
-## DNS Action Required
+## DNS Configuration
 
-Vercel requested this DNS record:
+The active Cloudflare DNS record is:
 
 ```text
 Type: A
 Name: algo
 Value: 76.76.21.21
-Proxy: DNS only until Vercel validates HTTPS
+Proxy: DNS only
 ```
 
-The local Cloudflare token discovered on this machine is active, but it does not expose the
-`mrksylvstr.com` zone through zone-list lookup. Do not guess the zone ID. Complete the DNS
-record through Cloudflare dashboard access or a zone-scoped token plus the exact zone ID.
+Vercel API checks reported the project domain as verified and the domain config as not
+misconfigured. The certificate was issued with:
+
+```sh
+vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
+```
 
 ## Verified Static Contract
 
 - `review_mode`: `multi_run_review`
 - `cohort_size`: `4`
 - `recommended_run_id`: `20260414T232200Z`
-- `latest_batch_review_id`: `20260416T134500Z`
-- Representative batch download returned HTTP 200 from the Vercel app alias.
+- latest batch review id: `20260416T134500Z`
+- Representative batch download returned HTTP 200 from the custom domain.
+
+## Browser QA Evidence
+
+- Command: `DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard`
+- Auth mode: signed out
+- Routes checked: `/`, `/strategy`, `/review`, `/package`, `/batch`, `/handoff`
+- Receipt: `scripts/test-results/algo-rhythm-dashboard-browser-qa/2026-04-16T16-47-11-550Z/receipt.json`
 
 ## Security Notes
 
