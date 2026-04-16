@@ -1,58 +1,66 @@
 {
   "status": "PASS",
-  "generated_at": "2026-04-15T04:57:16.517703Z",
+  "generated_at": "2026-04-16T03:10:55.797331Z",
   "batch_command": "python3 01_WORKINGSET/strategy_toolset/tools/assemble_strategy_run_batch.py",
-  "batch_id": "20260415T044337Z",
-  "review_id": "20260415T000500Z",
-  "review_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/PROMOTION_RECOMMENDATION.json",
-  "review_sha256": "59e95419d6ae688b24eb1969f0d4c0bfd2b934a5d1bafb9a76c9fabdadfa94da",
+  "batch_id": "20260416T134500Z",
+  "review_mode": "multi_run_review",
+  "review_scope": "reviewed_run_cohort",
+  "cohort_size": 4,
+  "review_id": "20260416T134500Z",
+  "review_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260416T134500Z/PROMOTION_RECOMMENDATION.json",
+  "review_sha256": "3dcaa18ae212cd5ce703c83cbf80e9df439dd1925a60e0c326f06af590907b8e",
   "included_run_ids": [
     "20260414T232200Z",
     "20260414T232000Z",
-    "20260414T232500Z"
+    "20260414T232500Z",
+    "20260416T124500Z"
   ],
-  "run_package_count": 3,
+  "run_package_count": 4,
   "run_packages": {
     "20260414T232200Z": {
       "package_mode": "promoted_canonical",
-      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232200Z/PACKAGE_MANIFEST.json",
-      "package_manifest_sha256": "adebe689913b52d7eb61051b91f72f7292538be8fc857920199ba51e23a2f61f",
-      "package_zip_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T044337Z.zip",
-      "package_zip_sha256": "ae3dd64dd004121a96f6720645f8e0b8bcbaa7f6455428e551919226306f813d"
+      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/20260414T232200Z/PACKAGE_MANIFEST.json",
+      "package_manifest_sha256": "2b359a57897439d71409e6e5201f352e0a60a897afdb14f7c2c5ce1df1c55ce9",
+      "package_zip_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260416T134500Z.zip",
+      "package_zip_sha256": "e080456b3fcdd3f0a5c32ee3e5d98226b4090c6e011ca5c0d5f6b2e6b9ddd21d"
     },
     "20260414T232000Z": {
       "package_mode": "reviewed_promotable",
-      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232000Z/PACKAGE_MANIFEST.json",
-      "package_manifest_sha256": "5de53e50d95772d444db31783acdddf122936f88112986d9278c421f550e8f60",
-      "package_zip_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/STRATEGY_RUN_PACKAGE__20260414T232000Z__20260415T044337Z.zip",
-      "package_zip_sha256": "9a8b0f860d5a2bc27402e8bbe5d411e2c78ba56a943554a70bac6cc797ba41d5"
+      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/20260414T232000Z/PACKAGE_MANIFEST.json",
+      "package_manifest_sha256": "a98ad6a13e0b079ea0dd1528c44fb1b1fb7e425829f4b1146c88877222a76f44",
+      "package_zip_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/STRATEGY_RUN_PACKAGE__20260414T232000Z__20260416T134500Z.zip",
+      "package_zip_sha256": "88b96e4d20f7cbf7cd3043f340680490b2805de556ccd595e161bbc0e7246d50"
     },
     "20260414T232500Z": {
       "package_mode": "reviewed_promotable",
-      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/20260414T232500Z/PACKAGE_MANIFEST.json",
-      "package_manifest_sha256": "faa4d4af20d3d8a9f75312f7a44ed303f0336e874730676c46e1fb1f7726ded5",
-      "package_zip_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/STRATEGY_RUN_PACKAGE__20260414T232500Z__20260415T044337Z.zip",
-      "package_zip_sha256": "0c7d5a4319a02b640de2f2a356ffce6de2c8ba7291dcf62d61f025f80f1fbe1d"
+      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/20260414T232500Z/PACKAGE_MANIFEST.json",
+      "package_manifest_sha256": "d9e9e0a37835c1af75600a87e48070603844d23500d2810c2df310a28604353f",
+      "package_zip_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/STRATEGY_RUN_PACKAGE__20260414T232500Z__20260416T134500Z.zip",
+      "package_zip_sha256": "ce5d02e72e6f5b85ebe5f70158b400cb94850cfb0dd985bcf08dbef3017d3558"
+    },
+    "20260416T124500Z": {
+      "package_mode": "reviewed_promotable",
+      "package_manifest_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/20260416T124500Z/PACKAGE_MANIFEST.json",
+      "package_manifest_sha256": "3c9dc65368b71714bf1858f8981281f863cc6f72508919a0d0a81955b5a431dc",
+      "package_zip_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/STRATEGY_RUN_PACKAGE__20260416T124500Z__20260416T134500Z.zip",
+      "package_zip_sha256": "5e5d374e5c1fb6ffe10f285c4353d94f77ae71db273409c526a5a50c1ed66dc1"
     }
   },
   "derived_outputs": {
     "RUN_PACKAGE_INDEX.json": {
-      "path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/RUN_PACKAGE_INDEX.json",
-      "sha256": "aab9308c92a3767dcdbae5118cfae5918d5fe1a3819b0307c74e567fbcd070ad"
+      "path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/RUN_PACKAGE_INDEX.json",
+      "sha256": "38a97b45d3dfc9c70230f32f9cf7491a951f379a37611f67e5abf55beffc677c"
     },
     "BATCH_SUMMARY.md": {
-      "path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/BATCH_SUMMARY.md",
-      "sha256": "4f07e295326a946e2adf45b4ceadb69df635e0ee12ecf69fa05276a14d5a2d71"
+      "path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/BATCH_SUMMARY.md",
+      "sha256": "16134b785ec300b82496bcb9de0bc2d183a5c274128b1d6ecaac0202c2c358fc"
     }
   },
   "batch_zip": {
-    "path": "raw_downloads/STRATEGY_RUN_BATCH__20260415T000500Z__20260415T044337Z.zip",
-    "sha256": "b81fef8032a1f6347a99cbf52dc8f5b376b68c3f7041c306edead5a40c66a7fd",
+    "path": "raw_downloads/STRATEGY_RUN_BATCH__20260416T134500Z__20260416T134500Z.zip",
+    "sha256": "f0ced121da6651161e6764ca6a98370079ce7824d73ad1cd124512f4a990e215",
     "contents_exclude": [
-      "BATCH_MANIFEST.json",
-      "STRATEGY_RUN_PACKAGE__20260414T232000Z__20260415T044337Z.zip",
-      "STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T044337Z.zip",
-      "STRATEGY_RUN_PACKAGE__20260414T232500Z__20260415T044337Z.zip"
+      "BATCH_MANIFEST.json"
     ]
   },
   "negative_checks": [

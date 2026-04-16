@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
+    "qa:dashboard": "tsx ./src/runStrategyDashboardBrowserQa.ts",
+    "qa:dashboard:headed": "tsx ./src/runStrategyDashboardBrowserQa.ts --headed",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "playwright": "1.55.0",
     "tsx": "catalog:"
   }
 }

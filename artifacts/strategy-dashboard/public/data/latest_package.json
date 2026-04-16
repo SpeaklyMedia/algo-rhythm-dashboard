@@ -1,12 +1,15 @@
 {
   "status": "PASS",
-  "package_id": "20260415T003909Z",
-  "package_dir": "04_OUTPUTS/STRATEGY_PACKAGES/20260415T003909Z",
-  "package_manifest_path": "04_OUTPUTS/STRATEGY_PACKAGES/20260415T003909Z/PACKAGE_MANIFEST.json",
-  "package_manifest_sha256": "c1266e5013ae5bc007d6d4c78b7c6fa62ecb5a2d36e51f66ce8b62a175d9a456",
-  "package_zip_path": "raw_downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T003909Z.zip",
-  "package_zip_sha256": "3a142ca8e1b504972d750a561433818c0bd0887bb20a9a071552ee9953f33c9e",
+  "package_id": "20260416T134500Z",
+  "review_mode": "multi_run_review",
+  "review_scope": "reviewed_run_cohort",
+  "cohort_size": 4,
+  "package_dir": "04_OUTPUTS/STRATEGY_PACKAGES/20260416T134500Z",
+  "package_manifest_path": "04_OUTPUTS/STRATEGY_PACKAGES/20260416T134500Z/PACKAGE_MANIFEST.json",
+  "package_manifest_sha256": "02a30ab82eea163adf397e205340ab5d40affdef7e9278376f3f05f8bd3c6293",
+  "package_zip_path": "raw_downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260416T134500Z.zip",
+  "package_zip_sha256": "793ee164fb41c51d69e59d42a4038d4a1a708fcc7ed893bcaea6149a9c55bd65",
   "run_id": "20260414T232200Z",
-  "review_id": "20260415T000500Z",
-  "generated_at": "2026-04-15T00:42:13.306281Z"
+  "review_id": "20260416T134500Z",
+  "generated_at": "2026-04-16T03:10:55.615688Z"
 }

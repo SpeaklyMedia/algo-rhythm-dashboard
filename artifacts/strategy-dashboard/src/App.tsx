@@ -2,6 +2,14 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'handoff'];
+const PAGE_PATHS = {
+  overview: '/',
+  strategy: '/strategy',
+  review: '/review',
+  package: '/package',
+  batch: '/batch',
+  handoff: '/handoff',
+};
 
 const PAGE_DATA_KEYS = {
   overview: ['latest_run', 'latest_review', 'latest_package', 'latest_batch'],
@@ -18,6 +26,18 @@ function pageHasData(pageId, datasets) {
   return keys.some((key) => datasets[key] != null);
 }
 
+function pageFromPathname(pathname) {
+  const normalized = String(pathname || '/').replace(/\/+$/, '') || '/';
+  if (normalized === '/') return 'overview';
+  const pageId = normalized.slice(1);
+  return PAGE_ORDER.includes(pageId) ? pageId : 'overview';
+}
+
+function currentPageFromLocation() {
+  if (typeof window === 'undefined') return 'overview';
+  return pageFromPathname(window.location.pathname);
+}
+
 const STRIP_ICONS = {
   promoted: 'LIVE',
   latest: 'LATEST',
@@ -26,44 +46,11 @@ const STRIP_ICONS = {
   properties: 'PROPS',
 };
 
-const HOME_LANES = [
-  {
-    id: 'overview',
-    label: 'Overview',
-    desc: "Promoted alias, latest successful run, review recommendation, and package/batch pointers at a glance.",
-  },
-  {
-    id: 'strategy',
-    label: 'Strategy',
-    desc: 'Content object, trend shortlist, viability scorecard, platform decisions, and experiment hypotheses.',
-  },
-  {
-    id: 'review',
-    label: 'Review',
-    desc: 'Promotion recommendation, ranked run scorecard, and excluded-candidate breakdown.',
-  },
-  {
-    id: 'package',
-    label: 'Package',
-    desc: 'Latest package facts, manifest integrity, and signal cards selected by property.',
-  },
-  {
-    id: 'batch',
-    label: 'Batch',
-    desc: 'Reviewed run cohort — modes, card counts, and SHA verification for the full batch.',
-  },
-  {
-    id: 'handoff',
-    label: 'Handoff',
-    desc: 'Canonical downloads, contract metadata, design authority, and handoff packet contents.',
-  },
-];
-
 const PAGE_DISPLAY = {
   overview: {
     label: 'Overview',
     shortLabel: 'Overview',
-    subtitle: 'Promoted alias · latest successful run · review recommendation · package and batch pointers',
+    subtitle: 'Promoted alias · review mode · recommendation · package and batch pointers',
     kicker: 'Lane B delivery posture',
   },
   strategy: {
@@ -75,7 +62,7 @@ const PAGE_DISPLAY = {
   review: {
     label: 'Review',
     shortLabel: 'Review',
-    subtitle: 'Promotion recommendation · ranked runs · excluded candidates',
+    subtitle: 'Promotion recommendation · cohort shape · ranked runs or single refresh snapshot',
     kicker: 'Review recommendation',
   },
   package: {
@@ -87,7 +74,7 @@ const PAGE_DISPLAY = {
   batch: {
     label: 'Batch',
     shortLabel: 'Batch',
-    subtitle: 'Reviewed run cohort · modes · card counts · SHA verification',
+    subtitle: 'Single-run batch or reviewed cohort · package modes · card counts · SHA verification',
     kicker: 'Latest batch',
   },
   handoff: {
@@ -97,6 +84,31 @@ const PAGE_DISPLAY = {
     kicker: 'Canonical handoff',
   },
 };
+
+function getReviewModeMeta(index, datasets = {}) {
+  const explicit = index?.review_mode;
+  if (explicit && typeof explicit === 'object') return explicit;
+  const recommendation = datasets.promotion_recommendation || {};
+  const latestReview = datasets.latest_review || {};
+  const latestBatch = datasets.latest_batch || {};
+  const includedRunIds = recommendation.included_run_ids || recommendation.reviewed_run_ids || latestBatch.included_run_ids || [];
+  const reviewMode = recommendation.review_mode || latestReview.review_mode || (includedRunIds.length > 1 ? 'multi_run_review' : 'beta_single_run');
+  return {
+    review_mode: reviewMode,
+    review_scope: recommendation.review_scope || latestReview.review_scope || (reviewMode === 'multi_run_review' ? 'reviewed_run_cohort' : 'single_refresh_snapshot'),
+    cohort_size: recommendation.cohort_size || latestReview.cohort_size || includedRunIds.length || 0,
+    recommended_run_id: recommendation.recommended_run_id || latestReview.recommended_run_id || null,
+    included_run_ids: includedRunIds,
+  };
+}
+
+function isSingleRunMode(reviewModeMeta) {
+  return reviewModeMeta?.review_mode === 'beta_single_run';
+}
+
+function reviewModeLabel(reviewModeMeta) {
+  return isSingleRunMode(reviewModeMeta) ? 'beta single-run' : 'multi-run review';
+}
 
 function formatDate(value) {
   if (!value) return 'Unavailable';
@@ -283,7 +295,7 @@ function AlgoRhythmLogo({ size = 28, className = '' }) {
   );
 }
 
-function BrandHeader({ dataMode }) {
+function BrandHeader({ dataMode, freshness }) {
   return (
     <div className="brand-header">
       <div className="brand-header__row">
@@ -292,7 +304,9 @@ function BrandHeader({ dataMode }) {
       </div>
       <p className="brand-header__context">Lane B · Internal review</p>
       <div className="mode-labels">
-        <span className="mode-label">{dataMode || 'static_json'}</span>
+        <span className="mode-label">{freshness?.mode || dataMode || 'static_refresh'}</span>
+        <span className="mode-label-sep">·</span>
+        <span className="mode-label">{freshness?.status || 'fresh'}</span>
         <span className="mode-label-sep">·</span>
         <span className="mode-label">no backend</span>
       </div>
@@ -339,7 +353,7 @@ function PipelineBar({ pages, activePage, onNavigate, onHome, datasets, onHambur
     <header className="pipeline-bar" role="navigation" aria-label="Pipeline stages">
       <button
         type="button"
-        className={`pipeline-brand${activePage === 'home' ? ' pipeline-brand--active' : ''}`}
+        className="pipeline-brand"
         onClick={onHome}
         aria-label="Algo-Rhythm home"
       >
@@ -474,6 +488,9 @@ function OverviewPage({ index, datasets }) {
   const summary = index.summary || {};
   const warnings = index.warnings || [];
   const uiContract = index.ui_contract || {};
+  const freshness = index.freshness || {};
+  const reviewMode = getReviewModeMeta(index, datasets);
+  const singleRun = isSingleRunMode(reviewMode);
 
   return (
     <div className="page-grid">
@@ -481,8 +498,10 @@ function OverviewPage({ index, datasets }) {
         <p className="panel-kicker">Lane B delivery posture</p>
         <h2>Overview</h2>
         <p className="lede">
-          Promoted canonical alias, latest successful run, review recommendation, and package/batch pointers —
-          frozen into the static contract. All data reads from bundled JSON only.
+          {singleRun
+            ? 'Beta-safe single-run refresh snapshot with one reviewed recommendation, one package, and one batch pointer.'
+            : 'Roadmap-target multi-run Lane B review with ranked runs, recommendation, and review-bound package and batch pointers.'}
+          {' '}All data reads from bundled JSON only.
         </p>
         <div className="stat-row">
           <div className="stat-item stat-item--promoted">
@@ -498,23 +517,49 @@ function OverviewPage({ index, datasets }) {
           </div>
           <div className="stat-divider" />
           <div className="stat-item stat-item--pick">
-            <span className="stat-chip stat-chip--pick">⊙ review recommendation</span>
+            <span className="stat-chip stat-chip--pick">⊙ {singleRun ? 'refresh snapshot' : 'review recommendation'}</span>
             <code className="stat-value">{latestReview?.recommended_run_id || '—'}</code>
             <span className="stat-detail">{latestReview?.review_id || 'No review ID'}</span>
           </div>
           <div className="stat-divider" />
           <div className="stat-item stat-item--pkg">
-            <span className="stat-chip stat-chip--pkg">▣ latest package</span>
+            <span className="stat-chip stat-chip--pkg">▣ {singleRun ? 'single-run package' : 'review-bound package'}</span>
             <code className="stat-value">{latestPackage?.run_id || '—'}</code>
             <span className="stat-detail">{latestPackage?.package_id || 'No package ID'}</span>
           </div>
           <div className="stat-divider" />
           <div className="stat-item">
-            <span className="stat-chip">latest batch</span>
+            <span className="stat-chip">{singleRun ? 'single-run batch' : 'latest batch'}</span>
             <code className="stat-value">{latestBatch?.review_id || '—'}</code>
-            <span className="stat-detail">{`${latestBatch?.included_run_ids?.length || 0} included runs`}</span>
+            <span className="stat-detail">{`${reviewMode?.cohort_size || latestBatch?.included_run_ids?.length || 0} included runs`}</span>
           </div>
         </div>
+      </section>
+
+      <section className="panel">
+        <h2>Review mode</h2>
+        <KeyValueTable
+          rows={[
+            { label: 'Mode', value: reviewModeLabel(reviewMode) },
+            { label: 'Scope', value: reviewMode.review_scope || 'Unavailable' },
+            { label: 'Cohort size', value: reviewMode.cohort_size || 'Unavailable' },
+            { label: 'Recommended run', value: reviewMode.recommended_run_id || 'Unavailable' },
+            { label: 'Included runs', value: (reviewMode.included_run_ids || []).join(', ') || 'Unavailable' },
+          ]}
+        />
+      </section>
+
+      <section className="panel">
+        <h2>Algo freshness</h2>
+        <KeyValueTable
+          rows={[
+            { label: 'Mode', value: freshness.mode || 'Unavailable' },
+            { label: 'Status', value: <StatusBadge tone={freshness.status === 'fresh' ? 'good' : freshness.status === 'staged' ? 'warn' : 'bad'}>{freshness.status || 'Unavailable'}</StatusBadge> },
+            { label: 'Refreshed at', value: formatDate(freshness.refreshed_at) },
+            { label: 'Snapshot ID', value: freshness.evidence_snapshot_id || 'Unavailable' },
+            { label: 'Source policy', value: freshness.source_policy || 'Unavailable' },
+          ]}
+        />
       </section>
 
       <section className="panel">
@@ -555,7 +600,7 @@ function OverviewPage({ index, datasets }) {
       </section>
 
       <section className="panel">
-        <h2>Contract warnings</h2>
+        <h2>{singleRun ? 'Operator notes' : 'Contract warnings'}</h2>
         {warnings.length ? (
           <ul className="warning-list">
             {warnings.map((warning) => (
@@ -785,22 +830,24 @@ function StrategyPage({ datasets }) {
   );
 }
 
-function ReviewPage({ datasets }) {
+function ReviewPage({ index, datasets }) {
   const recommendation = datasets.promotion_recommendation;
   const scorecard = datasets.run_comparison_scorecard;
   const reviewIndex = datasets.run_review_index;
+  const reviewMode = getReviewModeMeta(index, datasets);
+  const singleRun = isSingleRunMode(reviewMode);
 
   return (
     <div className="page-grid">
       <section className="panel span-2 hero-panel">
         <p className="panel-kicker">Make your call</p>
-        <h2>Latest review recommendation</h2>
+        <h2>{singleRun ? 'Latest refresh snapshot review' : 'Latest multi-run review recommendation'}</h2>
         {recommendation ? (
           <>
             <div className="metrics compact">
-              <MetricCard label="Recommended run" value={recommendation.recommended_run_id} tone="good" />
-              <MetricCard label="Promotion mode" value={recommendation.promotion_mode} tone="warn" />
-              <MetricCard label="Promotable runs" value={(recommendation.promotable_run_ids || []).length} />
+              <MetricCard label={singleRun ? 'Refresh snapshot run' : 'Recommended run'} value={recommendation.recommended_run_id} tone="good" />
+              <MetricCard label="Review mode" value={reviewModeLabel(reviewMode)} tone="warn" />
+              <MetricCard label={singleRun ? 'Published snapshots' : 'Promotable runs'} value={reviewMode.cohort_size || (recommendation.promotable_run_ids || []).length} />
             </div>
             <ul className="stack-list">
               {(recommendation.rationale || []).map((item) => (
@@ -814,7 +861,7 @@ function ReviewPage({ datasets }) {
       </section>
 
       <section className="panel span-2">
-        <h2>Ranked runs</h2>
+        <h2>{singleRun ? 'Published snapshot' : 'Ranked runs in reviewed cohort'}</h2>
         {scorecard?.ranked_runs?.length ? (
           <div className="table-scroll">
             <table>
@@ -862,7 +909,7 @@ function ReviewPage({ datasets }) {
       </section>
 
       <section className="panel">
-        <h2>Excluded runs</h2>
+        <h2>{singleRun ? 'Out-of-scope runs' : 'Excluded runs'}</h2>
         {reviewIndex?.candidates?.some((item) => item.exclusion_reasons?.length) ? (
           <ul className="stack-list">
             {reviewIndex.candidates
@@ -875,28 +922,31 @@ function ReviewPage({ datasets }) {
               ))}
           </ul>
         ) : (
-          <EmptyState title="No excluded runs" detail="Every candidate was promotable in the latest review." />
+          <EmptyState title={singleRun ? 'No extra runs' : 'No excluded runs'} detail={singleRun ? 'Beta single-run mode intentionally publishes one refreshed snapshot.' : 'Every candidate was promotable in the latest review.'} />
         )}
       </section>
     </div>
   );
 }
 
-function PackagePage({ datasets }) {
+function PackagePage({ index, datasets }) {
   const latestPackage = datasets.latest_package;
   const manifest = datasets.package_manifest;
   const selectedCards = datasets.selected_signal_cards;
+  const reviewMode = getReviewModeMeta(index, datasets);
+  const singleRun = isSingleRunMode(reviewMode);
 
   return (
     <div className="page-grid">
       <section className="panel">
-        <h2>Package summary</h2>
+        <h2>{singleRun ? 'Single-run package summary' : 'Review-bound package summary'}</h2>
         {latestPackage ? (
           <KeyValueTable
             rows={[
               { label: 'Run ID', value: latestPackage.run_id },
               { label: 'Package ID', value: latestPackage.package_id },
               { label: 'Review ID', value: latestPackage.review_id },
+              { label: 'Review mode', value: reviewModeLabel(reviewMode) },
               { label: 'Package SHA', value: <ShaField hash={latestPackage.package_zip_sha256} /> },
             ]}
           />
@@ -911,6 +961,8 @@ function PackagePage({ datasets }) {
           <KeyValueTable
             rows={[
               { label: 'Package mode', value: manifest.package_mode },
+              { label: 'Review scope', value: manifest.review_scope || reviewMode.review_scope || 'Unavailable' },
+              { label: 'Cohort size', value: manifest.cohort_size || reviewMode.cohort_size || 'Unavailable' },
               { label: 'Selected cards', value: manifest.selected_cards?.selected_card_count || 'Unavailable' },
               { label: 'Run manifest SHA', value: <ShaField hash={manifest.run?.run_manifest_sha256} /> },
               { label: 'Package ZIP SHA', value: <ShaField hash={manifest.package_zip?.sha256} /> },
@@ -953,20 +1005,23 @@ function PackagePage({ datasets }) {
   );
 }
 
-function BatchPage({ datasets }) {
+function BatchPage({ index, datasets }) {
   const latestBatch = datasets.latest_batch;
   const batchManifest = datasets.batch_manifest;
   const runPackageIndex = datasets.run_package_index;
+  const reviewMode = getReviewModeMeta(index, datasets);
+  const singleRun = isSingleRunMode(reviewMode);
 
   return (
     <div className="page-grid">
       <section className="panel">
-        <h2>Batch facts</h2>
+        <h2>{singleRun ? 'Single-run batch facts' : 'Reviewed cohort batch facts'}</h2>
         {latestBatch ? (
           <KeyValueTable
             rows={[
               { label: 'Batch ID', value: latestBatch.batch_id },
               { label: 'Review ID', value: latestBatch.review_id },
+              { label: 'Review mode', value: reviewModeLabel(reviewMode) },
               { label: 'Included runs', value: (latestBatch.included_run_ids || []).join(', ') || 'Unavailable' },
               { label: 'Batch ZIP SHA', value: <ShaField hash={latestBatch.batch_zip_sha256} /> },
             ]}
@@ -982,6 +1037,7 @@ function BatchPage({ datasets }) {
           <KeyValueTable
             rows={[
               { label: 'Run package count', value: batchManifest.run_package_count },
+              { label: 'Review scope', value: batchManifest.review_scope || reviewMode.review_scope || 'Unavailable' },
               { label: 'Review path', value: batchManifest.review_path },
               { label: 'Batch manifest SHA', value: <ShaField hash={batchManifest.batch_zip?.sha256} /> },
               { label: 'Generated at', value: formatDate(batchManifest.generated_at) },
@@ -993,7 +1049,7 @@ function BatchPage({ datasets }) {
       </section>
 
       <section className="panel span-2">
-        <h2>Runs in this collection</h2>
+        <h2>{singleRun ? 'Runs in this single-refresh collection' : 'Runs in this reviewed cohort'}</h2>
         {runPackageIndex?.packages?.length ? (
           <div className="table-scroll">
             <table>
@@ -1030,6 +1086,8 @@ function HandoffPage({ index }) {
   const uiContract = index.ui_contract || {};
   const handoffPacket = index.handoff_packet || {};
   const designAuthority = uiContract.design_authority || {};
+  const freshness = index.freshness || {};
+  const reviewMode = getReviewModeMeta(index);
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   return (
@@ -1078,6 +1136,7 @@ function HandoffPage({ index }) {
             { label: 'Generated at', value: formatDate(index.generated_at) },
             { label: 'Dashboard app', value: index.app?.name || 'Unavailable' },
             { label: 'Data mode', value: index.app?.data_mode || 'Unavailable' },
+            { label: 'Review mode', value: reviewModeLabel(reviewMode) },
             { label: 'Audience', value: index.app?.audience || 'Unavailable' },
           ]}
         />
@@ -1090,13 +1149,28 @@ function HandoffPage({ index }) {
             rows={[
               { label: 'Required data', value: uiContract.missing_data_behavior.required || 'Unavailable' },
               { label: 'Optional data', value: uiContract.missing_data_behavior.optional || 'Unavailable' },
-              { label: 'Refresh command', value: uiContract.data_refresh?.command || 'Unavailable' },
+              { label: 'Stage refresh', value: uiContract.data_refresh?.stage_command || 'Unavailable' },
+              { label: 'Promote refresh', value: uiContract.data_refresh?.promote_command || 'Unavailable' },
+              { label: 'Sync command', value: uiContract.data_refresh?.sync_command || 'Unavailable' },
               { label: 'Download policy', value: uiContract.download_policy?.source || 'Unavailable' },
             ]}
           />
         ) : (
           <EmptyState title="Unavailable" detail="Contract behavior rules are missing from the dashboard index." />
         )}
+      </section>
+
+      <section className="panel span-2">
+        <h2>Algo refresh state</h2>
+        <KeyValueTable
+          rows={[
+            { label: 'Mode', value: freshness.mode || 'Unavailable' },
+            { label: 'Status', value: <StatusBadge tone={freshness.status === 'fresh' ? 'good' : freshness.status === 'staged' ? 'warn' : 'bad'}>{freshness.status || 'Unavailable'}</StatusBadge> },
+            { label: 'Refreshed at', value: formatDate(freshness.refreshed_at) },
+            { label: 'Snapshot ID', value: freshness.evidence_snapshot_id || 'Unavailable' },
+            { label: 'Source policy', value: freshness.source_policy || 'Unavailable' },
+          ]}
+        />
       </section>
 
       <section className="panel span-2">
@@ -1148,68 +1222,9 @@ function HandoffPage({ index }) {
   );
 }
 
-function HomePage({ onNavigate }) {
-  return (
-    <div className="home-page">
-      <section className="home-hero panel">
-        <div className="home-hero__logo-wrap" aria-hidden="true">
-          <AlgoRhythmLogo size={64} className="home-hero__logo" />
-        </div>
-        <div className="home-hero__copy">
-          <p className="eyebrow">Internal review tool</p>
-          <h1 className="home-hero__title">Algo-Rhythm</h1>
-          <p className="home-hero__pitch">
-            A frozen, static review dashboard for the Lane B algorithmic content pipeline.
-            Inspect the full delivery cycle — from strategic substrate to canonical handoff —
-            using a bundled snapshot. All data is embedded at build time.
-            No live API. No backend dependencies.
-          </p>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => onNavigate('overview')}
-          >
-            Begin at Overview →
-          </button>
-        </div>
-      </section>
-
-      <section className="home-lanes">
-        <h2 className="home-lanes__heading">Six stages of the review cycle</h2>
-        <div className="home-lanes__grid">
-          {HOME_LANES.map((lane, i) => (
-            <article className="home-lane-card surface-card" key={lane.id}>
-              <div className="home-lane-card__num">{i + 1}</div>
-              <div className="home-lane-card__body">
-                <h3 className="home-lane-card__title">{lane.label}</h3>
-                <p className="home-lane-card__desc">{lane.desc}</p>
-                <button
-                  type="button"
-                  className="btn btn-outline btn-sm"
-                  onClick={() => onNavigate(lane.id)}
-                >
-                  Go to →
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <footer className="home-footer">
-        <p>
-          This dashboard reads from a static bundled contract — a frozen snapshot of the Lane B
-          pipeline seeded at review time. No network calls are made after initial page load.
-          All data is read-only and cannot be modified from this interface.
-        </p>
-      </footer>
-    </div>
-  );
-}
-
 function App() {
   const { loading, fatalError, index, datasets, optionalErrors } = useDashboardData();
-  const [activePage, setActivePage] = useState('home');
+  const [activePage, setActivePage] = useState(currentPageFromLocation);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -1219,6 +1234,12 @@ function App() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
+  useEffect(() => {
+    const handler = () => setActivePage(currentPageFromLocation());
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []);
+
   const pageDefinitions = useMemo(() => {
     if (!index?.navigation) return [];
     return PAGE_ORDER.map((id) => index.navigation.find((page) => page.id === id)).filter(Boolean);
@@ -1226,14 +1247,18 @@ function App() {
 
   useEffect(() => {
     if (!pageDefinitions.length) return;
-    if (activePage !== 'home' && !pageDefinitions.some((page) => page.id === activePage)) {
-      setActivePage('home');
+    if (!pageDefinitions.some((page) => page.id === activePage)) {
+      setActivePage(pageDefinitions[0]?.id || 'overview');
     }
   }, [activePage, pageDefinitions]);
 
   function handleNavigate(pageId) {
     setActivePage(pageId);
     setIsSidebarOpen(false);
+    const nextPath = PAGE_PATHS[pageId] || '/';
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+    }
   }
 
   if (loading) {
@@ -1268,18 +1293,16 @@ function App() {
   const displayLabel = PAGE_DISPLAY[activePage]?.label || activePageMeta?.label || 'Dashboard';
   const displayKicker = PAGE_DISPLAY[activePage]?.kicker || '';
 
-  const renderPage = () => {
+      const renderPage = () => {
     switch (activePage) {
-      case 'home':
-        return <HomePage onNavigate={handleNavigate} />;
       case 'strategy':
         return <StrategyPage datasets={datasets} />;
       case 'review':
-        return <ReviewPage datasets={datasets} />;
+        return <ReviewPage index={index} datasets={datasets} />;
       case 'package':
-        return <PackagePage datasets={datasets} />;
+        return <PackagePage index={index} datasets={datasets} />;
       case 'batch':
-        return <BatchPage datasets={datasets} />;
+        return <BatchPage index={index} datasets={datasets} />;
       case 'handoff':
         return <HandoffPage index={index} />;
       default:
@@ -1293,7 +1316,7 @@ function App() {
         pages={pageDefinitions}
         activePage={activePage}
         onNavigate={handleNavigate}
-        onHome={() => handleNavigate('home')}
+        onHome={() => handleNavigate('overview')}
         datasets={datasets}
         onHamburger={() => setIsSidebarOpen((o) => !o)}
       />
@@ -1309,18 +1332,10 @@ function App() {
 
         <aside className={isSidebarOpen ? 'sidebar sidebar--open' : 'sidebar'}>
           <div className="sidebar-top">
-            <BrandHeader dataMode={index.app?.data_mode} />
+            <BrandHeader dataMode={index.app?.data_mode} freshness={index.freshness} />
           </div>
 
           <nav className="nav-list" aria-label="Dashboard sections">
-            <button
-              type="button"
-              className={activePage === 'home' ? 'nav-item nav-item--home active' : 'nav-item nav-item--home'}
-              onClick={() => handleNavigate('home')}
-            >
-              <span>Home</span>
-              <small>Welcome · orientation · stage overview</small>
-            </button>
             {pageDefinitions.map((page) => (
               <button
                 key={page.id}
@@ -1356,8 +1371,7 @@ function App() {
           </div>
         </aside>
 
-        <main className={activePage === 'home' ? 'content content--home' : 'content'}>
-          {activePage !== 'home' && <>
+        <main className="content">
           <div className="data-rail">
             <div className="rail-cell rail-cell--promoted">
               <div className="rail-label-row">
@@ -1425,7 +1439,7 @@ function App() {
                 {pageIndex + 1} / {pageDefinitions.length} · {displayKicker}
               </p>
               <h2 className="page-title">{displayLabel}</h2>
-              <p className="header-note">Bundled JSON only · No live API · No raw repo reads</p>
+              <p className="header-note">Bundled JSON snapshot · Operator-triggered refresh · No live API</p>
             </div>
             <div className="header-right">
               <div className="header-badges-inline">
@@ -1450,7 +1464,6 @@ function App() {
               </ul>
             </details>
           )}
-          </>}
 
           <div key={activePage}>
             {renderPage()}

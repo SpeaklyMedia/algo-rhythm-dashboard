@@ -1,34 +1,57 @@
 {
   "status": "PASS",
-  "generated_at": "2026-04-15T14:23:31.305801Z",
+  "generated_at": "2026-04-16T03:10:55.912444Z",
   "contract_version": "r24-replit-ui-v1",
   "app": {
     "name": "strategy_dashboard_replit",
     "title": "Lane B Strategy Review Dashboard",
-    "description": "Static seeded dashboard for reviewing the promoted run, latest successful run, review, package, batch, and handoff surfaces.",
-    "data_mode": "static_json",
+    "description": "Static snapshot dashboard for reviewing the promoted run, latest successful run, review, package, batch, handoff, and algo-refresh posture.",
+    "data_mode": "static_refresh",
     "target_runtime": "React + Vite",
     "audience": "internal_operator_strategy_reviewer",
     "handoff_mode": "replit_ui_packet"
   },
   "summary": {
+    "review_mode": "multi_run_review",
+    "review_scope": "reviewed_run_cohort",
+    "review_cohort_size": 4,
     "top_level_alias_run_id": "20260414T232200Z",
     "top_level_alias_candidate_ids": [
       "20260414T232200Z"
     ],
-    "latest_successful_run_id": "20260414T232500Z",
+    "latest_successful_run_id": "20260416T124500Z",
     "latest_review_recommended_run_id": "20260414T232200Z",
     "latest_package_run_id": "20260414T232200Z",
-    "latest_batch_review_id": "20260415T000500Z",
+    "latest_batch_review_id": "20260416T134500Z",
     "latest_batch_run_ids": [
       "20260414T232200Z",
       "20260414T232000Z",
-      "20260414T232500Z"
+      "20260414T232500Z",
+      "20260416T124500Z"
     ]
   },
   "warnings": [
     "Latest successful run differs from the current top-level alias source run."
   ],
+  "freshness": {
+    "mode": "static_refresh",
+    "refreshed_at": "2026-04-16T02:09:52.155234Z",
+    "evidence_snapshot_id": "20260416T124500Z",
+    "source_policy": "official_curated_only",
+    "status": "fresh"
+  },
+  "review_mode": {
+    "review_mode": "multi_run_review",
+    "review_scope": "reviewed_run_cohort",
+    "cohort_size": 4,
+    "recommended_run_id": "20260414T232200Z",
+    "included_run_ids": [
+      "20260414T232200Z",
+      "20260414T232000Z",
+      "20260414T232500Z",
+      "20260416T124500Z"
+    ]
+  },
   "navigation": [
     {
       "id": "overview",
@@ -148,6 +171,7 @@
       }
     ],
     "required_state_distinctions": [
+      "review_mode",
       "promoted_canonical",
       "latest_successful_run",
       "review_recommended_run",
@@ -159,8 +183,14 @@
       "optional": "render_unavailable_state"
     },
     "data_refresh": {
-      "command": "python3 01_WORKINGSET/strategy_dashboard_replit/tools/sync_dashboard_data.py",
-      "mode": "static_bundle_only"
+      "stage_command": "python3 01_WORKINGSET/algo_evidence_pack/tools/refresh_official_algo_sources.py",
+      "promote_command": "python3 01_WORKINGSET/algo_evidence_pack/tools/promote_official_algo_refresh.py --snapshot-id <snapshot_id>",
+      "sync_command": "python3 01_WORKINGSET/strategy_dashboard_replit/tools/sync_dashboard_data.py",
+      "mode": "static_bundle_only",
+      "review_modes": [
+        "beta_single_run",
+        "multi_run_review"
+      ]
     },
     "download_policy": {
       "source": "public/downloads only",
@@ -179,7 +209,7 @@
     }
   },
   "handoff_packet": {
-    "artifact_name": "SOCIAL_UTILITY__REPLIT_UI_HANDOFF__20260415__R24.zip",
+    "artifact_name": "SOCIAL_UTILITY__REPLIT_UI_HANDOFF__20260415__R27.zip",
     "runtime_files": [
       ".replit",
       "replit.nix",
@@ -203,25 +233,25 @@
       "public_path": "/data/latest_run.json",
       "source_path": "04_OUTPUTS/STRATEGY_RUNS/LATEST.json",
       "required": true,
-      "sha256": "a7d4da2f9c8fe475340ffed2c5fe4becc49f86c07c08200a2a53a12c9c34eadc"
+      "sha256": "af3ecfd086c565bfc3fa488f2a895f68004181a7e8d7fb9c495171accdfed390"
     },
     "latest_review": {
       "public_path": "/data/latest_review.json",
       "source_path": "04_OUTPUTS/STRATEGY_RUNS/LATEST_REVIEW.json",
       "required": true,
-      "sha256": "25068d0417a0b9ae228b1a4b15ce2e5a9626711df4581f17c950e31e9b537de7"
+      "sha256": "3bcb90dac0ffbd7745cc46dd8b495666242ddd0fab2ba945f2e9227e26a87248"
     },
     "latest_package": {
       "public_path": "/data/latest_package.json",
       "source_path": "04_OUTPUTS/STRATEGY_PACKAGES/LATEST_PACKAGE.json",
       "required": true,
-      "sha256": "33f75a6d32bd6b288ae31b80ef68662c897107e859a74aa240b3c06fca93f6be"
+      "sha256": "41cb0d80b61a3f1bae9b39c1386a992c53fe456cc7db80dd58f1f49e7994e1f6"
     },
     "latest_batch": {
       "public_path": "/data/latest_batch.json",
       "source_path": "04_OUTPUTS/STRATEGY_BATCHES/LATEST_BATCH.json",
       "required": true,
-      "sha256": "653c2b1685c88ebda0017f6b0fe2460d0418395036768d2f0f07318a186b17e8"
+      "sha256": "707b0b0da31fb74c161894b6d2e9c3d2e2318559d191d3cbcd7a0ce350292eae"
     },
     "content_object": {
       "public_path": "/data/content_object.json",
@@ -267,45 +297,45 @@
     },
     "promotion_recommendation": {
       "public_path": "/data/promotion_recommendation.json",
-      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/PROMOTION_RECOMMENDATION.json",
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260416T134500Z/PROMOTION_RECOMMENDATION.json",
       "required": true,
-      "sha256": "59e95419d6ae688b24eb1969f0d4c0bfd2b934a5d1bafb9a76c9fabdadfa94da"
+      "sha256": "3dcaa18ae212cd5ce703c83cbf80e9df439dd1925a60e0c326f06af590907b8e"
     },
     "run_comparison_scorecard": {
       "public_path": "/data/run_comparison_scorecard.json",
-      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/RUN_COMPARISON_SCORECARD.json",
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260416T134500Z/RUN_COMPARISON_SCORECARD.json",
       "required": true,
-      "sha256": "9691593e491d451ff59ce54a39d858ce12cc095bdf044c8e05f06fd385fb6147"
+      "sha256": "bd7de3cb732002c83660cb265f4fbdfe6e2bbf3ff94d3692e38ec0ab012aa13c"
     },
     "run_review_index": {
       "public_path": "/data/run_review_index.json",
-      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260415T000500Z/RUN_REVIEW_INDEX.json",
+      "source_path": "04_OUTPUTS/STRATEGY_RUNS/reviews/20260416T134500Z/RUN_REVIEW_INDEX.json",
       "required": true,
-      "sha256": "d9ec7647f4006f2363fe7835034d4798c3646c52ce38d383acf1e604a5e21b82"
+      "sha256": "2c2cbb3d6ece50a2c7e15bf932b1d6496d7996c207f05c5a4ad70d0f6a35d61c"
     },
     "package_manifest": {
       "public_path": "/data/package_manifest.json",
-      "source_path": "04_OUTPUTS/STRATEGY_PACKAGES/20260415T003909Z/PACKAGE_MANIFEST.json",
+      "source_path": "04_OUTPUTS/STRATEGY_PACKAGES/20260416T134500Z/PACKAGE_MANIFEST.json",
       "required": true,
-      "sha256": "c1266e5013ae5bc007d6d4c78b7c6fa62ecb5a2d36e51f66ce8b62a175d9a456"
+      "sha256": "02a30ab82eea163adf397e205340ab5d40affdef7e9278376f3f05f8bd3c6293"
     },
     "selected_signal_cards": {
       "public_path": "/data/selected_signal_cards.json",
-      "source_path": "04_OUTPUTS/STRATEGY_PACKAGES/20260415T003909Z/SELECTED_SIGNAL_CARDS.json",
+      "source_path": "04_OUTPUTS/STRATEGY_PACKAGES/20260416T134500Z/SELECTED_SIGNAL_CARDS.json",
       "required": false,
-      "sha256": "1d0edfcff0673df29a17dea1d939c1a4f575ee508d22da29d457ab73c337e5ca"
+      "sha256": "3972a3757d80ff5bc4f371872d302c33ade47a8529672c79e3149c1fc8b6c79c"
     },
     "batch_manifest": {
       "public_path": "/data/batch_manifest.json",
-      "source_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/BATCH_MANIFEST.json",
+      "source_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/BATCH_MANIFEST.json",
       "required": true,
-      "sha256": "5a6818fb4563ef45b9066ed9b8f011fd55bf6b0d349bfd300591946b77cdde1d"
+      "sha256": "7c47239969b6ef3abd97b6059e991bea0bb27f943a156b4b362a38d62db70a98"
     },
     "run_package_index": {
       "public_path": "/data/run_package_index.json",
-      "source_path": "04_OUTPUTS/STRATEGY_BATCHES/20260415T044337Z/RUN_PACKAGE_INDEX.json",
+      "source_path": "04_OUTPUTS/STRATEGY_BATCHES/20260416T134500Z/RUN_PACKAGE_INDEX.json",
       "required": false,
-      "sha256": "aab9308c92a3767dcdbae5118cfae5918d5fe1a3819b0307c74e567fbcd070ad"
+      "sha256": "38a97b45d3dfc9c70230f32f9cf7491a951f379a37611f67e5abf55beffc677c"
     }
   },
   "downloads": [
@@ -316,7 +346,7 @@
       "public_path": "/downloads/CANONICAL_POINTER__SSOT_LATEST.txt",
       "bundled": true,
       "source_path": "transports/project_folder_travel/CANONICAL_POINTER__SSOT_LATEST.txt",
-      "sha256": "8986015dcfc88554f4c8347fa99bd6e44b6bd540b82a2f0ae58e804eecf96657",
+      "sha256": "c6606f8cc536a027b8e8830b238b69256a897ce58cf4efc1d7dd7f46b00113d7",
       "size_bytes": 52,
       "hash_note": null
     },
@@ -327,74 +357,74 @@
       "public_path": "/downloads/CANONICAL_SHA256__SSOT_LATEST.txt",
       "bundled": true,
       "source_path": "transports/project_folder_travel/CANONICAL_SHA256__SSOT_LATEST.txt",
-      "sha256": "7a3539cb3b0d44def7cbdb11a4be974e6a2595e461a73bc49eccdca6e9b6eda2",
+      "sha256": "5d5e8e25e39aa3d0a49de681fb092cd51b0b494c7daf854ec290873dbae840c4",
       "size_bytes": 65,
       "hash_note": null
     },
     {
       "id": "canonical_ssot",
-      "label": "SOCIAL_UTILITY SSOT MVP_LANE_1 20260409 R24",
-      "filename": "SOCIAL_UTILITY__SSOT__MVP_LANE_1__20260409__R24.zip",
+      "label": "SOCIAL_UTILITY SSOT MVP_LANE_1 20260409 R28",
+      "filename": "SOCIAL_UTILITY__SSOT__MVP_LANE_1__20260409__R28.zip",
       "public_path": null,
       "bundled": false,
-      "source_path": "raw_downloads/SOCIAL_UTILITY__SSOT__MVP_LANE_1__20260409__R24.zip",
+      "source_path": "raw_downloads/SOCIAL_UTILITY__SSOT__MVP_LANE_1__20260409__R28.zip",
       "sha256": null,
       "size_bytes": null,
       "hash_note": "See bundled selector files or external export receipts for canonical archive hashes."
     },
     {
       "id": "non_bundled_transport",
-      "label": "SOCIAL_UTILITY NON_BUNDLED_ARTIFACTS 20260415 R24_TRANSPORT",
-      "filename": "SOCIAL_UTILITY__NON_BUNDLED_ARTIFACTS__20260415__R24_TRANSPORT.zip",
+      "label": "SOCIAL_UTILITY NON_BUNDLED_ARTIFACTS 20260416 R28_TRANSPORT",
+      "filename": "SOCIAL_UTILITY__NON_BUNDLED_ARTIFACTS__20260416__R28_TRANSPORT.zip",
       "public_path": null,
       "bundled": false,
-      "source_path": "raw_downloads/SOCIAL_UTILITY__NON_BUNDLED_ARTIFACTS__20260415__R24_TRANSPORT.zip",
+      "source_path": "raw_downloads/SOCIAL_UTILITY__NON_BUNDLED_ARTIFACTS__20260416__R28_TRANSPORT.zip",
       "sha256": null,
       "size_bytes": null,
       "hash_note": "See bundled selector files or external export receipts for canonical archive hashes."
     },
     {
       "id": "project_travel",
-      "label": "SOCIAL_UTILITY PROJECT_FOLDER_TRAVEL 20260409 R24",
-      "filename": "SOCIAL_UTILITY__PROJECT_FOLDER_TRAVEL__20260409__R24.zip",
+      "label": "SOCIAL_UTILITY PROJECT_FOLDER_TRAVEL 20260409 R28",
+      "filename": "SOCIAL_UTILITY__PROJECT_FOLDER_TRAVEL__20260409__R28.zip",
       "public_path": null,
       "bundled": false,
-      "source_path": "raw_downloads/SOCIAL_UTILITY__PROJECT_FOLDER_TRAVEL__20260409__R24.zip",
+      "source_path": "raw_downloads/SOCIAL_UTILITY__PROJECT_FOLDER_TRAVEL__20260409__R28.zip",
       "sha256": null,
       "size_bytes": null,
       "hash_note": "See bundled selector files or external export receipts for canonical archive hashes."
     },
     {
       "id": "full_travel",
-      "label": "SOCIAL_UTILITY FULL_PROJECT_TRAVEL 20260409 R24",
-      "filename": "SOCIAL_UTILITY__FULL_PROJECT_TRAVEL__20260409__R24.zip",
+      "label": "SOCIAL_UTILITY FULL_PROJECT_TRAVEL 20260409 R28",
+      "filename": "SOCIAL_UTILITY__FULL_PROJECT_TRAVEL__20260409__R28.zip",
       "public_path": null,
       "bundled": false,
-      "source_path": "raw_downloads/SOCIAL_UTILITY__FULL_PROJECT_TRAVEL__20260409__R24.zip",
+      "source_path": "raw_downloads/SOCIAL_UTILITY__FULL_PROJECT_TRAVEL__20260409__R28.zip",
       "sha256": null,
       "size_bytes": null,
       "hash_note": "See bundled selector files or external export receipts for canonical archive hashes."
     },
     {
       "id": "latest_package_zip",
-      "label": "STRATEGY_RUN_PACKAGE 20260414T232200Z 20260415T003909Z",
-      "filename": "STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T003909Z.zip",
-      "public_path": "/downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T003909Z.zip",
+      "label": "STRATEGY_RUN_PACKAGE 20260414T232200Z 20260416T134500Z",
+      "filename": "STRATEGY_RUN_PACKAGE__20260414T232200Z__20260416T134500Z.zip",
+      "public_path": "/downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260416T134500Z.zip",
       "bundled": true,
-      "source_path": "raw_downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260415T003909Z.zip",
-      "sha256": "3a142ca8e1b504972d750a561433818c0bd0887bb20a9a071552ee9953f33c9e",
-      "size_bytes": 20638,
+      "source_path": "raw_downloads/STRATEGY_RUN_PACKAGE__20260414T232200Z__20260416T134500Z.zip",
+      "sha256": "793ee164fb41c51d69e59d42a4038d4a1a708fcc7ed893bcaea6149a9c55bd65",
+      "size_bytes": 21040,
       "hash_note": null
     },
     {
       "id": "latest_batch_zip",
-      "label": "STRATEGY_RUN_BATCH 20260415T000500Z 20260415T044337Z",
-      "filename": "STRATEGY_RUN_BATCH__20260415T000500Z__20260415T044337Z.zip",
-      "public_path": "/downloads/STRATEGY_RUN_BATCH__20260415T000500Z__20260415T044337Z.zip",
+      "label": "STRATEGY_RUN_BATCH 20260416T134500Z 20260416T134500Z",
+      "filename": "STRATEGY_RUN_BATCH__20260416T134500Z__20260416T134500Z.zip",
+      "public_path": "/downloads/STRATEGY_RUN_BATCH__20260416T134500Z__20260416T134500Z.zip",
       "bundled": true,
-      "source_path": "raw_downloads/STRATEGY_RUN_BATCH__20260415T000500Z__20260415T044337Z.zip",
-      "sha256": "b81fef8032a1f6347a99cbf52dc8f5b376b68c3f7041c306edead5a40c66a7fd",
-      "size_bytes": 69695,
+      "source_path": "raw_downloads/STRATEGY_RUN_BATCH__20260416T134500Z__20260416T134500Z.zip",
+      "sha256": "f0ced121da6651161e6764ca6a98370079ce7824d73ad1cd124512f4a990e215",
+      "size_bytes": 93855,
       "hash_note": null
     }
   ],
