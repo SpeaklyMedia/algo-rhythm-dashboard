@@ -13,10 +13,10 @@ and `BETA_OPERATOR_INTAKE_R36.md`.
 - Hosting: existing Vercel project for `SpeaklyMedia/algo-rhythm-dashboard`
 - Auth: dedicated Algo-Rhythm Clerk instance configured by the Vercel
   `VITE_CLERK_PUBLISHABLE_KEY` environment variable
-- Google OAuth: started by the static `/sign-in` page through Clerk's
-  `oauth_google` strategy and completed by the local `/sso-callback` route.
-  Google must be enabled in the dedicated Algo-Rhythm Clerk instance; the app
-  does not own Google OAuth secrets or callback handlers.
+- Google OAuth: exposed only by Clerk's built-in `<SignIn />` component after
+  Google is enabled for sign-up and sign-in in the dedicated Algo-Rhythm Clerk
+  instance. The app does not call `oauth_google` directly and does not own
+  Google OAuth secrets or callback handlers.
 - Domain: `algo.mrksylvstr.com`
 - Static runtime: bundled `/data/*.json` and `/downloads/*`
 
@@ -39,8 +39,9 @@ ThetaFrame Clerk project or assume `mrksylvstr.com` production Clerk credentials
 are correct for this app.
 
 - Clerk sign-in branding should show Algo-Rhythm, not ThetaFrame.
-- The signed-out `/sign-in` page should expose a `Continue with Google` option
-  before the email/password Clerk form.
+- The signed-out `/sign-in` page should expose Clerk's email/password form.
+- After Google is enabled in Clerk Dashboard, the same built-in Clerk form
+  should expose `Continue with Google`.
 - Vercel should hold only `VITE_CLERK_PUBLISHABLE_KEY` for the frontend UI gate.
 - The publishable key may be `pk_live_...` for production or `pk_test_...` for a
   Clerk development/test instance during supervised beta.
@@ -49,6 +50,13 @@ are correct for this app.
 
 Do not force `VITE_CLERK_PROXY_URL` unless the dedicated Algo-Rhythm Clerk
 configuration explicitly requires it.
+
+To make browser QA fail if Clerk's built-in Google option is missing after
+Dashboard configuration, run signed-out QA with:
+
+```text
+DASHBOARD_QA_EXPECT_CLERK_GOOGLE=1
+```
 
 ## Clerk DNS Records For Algo-Rhythm
 

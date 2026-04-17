@@ -38,6 +38,7 @@ const storageState =
   explicitStorageState ??
   (authMode === "signed-in" && fs.existsSync(defaultStorageState) ? defaultStorageState : undefined);
 const hostResolverRules = process.env.DASHBOARD_QA_HOST_RESOLVER_RULES;
+const expectClerkGoogleOption = /^(1|true|yes)$/i.test(process.env.DASHBOARD_QA_EXPECT_CLERK_GOOGLE ?? "");
 const outputDir =
   process.env.DASHBOARD_QA_OUTPUT_DIR ??
   path.join("test-results", "algo-rhythm-dashboard-browser-qa", new Date().toISOString().replace(/[:.]/g, "-"));
@@ -203,7 +204,12 @@ async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.getByRole("heading", { name: "Sign in to Algo-Rhythm", exact: true }).first().waitFor({ timeout: 15_000 });
   await page.getByText("Clerk UI gate", { exact: false }).first().waitFor({ timeout: 10_000 });
-  await page.getByRole("button", { name: "Continue with Google", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("textbox", { name: "Email address", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByLabel("Password", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Continue", exact: true }).waitFor({ timeout: 10_000 });
+  if (expectClerkGoogleOption) {
+    await page.getByRole("button", { name: "Continue with Google", exact: true }).waitFor({ timeout: 10_000 });
+  }
 
   const dashboardHeadingVisible = await page.getByRole("heading", { name: "Overview", exact: true }).isVisible().catch(() => false);
   if (dashboardHeadingVisible) {
@@ -412,6 +418,10 @@ async function main() {
     storage_state_used: Boolean(storageState),
     storage_state_source:
       storageState === defaultStorageState ? "default-private-path" : storageState ? "explicit-env" : "none",
+    auth_expectations: {
+      email_password_sign_in_required: true,
+      clerk_google_option_required: expectClerkGoogleOption,
+    },
     viewports,
     responsive_checks: {
       document_level_horizontal_overflow: "blocked",
