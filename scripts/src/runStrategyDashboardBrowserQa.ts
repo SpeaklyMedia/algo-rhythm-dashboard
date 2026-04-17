@@ -51,7 +51,7 @@ const routes: RouteCheck[] = [
     requiredText: [
       "Make a posting plan in 5 steps.",
       "Your Progress",
-      "Download plan",
+      "Download your plan.",
       "What this page is for",
       "Use this section to download files you can keep or send.",
     ],
@@ -236,6 +236,22 @@ async function assertPrimaryPageMessaging(page: Page, route: RouteCheck) {
   }
 }
 
+async function waitForVisibleText(page: Page, text: string) {
+  try {
+    await page.waitForFunction(
+      (expected) => {
+        const runtime = globalThis as unknown as { document?: { body?: { innerText?: string } } };
+        return Boolean(runtime.document?.body?.innerText?.toLowerCase().includes(String(expected).toLowerCase()));
+      },
+      text,
+      { timeout: 10_000 },
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Visible text not found: ${text}\n${message}`);
+  }
+}
+
 async function assertNoRequiredDataFailure(page: Page, route: RouteCheck) {
   const blocked = await page.getByText("Dashboard blocked").isVisible().catch(() => false);
   if (blocked) throw new Error(`${route.label} rendered the required-data failure panel.`);
@@ -316,7 +332,7 @@ async function runRouteCheck(page: Page, route: RouteCheck, viewportLabel: strin
   await assertNoRequiredDataFailure(page, route);
 
   for (const text of route.requiredText) {
-    await page.getByText(text, { exact: false }).first().waitFor({ timeout: 10_000 });
+    await waitForVisibleText(page, text);
   }
 
   await assertPrimaryPageMessaging(page, route);
@@ -575,7 +591,7 @@ async function runStrategyWorkspaceCheck(page: Page) {
   await page.goto(urlFor("/drafts"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.getByRole("heading", { name: "Edit Drafts", exact: true }).first().waitFor({ timeout: 10_000 });
-  await page.getByText("Draft style", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByText("Draft style", { exact: true }).first().waitFor({ timeout: 10_000 });
   await page.getByText("Opening idea", { exact: true }).first().waitFor({ timeout: 10_000 });
   await page.getByText("Call to action", { exact: true }).first().waitFor({ timeout: 10_000 });
   await page.getByText("Why this draft may work", { exact: true }).first().waitFor({ timeout: 10_000 });

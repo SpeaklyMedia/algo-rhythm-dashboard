@@ -169,13 +169,15 @@ URLs are known. Do not describe bundled static data as private customer storage.
 Current production target:
 
 - Live app: `https://algo.mrksylvstr.com`
-- Strategy workspace deployment: `dpl_8oHfSXr1oNWnYFy3zUVzKPCTVLiF`
+- Latest production deployment URL:
+  `https://algo-rhythm-dashboard-jeai0bxbq-marks-projects-f03fd1cc.vercel.app`
 - GitHub Actions Vercel deploy restored: workflow run `24566889412`
 - Neurodivergent-friendly onboarding deploy: workflow run `24567687169`
+- Messaging cleanup deploy: workflow run `24570177899` for commit `35c101b`
 - Signed-out QA receipt:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-31-43-506Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T14-25-56-492Z/receipt.json`
 - Signed-in QA receipt:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-34-53-132Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T14-31-17-006Z/receipt.json`
 
 Signed-in QA must continue to verify:
 
