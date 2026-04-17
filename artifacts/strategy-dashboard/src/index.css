@@ -2016,6 +2016,9 @@ html[data-theme="light"] .score-dim__bar {
 }
 
 .field input[type="text"],
+.field input[type="date"],
+.field input[type="time"],
+.field input[type="number"],
 .field select,
 .field textarea {
   width: 100%;
@@ -2036,6 +2039,9 @@ html[data-theme="light"] .score-dim__bar {
 }
 
 .field input[type="text"]:focus,
+.field input[type="date"]:focus,
+.field input[type="time"]:focus,
+.field input[type="number"]:focus,
 .field select:focus,
 .field textarea:focus {
   border-color: var(--accent);
@@ -2047,6 +2053,80 @@ html[data-theme="light"] .score-dim__bar {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.9rem;
+  min-width: 0;
+}
+
+.workspace-action-list,
+.metric-input-grid {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.metric-input-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.workspace-action {
+  display: grid;
+  gap: 0.28rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.workspace-action:hover {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+
+.workspace-action span {
+  font-weight: 750;
+}
+
+.workspace-action small {
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.workspace-tier-select {
+  max-width: 360px;
+  margin-top: 1rem;
+}
+
+.workspace-export-panel {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.05rem;
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: rgba(104, 214, 255, 0.045);
+}
+
+.workspace-export-panel h3 {
+  margin: 0 0 0.45rem;
+}
+
+.workspace-export-panel__ack {
+  margin-top: 0.8rem;
+  max-width: 720px;
+}
+
+.workspace-draft-card,
+.workspace-schedule-card,
+.workspace-result-card {
   min-width: 0;
 }
 
@@ -2162,9 +2242,17 @@ html[data-theme="light"] .check-row {
 }
 
 html[data-theme="light"] .field input[type="text"],
+html[data-theme="light"] .field input[type="date"],
+html[data-theme="light"] .field input[type="time"],
+html[data-theme="light"] .field input[type="number"],
 html[data-theme="light"] .field select,
 html[data-theme="light"] .field textarea {
   background: rgba(255, 255, 255, 0.72);
+}
+
+html[data-theme="light"] .workspace-action,
+html[data-theme="light"] .workspace-export-panel {
+  background: rgba(255, 255, 255, 0.64);
 }
 
 /* ============================================================
@@ -2685,6 +2773,7 @@ html[data-theme="light"] .home-lane-card__num {
   }
 
   .reviewer-task-callout,
+  .workspace-export-panel,
   .reviewer-workspace__header,
   .receipt-actions,
   .section-head {
@@ -2698,6 +2787,10 @@ html[data-theme="light"] .home-lane-card__num {
 
   .choice-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .metric-input-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .issue-row {
@@ -2841,6 +2934,10 @@ html[data-theme="light"] .home-lane-card__num {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .metric-input-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .split-grid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2926,6 +3023,9 @@ html[data-theme="light"] .home-lane-card__num {
 
   .field select,
   .field input[type="text"],
+  .field input[type="date"],
+  .field input[type="time"],
+  .field input[type="number"],
   .field textarea {
     font-size: 16px;
   }

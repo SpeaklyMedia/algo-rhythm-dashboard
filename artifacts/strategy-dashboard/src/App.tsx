@@ -2,28 +2,38 @@
 import { ClerkLoaded, ClerkLoading, ClerkProvider, Show, SignIn, SignUp, UserButton } from '@clerk/react';
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
-const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'handoff'];
+const PAGE_ORDER = ['workspace', 'intake', 'drafts', 'calendar', 'results', 'review'];
 const AUTH_PATHS = ['/sign-in', '/sign-up'];
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-const reviewRedirectUrl = `${basePath || ''}/review`;
+const workspaceRedirectUrl = `${basePath || ''}/workspace`;
 
 const PAGE_PATHS = {
+  workspace: '/workspace',
+  intake: '/intake',
+  drafts: '/drafts',
+  calendar: '/calendar',
+  results: '/results',
+  review: '/review',
   overview: '/',
   strategy: '/strategy',
-  review: '/review',
-  package: '/package',
-  batch: '/batch',
-  handoff: '/handoff',
+  adminPackage: '/admin/package',
+  adminBatch: '/admin/batch',
+  adminHandoff: '/admin/handoff',
 };
 
 const PAGE_DATA_KEYS = {
+  workspace: ['content_object', 'four_tier_adaptations', 'experiment_plan', 'campaign_ledger_seed'],
+  intake: ['content_object'],
+  drafts: ['content_object', 'four_tier_adaptations'],
+  calendar: ['content_object', 'experiment_plan'],
+  results: ['content_object', 'experiment_plan'],
   overview: ['latest_run', 'latest_review', 'latest_package', 'latest_batch'],
   strategy: ['content_object', 'trend_shortlist', 'platform_signal_selection', 'viability_scorecard', 'four_tier_adaptations', 'experiment_plan', 'campaign_ledger_seed'],
   review: ['promotion_recommendation', 'run_comparison_scorecard', 'run_review_index'],
-  package: ['latest_package', 'package_manifest'],
-  batch: ['latest_batch', 'batch_manifest'],
-  handoff: [],
+  adminPackage: ['latest_package', 'package_manifest'],
+  adminBatch: ['latest_batch', 'batch_manifest'],
+  adminHandoff: [],
 };
 
 const REVIEW_DECISIONS = [
@@ -77,9 +87,24 @@ function pageHasData(pageId, datasets) {
 
 function pageFromPathname(pathname) {
   const normalized = String(pathname || '/').replace(/\/+$/, '') || '/';
-  if (normalized === '/') return 'overview';
-  const pageId = normalized.slice(1);
-  return PAGE_ORDER.includes(pageId) ? pageId : 'overview';
+  if (normalized === '/') return 'workspace';
+  const routeMap = {
+    '/workspace': 'workspace',
+    '/intake': 'intake',
+    '/drafts': 'drafts',
+    '/calendar': 'calendar',
+    '/results': 'results',
+    '/review': 'review',
+    '/overview': 'overview',
+    '/strategy': 'strategy',
+    '/package': 'adminPackage',
+    '/batch': 'adminBatch',
+    '/handoff': 'adminHandoff',
+    '/admin/package': 'adminPackage',
+    '/admin/batch': 'adminBatch',
+    '/admin/handoff': 'adminHandoff',
+  };
+  return routeMap[normalized] || 'workspace';
 }
 
 function stripBase(path) {
@@ -121,9 +146,39 @@ const STRIP_ICONS = {
 };
 
 const PAGE_DISPLAY = {
+  workspace: {
+    label: 'Workspace',
+    shortLabel: 'Home',
+    subtitle: 'Campaign summary · next actions · local export status',
+    kicker: 'Strategy workspace',
+  },
+  intake: {
+    label: 'Intake',
+    shortLabel: 'Intake',
+    subtitle: 'Source idea · audience · offer · goals · tone and constraints',
+    kicker: 'Project setup',
+  },
+  drafts: {
+    label: 'Drafts',
+    shortLabel: 'Drafts',
+    subtitle: 'Platform-specific draft directions · copyable assets · notes',
+    kicker: 'Posting assets',
+  },
+  calendar: {
+    label: 'Calendar',
+    shortLabel: 'Calendar',
+    subtitle: 'Manual posting schedule · platform status · schedule notes',
+    kicker: 'Posting schedule',
+  },
+  results: {
+    label: 'Results',
+    shortLabel: 'Results',
+    subtitle: 'Manual outcome logging · qualitative notes · experiment learning',
+    kicker: 'Results notes',
+  },
   overview: {
-    label: 'Overview',
-    shortLabel: 'Overview',
+    label: 'Internal Overview',
+    shortLabel: 'Internal',
     subtitle: 'Promoted alias · review mode · recommendation · package and batch pointers',
     kicker: 'Lane B delivery posture',
   },
@@ -139,19 +194,19 @@ const PAGE_DISPLAY = {
     subtitle: 'Promotion recommendation · cohort shape · ranked runs or single refresh snapshot',
     kicker: 'Review recommendation',
   },
-  package: {
+  adminPackage: {
     label: 'Package',
     shortLabel: 'Package',
     subtitle: 'Latest package facts · manifest integrity · selected signal cards by property',
     kicker: 'Latest package',
   },
-  batch: {
+  adminBatch: {
     label: 'Batch',
     shortLabel: 'Batch',
     subtitle: 'Single-run batch or reviewed cohort · package modes · card counts · SHA verification',
     kicker: 'Latest batch',
   },
-  handoff: {
+  adminHandoff: {
     label: 'Handoff',
     shortLabel: 'Handoff',
     subtitle: 'Canonical downloads · contract metadata · design authority · handoff packet',
@@ -211,6 +266,207 @@ function sameStringSet(a = [], b = []) {
   if (a.length !== b.length) return false;
   const set = new Set(a);
   return b.every((item) => set.has(item));
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function getWorkspaceSourceId(datasets = {}) {
+  return datasets.content_object?.content_id
+    || datasets.content_object?.brief_ref
+    || datasets.latest_review?.recommended_run_id
+    || 'static_strategy_sample';
+}
+
+function getAdaptationTiers(datasets = {}) {
+  const adaptations = datasets.four_tier_adaptations;
+  if (Array.isArray(adaptations?.tiers)) return adaptations.tiers;
+  if (Array.isArray(adaptations)) return adaptations;
+  return [];
+}
+
+function getDefaultWorkspaceTier(datasets = {}) {
+  const tiers = getAdaptationTiers(datasets);
+  return tiers.find((tier) => tier.tier_id === 'T3_NATIVE') || tiers[0] || null;
+}
+
+function getTierById(datasets = {}, tierId) {
+  const tiers = getAdaptationTiers(datasets);
+  return tiers.find((tier) => tier.tier_id === tierId) || getDefaultWorkspaceTier(datasets);
+}
+
+function buildDraftCopy(content, platformPlan) {
+  const parts = [
+    platformPlan?.hook_direction,
+    content?.source_summary || content?.core_thesis,
+    platformPlan?.cta || content?.primary_cta,
+  ].filter(Boolean);
+  return parts.join('\n\n');
+}
+
+function buildPlatformDrafts(content, tier) {
+  return asArray(tier?.per_platform).map((platformPlan) => ({
+    platform: platformPlan.platform,
+    tier_id: tier?.tier_id || 'custom',
+    hook_direction: platformPlan.hook_direction || '',
+    format_shift: platformPlan.format_shift || '',
+    cta: platformPlan.cta || content?.primary_cta || '',
+    supporting_card_ids: asArray(platformPlan.supporting_card_ids),
+    draft_copy: buildDraftCopy(content, platformPlan),
+    notes: '',
+  }));
+}
+
+function buildCalendarItems(platforms) {
+  return asArray(platforms).map((platform, index) => ({
+    id: `calendar_${String(platform).toLowerCase().replace(/[^a-z0-9]+/g, '_') || index}`,
+    platform,
+    date: '',
+    time: '',
+    status: 'planned',
+    notes: '',
+  }));
+}
+
+function buildResultLogs(platforms) {
+  return asArray(platforms).map((platform, index) => ({
+    id: `result_${String(platform).toLowerCase().replace(/[^a-z0-9]+/g, '_') || index}`,
+    platform,
+    impressions: '',
+    saves: '',
+    clicks: '',
+    replies_comments: '',
+    reposts_shares: '',
+    conversions: '',
+    qualitative_notes: '',
+  }));
+}
+
+function buildInitialWorkspaceDraft(index = {}, datasets = {}) {
+  const content = datasets.content_object || {};
+  const tier = getDefaultWorkspaceTier(datasets);
+  const platforms = asArray(content.target_platforms);
+  const sourceId = getWorkspaceSourceId(datasets);
+
+  return {
+    workspace_id: `algo_strategy_workspace_${sourceId}`,
+    source_content_id: sourceId,
+    project: {
+      name: content.title || 'Untitled social strategy',
+      status: 'planning',
+    },
+    intake: {
+      source_idea: content.source_text || content.source_summary || '',
+      audience: content.audience || '',
+      offer: content.offer || '',
+      goal: content.operator_goal || '',
+      primary_cta: content.primary_cta || '',
+      tone_notes: content.brand_voice || '',
+      constraints: asArray(content.constraints).join('\n'),
+      target_platforms: platforms,
+    },
+    selected_draft_tier: tier?.tier_id || '',
+    platform_drafts: buildPlatformDrafts(content, tier),
+    calendar_items: buildCalendarItems(platforms),
+    result_logs: buildResultLogs(platforms),
+    export_status: {
+      acknowledged: false,
+      last_exported_at: null,
+    },
+    generated_from: {
+      dashboard_generated_at: index.generated_at || null,
+      review_id: datasets.latest_review?.review_id || null,
+      recommended_run_id: datasets.latest_review?.recommended_run_id || null,
+    },
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function mergeWorkspaceDraft(initial, saved) {
+  const savedDraft = saved && typeof saved === 'object' ? saved : {};
+  return {
+    ...initial,
+    ...savedDraft,
+    project: { ...initial.project, ...(savedDraft.project || {}) },
+    intake: { ...initial.intake, ...(savedDraft.intake || {}) },
+    export_status: { ...initial.export_status, ...(savedDraft.export_status || {}) },
+    platform_drafts: Array.isArray(savedDraft.platform_drafts) ? savedDraft.platform_drafts : initial.platform_drafts,
+    calendar_items: Array.isArray(savedDraft.calendar_items) ? savedDraft.calendar_items : initial.calendar_items,
+    result_logs: Array.isArray(savedDraft.result_logs) ? savedDraft.result_logs : initial.result_logs,
+  };
+}
+
+function buildStrategyWorkspaceReceipt(draft) {
+  return {
+    schema_version: 'strategy_workspace_v1',
+    exported_at: new Date().toISOString(),
+    app_url: getAppUrl(),
+    ...draft,
+    export_status: {
+      ...(draft.export_status || {}),
+      acknowledged: Boolean(draft.export_status?.acknowledged),
+      last_exported_at: new Date().toISOString(),
+    },
+  };
+}
+
+function buildStrategyWorkspaceMarkdown(receipt, datasets = {}) {
+  const experiment = datasets.experiment_plan || {};
+  const hypotheses = asArray(experiment.hypotheses);
+  const draftRows = asArray(receipt.platform_drafts).map((draft) => `### ${draft.platform}
+
+**Format:** ${draft.format_shift || 'Manual post'}
+
+**Draft**
+
+${draft.draft_copy || 'No draft copy recorded.'}
+
+**Notes:** ${draft.notes || 'None'}
+`).join('\n');
+  const calendarRows = asArray(receipt.calendar_items).map((item) => (
+    `- ${item.platform}: ${item.date || 'date TBD'} ${item.time || ''} · ${item.status || 'planned'} · ${item.notes || 'No notes'}`
+  )).join('\n') || '- No calendar items recorded.';
+  const resultRows = asArray(receipt.result_logs).map((item) => (
+    `- ${item.platform}: impressions ${item.impressions || 'n/a'}, saves ${item.saves || 'n/a'}, clicks ${item.clicks || 'n/a'}, replies/comments ${item.replies_comments || 'n/a'}, reposts/shares ${item.reposts_shares || 'n/a'}, conversions ${item.conversions || 'n/a'}; notes: ${item.qualitative_notes || 'None'}`
+  )).join('\n') || '- No results recorded.';
+  const hypothesisRows = hypotheses.map((item) => `- ${item.platform}: ${item.hypothesis}`).join('\n') || '- No experiment hypotheses available.';
+
+  return `# Algo-Rhythm Strategy Workspace Export
+
+- Schema: \`${receipt.schema_version}\`
+- Exported at: \`${receipt.exported_at}\`
+- Workspace: \`${receipt.workspace_id}\`
+- Project: ${receipt.project?.name || 'Untitled social strategy'}
+- Status: ${receipt.project?.status || 'planning'}
+
+## Intake
+
+- Source idea: ${receipt.intake?.source_idea || 'Unavailable'}
+- Audience: ${receipt.intake?.audience || 'Unavailable'}
+- Offer: ${receipt.intake?.offer || 'None recorded'}
+- Goal: ${receipt.intake?.goal || 'Unavailable'}
+- Primary CTA: ${receipt.intake?.primary_cta || 'Unavailable'}
+- Tone notes: ${receipt.intake?.tone_notes || 'Unavailable'}
+- Platforms: ${(receipt.intake?.target_platforms || []).join(', ') || 'Unavailable'}
+- Constraints: ${receipt.intake?.constraints || 'None recorded'}
+
+## Platform Drafts
+
+${draftRows || 'No platform drafts recorded.'}
+
+## Posting Schedule
+
+${calendarRows}
+
+## Manual Test Plan
+
+${hypothesisRows}
+
+## Results Notes
+
+${resultRows}
+`;
 }
 
 function statusTone(value) {
@@ -1178,6 +1434,535 @@ function StrategyPage({ datasets }) {
   );
 }
 
+function useWorkspaceDraft(index, datasets) {
+  const sourceId = getWorkspaceSourceId(datasets);
+  const storageKey = `algo-rhythm:strategy-workspace:v1:${sourceId}`;
+  const [draft, setDraft] = useState(() => {
+    const initial = buildInitialWorkspaceDraft(index, datasets);
+    if (typeof window === 'undefined') return initial;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return saved ? mergeWorkspaceDraft(initial, JSON.parse(saved)) : initial;
+    } catch {
+      return initial;
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+    } catch {}
+  }, [draft, storageKey]);
+
+  function updateProject(field, value) {
+    setDraft((current) => ({
+      ...current,
+      project: { ...current.project, [field]: value },
+      updated_at: new Date().toISOString(),
+    }));
+  }
+
+  function updateIntake(field, value) {
+    setDraft((current) => ({
+      ...current,
+      intake: { ...current.intake, [field]: value },
+      updated_at: new Date().toISOString(),
+    }));
+  }
+
+  function updatePlatformDraft(platform, field, value) {
+    setDraft((current) => ({
+      ...current,
+      platform_drafts: current.platform_drafts.map((item) => (
+        item.platform === platform ? { ...item, [field]: value } : item
+      )),
+      updated_at: new Date().toISOString(),
+    }));
+  }
+
+  function updateCalendarItem(id, field, value) {
+    setDraft((current) => ({
+      ...current,
+      calendar_items: current.calendar_items.map((item) => (
+        item.id === id ? { ...item, [field]: value } : item
+      )),
+      updated_at: new Date().toISOString(),
+    }));
+  }
+
+  function updateResultLog(id, field, value) {
+    setDraft((current) => ({
+      ...current,
+      result_logs: current.result_logs.map((item) => (
+        item.id === id ? { ...item, [field]: value } : item
+      )),
+      updated_at: new Date().toISOString(),
+    }));
+  }
+
+  function updateExportAcknowledgement(value) {
+    setDraft((current) => ({
+      ...current,
+      export_status: { ...current.export_status, acknowledged: value },
+      updated_at: new Date().toISOString(),
+    }));
+  }
+
+  function selectDraftTier(tierId) {
+    const tier = getTierById(datasets, tierId);
+    const content = datasets.content_object || {};
+    setDraft((current) => ({
+      ...current,
+      selected_draft_tier: tier?.tier_id || tierId,
+      platform_drafts: buildPlatformDrafts(content, tier).map((nextDraft) => {
+        const existing = current.platform_drafts.find((item) => item.platform === nextDraft.platform);
+        return existing
+          ? { ...nextDraft, notes: existing.notes || '', draft_copy: existing.draft_copy || nextDraft.draft_copy }
+          : nextDraft;
+      }),
+      updated_at: new Date().toISOString(),
+    }));
+  }
+
+  function resetWorkspace() {
+    const initial = buildInitialWorkspaceDraft(index, datasets);
+    if (typeof window !== 'undefined') {
+      try { localStorage.removeItem(storageKey); } catch {}
+    }
+    setDraft(initial);
+  }
+
+  function recordExport() {
+    setDraft((current) => ({
+      ...current,
+      export_status: { ...current.export_status, last_exported_at: new Date().toISOString() },
+      updated_at: new Date().toISOString(),
+    }));
+  }
+
+  function downloadWorkspaceJson() {
+    if (!draft.export_status?.acknowledged) return;
+    const receipt = buildStrategyWorkspaceReceipt(draft);
+    const filename = `ALGO_STRATEGY_WORKSPACE__${safeFilenamePart(draft.source_content_id)}.json`;
+    downloadTextFile(filename, `${JSON.stringify(receipt, null, 2)}\n`, 'application/json');
+    recordExport();
+  }
+
+  function downloadWorkspaceMarkdown() {
+    if (!draft.export_status?.acknowledged) return;
+    const receipt = buildStrategyWorkspaceReceipt(draft);
+    const filename = `ALGO_STRATEGY_WORKSPACE__${safeFilenamePart(draft.source_content_id)}.md`;
+    downloadTextFile(filename, buildStrategyWorkspaceMarkdown(receipt, datasets), 'text/markdown');
+    recordExport();
+  }
+
+  return {
+    draft,
+    storageKey,
+    updateProject,
+    updateIntake,
+    updatePlatformDraft,
+    updateCalendarItem,
+    updateResultLog,
+    updateExportAcknowledgement,
+    selectDraftTier,
+    resetWorkspace,
+    downloadWorkspaceJson,
+    downloadWorkspaceMarkdown,
+  };
+}
+
+function WorkspaceExportPanel({ workspace }) {
+  const canExport = Boolean(workspace.draft.export_status?.acknowledged);
+  return (
+    <section className="workspace-export-panel" aria-label="Strategy export">
+      <div>
+        <p className="panel-kicker">Local export</p>
+        <h3>Download the plan when it is ready to share or use.</h3>
+        <p className="muted">Exports are local files only. Nothing is posted, submitted, or saved to a server.</p>
+        <label className="check-row workspace-export-panel__ack">
+          <input
+            type="checkbox"
+            checked={canExport}
+            onChange={(event) => workspace.updateExportAcknowledgement(event.target.checked)}
+          />
+          <span>I understand this export is local-only and I am responsible for using or sharing it manually.</span>
+        </label>
+      </div>
+      <div className="reviewer-workspace__actions">
+        <button type="button" className="btn btn-primary" onClick={workspace.downloadWorkspaceJson} disabled={!canExport}>
+          Download strategy JSON
+        </button>
+        <button type="button" className="btn btn-outline" onClick={workspace.downloadWorkspaceMarkdown} disabled={!canExport}>
+          Download strategy Markdown
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function WorkspaceTaskCallout({ activePage, onNavigate }) {
+  return (
+    <section className="reviewer-task-callout workspace-task-callout" aria-label="Workspace task">
+      <div>
+        <p className="panel-kicker">Strategy workspace</p>
+        <h3>Turn the source idea into a manual posting plan.</h3>
+        <p>
+          Fill the intake, tune platform drafts, schedule posts, log results, then export a local plan.
+          This app does not post, connect social accounts, submit feedback, or store private customer data on a server.
+        </p>
+      </div>
+      {activePage !== 'workspace' ? (
+        <button type="button" className="btn btn-primary" onClick={() => onNavigate('workspace')}>
+          Open workspace home
+        </button>
+      ) : (
+        <StatusBadge tone="good">workspace active</StatusBadge>
+      )}
+    </section>
+  );
+}
+
+function WorkspacePage({ datasets, workspace, onNavigate }) {
+  const draft = workspace.draft;
+  const platforms = asArray(draft.intake?.target_platforms);
+  const filledSchedule = asArray(draft.calendar_items).filter((item) => item.date || item.time || item.notes).length;
+  const resultCount = asArray(draft.result_logs).filter((item) => (
+    item.impressions || item.saves || item.clicks || item.replies_comments || item.reposts_shares || item.conversions || item.qualitative_notes
+  )).length;
+  const content = datasets.content_object || {};
+
+  return (
+    <div className="page-grid">
+      <section className="panel span-2 hero-panel workspace-hero">
+        <p className="panel-kicker">Workspace home</p>
+        <h2>Build a usable social posting plan.</h2>
+        <p className="lede">
+          Start with one source idea, adapt it for each platform, schedule a manual test, and export the plan.
+          The current seed is “{draft.project?.name || content.title || 'Untitled strategy'}”.
+        </p>
+        <div className="stat-row">
+          <div className="stat-item stat-item--promoted">
+            <span className="stat-chip stat-chip--promoted">project</span>
+            <code className="stat-value">{draft.project?.status || 'planning'}</code>
+            <span className="stat-detail">{draft.project?.name || 'Untitled strategy'}</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat-item">
+            <span className="stat-chip">platforms</span>
+            <code className="stat-value">{platforms.length}</code>
+            <span className="stat-detail">{platforms.join(', ') || 'No platforms selected'}</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat-item stat-item--pick">
+            <span className="stat-chip stat-chip--pick">draft tier</span>
+            <code className="stat-value">{draft.selected_draft_tier || 'custom'}</code>
+            <span className="stat-detail">Editable platform drafts</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat-item">
+            <span className="stat-chip">export</span>
+            <code className="stat-value">{draft.export_status?.acknowledged ? 'ready' : 'not ready'}</code>
+            <span className="stat-detail">{draft.export_status?.last_exported_at ? `last ${formatDateShort(draft.export_status.last_exported_at)}` : 'No export yet'}</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <h2>Next actions</h2>
+        <div className="workspace-action-list">
+          {[
+            ['intake', 'Confirm the source idea and target audience.'],
+            ['drafts', 'Tune platform drafts and copy the assets you need.'],
+            ['calendar', 'Schedule the manual posting test.'],
+            ['results', 'Log outcomes after posts go live.'],
+          ].map(([pageId, detail]) => (
+            <button key={pageId} type="button" className="workspace-action" onClick={() => onNavigate(pageId)}>
+              <span>{PAGE_DISPLAY[pageId].label}</span>
+              <small>{detail}</small>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel">
+        <h2>Campaign summary</h2>
+        <KeyValueTable
+          rows={[
+            { label: 'Audience', value: draft.intake?.audience || 'Unavailable' },
+            { label: 'Goal', value: draft.intake?.goal || 'Unavailable' },
+            { label: 'CTA', value: draft.intake?.primary_cta || 'Unavailable' },
+            { label: 'Schedule items', value: `${filledSchedule}/${draft.calendar_items.length}` },
+            { label: 'Result logs', value: `${resultCount}/${draft.result_logs.length}` },
+          ]}
+        />
+      </section>
+
+      <section className="panel span-2">
+        <h2>Platform plan</h2>
+        <div className="split-grid">
+          {asArray(draft.platform_drafts).map((item) => (
+            <article className="surface-card" key={item.platform}>
+              <div className="surface-heading">
+                <h3>{item.platform}</h3>
+                <StatusBadge tone="good">manual draft</StatusBadge>
+              </div>
+              <p>{item.format_shift || 'Manual platform rewrite.'}</p>
+              <p className="muted">{item.cta || draft.intake?.primary_cta || 'No CTA recorded.'}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <WorkspaceExportPanel workspace={workspace} />
+    </div>
+  );
+}
+
+function IntakePage({ datasets, workspace }) {
+  const draft = workspace.draft;
+  const availablePlatforms = asArray(datasets.content_object?.target_platforms);
+
+  function togglePlatform(platform, checked) {
+    const current = new Set(asArray(draft.intake.target_platforms));
+    if (checked) current.add(platform);
+    else current.delete(platform);
+    workspace.updateIntake('target_platforms', Array.from(current));
+  }
+
+  return (
+    <div className="page-grid">
+      <section className="panel span-2">
+        <p className="panel-kicker">Project intake</p>
+        <h2>Describe the campaign in plain language.</h2>
+        <p className="lede">These fields only update local browser state and exported files.</p>
+      </section>
+
+      <section className="panel span-2">
+        <div className="form-row">
+          <label className="field">
+            <span>Project name</span>
+            <input type="text" value={draft.project.name} onChange={(event) => workspace.updateProject('name', event.target.value)} />
+          </label>
+          <label className="field">
+            <span>Status</span>
+            <select value={draft.project.status} onChange={(event) => workspace.updateProject('status', event.target.value)}>
+              <option value="planning">planning</option>
+              <option value="ready_to_post">ready to post</option>
+              <option value="testing">testing</option>
+              <option value="complete">complete</option>
+            </select>
+          </label>
+        </div>
+
+        <label className="field">
+          <span>Source idea</span>
+          <textarea rows={6} value={draft.intake.source_idea} onChange={(event) => workspace.updateIntake('source_idea', event.target.value)} />
+        </label>
+
+        <div className="form-row">
+          <label className="field">
+            <span>Audience</span>
+            <input type="text" value={draft.intake.audience} onChange={(event) => workspace.updateIntake('audience', event.target.value)} />
+          </label>
+          <label className="field">
+            <span>Offer</span>
+            <input type="text" value={draft.intake.offer} onChange={(event) => workspace.updateIntake('offer', event.target.value)} placeholder="Product, service, lead magnet, or no offer yet" />
+          </label>
+        </div>
+
+        <label className="field">
+          <span>Goal</span>
+          <textarea rows={3} value={draft.intake.goal} onChange={(event) => workspace.updateIntake('goal', event.target.value)} />
+        </label>
+
+        <div className="form-row">
+          <label className="field">
+            <span>Primary CTA</span>
+            <input type="text" value={draft.intake.primary_cta} onChange={(event) => workspace.updateIntake('primary_cta', event.target.value)} />
+          </label>
+          <label className="field">
+            <span>Tone notes</span>
+            <input type="text" value={draft.intake.tone_notes} onChange={(event) => workspace.updateIntake('tone_notes', event.target.value)} />
+          </label>
+        </div>
+
+        <div className="field">
+          <span>Target platforms</span>
+          <div className="checklist-grid">
+            {availablePlatforms.map((platform) => (
+              <label className="check-row" key={platform}>
+                <input
+                  type="checkbox"
+                  checked={asArray(draft.intake.target_platforms).includes(platform)}
+                  onChange={(event) => togglePlatform(platform, event.target.checked)}
+                />
+                <span>{platform}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <label className="field">
+          <span>Constraints</span>
+          <textarea rows={5} value={draft.intake.constraints} onChange={(event) => workspace.updateIntake('constraints', event.target.value)} />
+          <small>Keep this manual and evidence-first. Do not add posting automation or unsupported platform claims.</small>
+        </label>
+      </section>
+    </div>
+  );
+}
+
+function DraftsPage({ datasets, workspace }) {
+  const draft = workspace.draft;
+  const tiers = getAdaptationTiers(datasets);
+
+  return (
+    <div className="page-grid">
+      <section className="panel span-2">
+        <p className="panel-kicker">Platform drafts</p>
+        <h2>Adapt the idea for each selected surface.</h2>
+        <p className="lede">Use the seeded strategy as a starting point, then edit the copy and notes before exporting.</p>
+        <label className="field workspace-tier-select">
+          <span>Draft tier</span>
+          <select value={draft.selected_draft_tier} onChange={(event) => workspace.selectDraftTier(event.target.value)}>
+            {tiers.map((tier) => (
+              <option key={tier.tier_id} value={tier.tier_id}>{tier.tier_label || tier.tier_id}</option>
+            ))}
+          </select>
+        </label>
+      </section>
+
+      {asArray(draft.platform_drafts).map((item) => (
+        <section className="panel workspace-draft-card" key={item.platform}>
+          <div className="surface-heading">
+            <h2>{item.platform}</h2>
+            <CopyButton value={item.draft_copy || ''} />
+          </div>
+          <p className="muted">{item.format_shift || 'Manual platform rewrite.'}</p>
+          <label className="field">
+            <span>Draft copy</span>
+            <textarea rows={8} value={item.draft_copy} onChange={(event) => workspace.updatePlatformDraft(item.platform, 'draft_copy', event.target.value)} />
+          </label>
+          <label className="field">
+            <span>Draft notes</span>
+            <textarea rows={3} value={item.notes} onChange={(event) => workspace.updatePlatformDraft(item.platform, 'notes', event.target.value)} placeholder="Creative direction, asset needs, caption notes, or revision ideas" />
+          </label>
+          <KeyValueTable
+            rows={[
+              { label: 'Hook direction', value: item.hook_direction || 'Unavailable' },
+              { label: 'CTA', value: item.cta || 'Unavailable' },
+              { label: 'Signal cards', value: asArray(item.supporting_card_ids).join(', ') || 'Unavailable' },
+            ]}
+          />
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function CalendarPage({ workspace }) {
+  const draft = workspace.draft;
+  return (
+    <div className="page-grid">
+      <section className="panel span-2">
+        <p className="panel-kicker">Posting schedule</p>
+        <h2>Plan the manual test window.</h2>
+        <p className="lede">This schedule is for operator use only. It does not connect to social platforms or publish anything.</p>
+      </section>
+
+      {asArray(draft.calendar_items).map((item) => (
+        <section className="panel workspace-schedule-card" key={item.id}>
+          <div className="surface-heading">
+            <h2>{item.platform}</h2>
+            <StatusBadge tone={item.status === 'posted' ? 'good' : item.status === 'skipped' ? 'bad' : 'warn'}>{item.status}</StatusBadge>
+          </div>
+          <div className="form-row">
+            <label className="field">
+              <span>Date</span>
+              <input type="date" value={item.date} onChange={(event) => workspace.updateCalendarItem(item.id, 'date', event.target.value)} />
+            </label>
+            <label className="field">
+              <span>Time</span>
+              <input type="time" value={item.time} onChange={(event) => workspace.updateCalendarItem(item.id, 'time', event.target.value)} />
+            </label>
+          </div>
+          <label className="field">
+            <span>Status</span>
+            <select value={item.status} onChange={(event) => workspace.updateCalendarItem(item.id, 'status', event.target.value)}>
+              <option value="planned">planned</option>
+              <option value="posted">posted</option>
+              <option value="skipped">skipped</option>
+              <option value="needs_revision">needs revision</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>Schedule notes</span>
+            <textarea rows={3} value={item.notes} onChange={(event) => workspace.updateCalendarItem(item.id, 'notes', event.target.value)} />
+          </label>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function ResultsPage({ datasets, workspace }) {
+  const hypotheses = asArray(datasets.experiment_plan?.hypotheses);
+  return (
+    <div className="page-grid">
+      <section className="panel span-2">
+        <p className="panel-kicker">Results notes</p>
+        <h2>Log outcomes after posting manually.</h2>
+        <p className="lede">Capture enough signal to decide whether to repeat, revise, or stop the campaign.</p>
+      </section>
+
+      <section className="panel span-2">
+        <h2>Manual test plan</h2>
+        <div className="split-grid">
+          {hypotheses.map((item) => (
+            <article className="surface-card" key={item.platform}>
+              <div className="surface-heading">
+                <h3>{item.platform}</h3>
+                <StatusBadge tone="warn">hypothesis</StatusBadge>
+              </div>
+              <p>{item.hypothesis}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {asArray(workspace.draft.result_logs).map((item) => (
+        <section className="panel workspace-result-card" key={item.id}>
+          <div className="surface-heading">
+            <h2>{item.platform}</h2>
+            <StatusBadge tone="neutral">manual log</StatusBadge>
+          </div>
+          <div className="metric-input-grid">
+            {[
+              ['impressions', 'Impressions'],
+              ['saves', 'Saves'],
+              ['clicks', 'Clicks'],
+              ['replies_comments', 'Replies/comments'],
+              ['reposts_shares', 'Reposts/shares'],
+              ['conversions', 'Conversions'],
+            ].map(([field, label]) => (
+              <label className="field" key={field}>
+                <span>{label}</span>
+                <input type="number" min="0" inputMode="numeric" value={item[field]} onChange={(event) => workspace.updateResultLog(item.id, field, event.target.value)} />
+              </label>
+            ))}
+          </div>
+          <label className="field">
+            <span>Qualitative notes</span>
+            <textarea rows={4} value={item.qualitative_notes} onChange={(event) => workspace.updateResultLog(item.id, 'qualitative_notes', event.target.value)} />
+          </label>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 function useReviewerDraft(context) {
   const storageKey = `algo-rhythm:reviewer-session:v1:${context.review_id || 'unversioned'}`;
   const [draft, setDraft] = useState(() => {
@@ -1997,48 +2782,14 @@ function ReviewerTaskCallout({ activePage, onNavigate }) {
 
 function App() {
   const { loading, fatalError, index, datasets, optionalErrors } = useDashboardData();
-  const [activePage, setActivePage] = useState(currentPageFromLocation);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 861px)');
-    const handler = (e) => { if (e.matches) setIsSidebarOpen(false); };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-
-  useEffect(() => {
-    const handler = () => setActivePage(currentPageFromLocation());
-    window.addEventListener('popstate', handler);
-    return () => window.removeEventListener('popstate', handler);
-  }, []);
-
-  const pageDefinitions = useMemo(() => {
-    if (!index?.navigation) return [];
-    return PAGE_ORDER.map((id) => index.navigation.find((page) => page.id === id)).filter(Boolean);
-  }, [index]);
-
-  useEffect(() => {
-    if (!pageDefinitions.length) return;
-    if (!pageDefinitions.some((page) => page.id === activePage)) {
-      setActivePage(pageDefinitions[0]?.id || 'overview');
-    }
-  }, [activePage, pageDefinitions]);
-
-  function handleNavigate(pageId) {
-    setActivePage(pageId);
-    setIsSidebarOpen(false);
-    const nextPath = PAGE_PATHS[pageId] || '/';
-    pushAppPath(nextPath);
-  }
 
   if (loading) {
     return (
       <div className="shell centered">
         <div className="loading-panel">
           <p className="eyebrow">Algo-Rhythm</p>
-          <h1>Loading review dashboard…</h1>
-          <p>Reading static seeded data from the bundled handoff surface.</p>
+          <h1>Loading strategy workspace…</h1>
+          <p>Reading static seeded data from the bundled strategy snapshot.</p>
         </div>
       </div>
     );
@@ -2056,28 +2807,82 @@ function App() {
     );
   }
 
+  return <DashboardShell index={index} datasets={datasets} optionalErrors={optionalErrors} />;
+}
+
+function DashboardShell({ index, datasets, optionalErrors }) {
+  const [activePage, setActivePage] = useState(currentPageFromLocation);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const workspace = useWorkspaceDraft(index, datasets);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 861px)');
+    const handler = (e) => { if (e.matches) setIsSidebarOpen(false); };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setActivePage(currentPageFromLocation());
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []);
+
+  const pageDefinitions = useMemo(() => (
+    PAGE_ORDER.map((id) => ({
+      id,
+      label: PAGE_DISPLAY[id]?.label || id,
+      subtitle: PAGE_DISPLAY[id]?.subtitle || '',
+    }))
+  ), []);
+
+  useEffect(() => {
+    const validPages = new Set([...PAGE_ORDER, 'overview', 'strategy', 'adminPackage', 'adminBatch', 'adminHandoff']);
+    if (!validPages.has(activePage)) {
+      setActivePage('workspace');
+    }
+  }, [activePage]);
+
+  function handleNavigate(pageId) {
+    setActivePage(pageId);
+    setIsSidebarOpen(false);
+    const nextPath = PAGE_PATHS[pageId] || '/workspace';
+    pushAppPath(nextPath);
+  }
+
   const activePageMeta = pageDefinitions.find((page) => page.id === activePage);
-  const pageIndex = pageDefinitions.findIndex((page) => page.id === activePage);
-  const summary = index.summary || {};
+  const pageIndex = Math.max(0, pageDefinitions.findIndex((page) => page.id === activePage));
   const propertyCount = Object.keys(datasets.selected_signal_cards?.platforms || {}).length;
 
-  const displayLabel = PAGE_DISPLAY[activePage]?.label || activePageMeta?.label || 'Dashboard';
+  const displayLabel = PAGE_DISPLAY[activePage]?.label || activePageMeta?.label || 'Workspace';
   const displayKicker = PAGE_DISPLAY[activePage]?.kicker || '';
 
-      const renderPage = () => {
+  const renderPage = () => {
     switch (activePage) {
-      case 'strategy':
-        return <StrategyPage datasets={datasets} />;
+      case 'workspace':
+        return <WorkspacePage datasets={datasets} workspace={workspace} onNavigate={handleNavigate} />;
+      case 'intake':
+        return <IntakePage datasets={datasets} workspace={workspace} />;
+      case 'drafts':
+        return <DraftsPage datasets={datasets} workspace={workspace} />;
+      case 'calendar':
+        return <CalendarPage workspace={workspace} />;
+      case 'results':
+        return <ResultsPage datasets={datasets} workspace={workspace} />;
       case 'review':
         return <ReviewPage index={index} datasets={datasets} />;
-      case 'package':
+      case 'strategy':
+        return <StrategyPage datasets={datasets} />;
+      case 'overview':
+        return <OverviewPage index={index} datasets={datasets} />;
+      case 'adminPackage':
         return <PackagePage index={index} datasets={datasets} />;
-      case 'batch':
+      case 'adminBatch':
         return <BatchPage index={index} datasets={datasets} />;
-      case 'handoff':
+      case 'adminHandoff':
         return <HandoffPage index={index} />;
       default:
-        return <OverviewPage index={index} datasets={datasets} />;
+        return <WorkspacePage datasets={datasets} workspace={workspace} onNavigate={handleNavigate} />;
     }
   };
 
@@ -2087,7 +2892,7 @@ function App() {
         pages={pageDefinitions}
         activePage={activePage}
         onNavigate={handleNavigate}
-        onHome={() => handleNavigate('overview')}
+        onHome={() => handleNavigate('workspace')}
         datasets={datasets}
         onHamburger={() => setIsSidebarOpen((o) => !o)}
       />
@@ -2127,17 +2932,24 @@ function App() {
               <button
                 type="button"
                 className="sidebar-link"
-                onClick={() => handleNavigate('package')}
+                onClick={() => handleNavigate('adminPackage')}
               >
-                {propertyCount} {propertyCount === 1 ? 'property' : 'properties'}
+                Internal package ({propertyCount} {propertyCount === 1 ? 'property' : 'properties'})
               </button>
             )}
             <button
               type="button"
               className="sidebar-link sidebar-link--secondary"
-              onClick={() => handleNavigate('handoff')}
+              onClick={() => handleNavigate('strategy')}
             >
-              Design authority →
+              Internal strategy data
+            </button>
+            <button
+              type="button"
+              className="sidebar-link sidebar-link--secondary"
+              onClick={() => handleNavigate('adminHandoff')}
+            >
+              Admin handoff →
             </button>
           </div>
         </aside>
@@ -2147,45 +2959,45 @@ function App() {
             <div className="rail-cell rail-cell--promoted">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Promoted alias</span>
-                  <span className="rail-label__short">ALIAS</span>
+                  <span className="rail-label__full">Project status</span>
+                  <span className="rail-label__short">STATUS</span>
                 </span>
                 <span className="rail-icon rail-icon--promoted">{STRIP_ICONS.promoted}</span>
               </div>
-              <code className="rail-value rail-value--promoted">{summary.top_level_alias_run_id || '—'}</code>
+              <code className="rail-value rail-value--promoted">{workspace.draft.project?.status || 'planning'}</code>
             </div>
             <div className="rail-divider" />
             <div className="rail-cell">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Latest successful run</span>
-                  <span className="rail-label__short">LATEST</span>
+                  <span className="rail-label__full">Target platforms</span>
+                  <span className="rail-label__short">PLATFORMS</span>
                 </span>
                 <span className="rail-icon">{STRIP_ICONS.latest}</span>
               </div>
-              <code className="rail-value">{summary.latest_successful_run_id || '—'}</code>
+              <code className="rail-value">{asArray(workspace.draft.intake?.target_platforms).length}</code>
             </div>
             <div className="rail-divider" />
             <div className="rail-cell">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Review recommendation</span>
-                  <span className="rail-label__short">PICK</span>
+                  <span className="rail-label__full">Draft tier</span>
+                  <span className="rail-label__short">TIER</span>
                 </span>
                 <span className="rail-icon">{STRIP_ICONS.recommended}</span>
               </div>
-              <code className="rail-value">{summary.latest_review_recommended_run_id || '—'}</code>
+              <code className="rail-value">{workspace.draft.selected_draft_tier || 'custom'}</code>
             </div>
             <div className="rail-divider" />
             <div className="rail-cell">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Latest package</span>
-                  <span className="rail-label__short">PKG</span>
+                  <span className="rail-label__full">Local export</span>
+                  <span className="rail-label__short">EXPORT</span>
                 </span>
                 <span className="rail-icon">{STRIP_ICONS.package}</span>
               </div>
-              <code className="rail-value">{summary.latest_package_run_id || '—'}</code>
+              <code className="rail-value">{workspace.draft.export_status?.acknowledged ? 'ready' : 'draft'}</code>
             </div>
             {propertyCount > 0 && (
               <>
@@ -2210,12 +3022,12 @@ function App() {
                 {pageIndex + 1} / {pageDefinitions.length} · {displayKicker}
               </p>
               <h2 className="page-title">{displayLabel}</h2>
-              <p className="header-note">Bundled JSON snapshot · Operator-triggered refresh · No live API</p>
+              <p className="header-note">Local browser draft · Manual posting workflow · No social account connection</p>
             </div>
             <div className="header-right">
               <div className="header-badges-inline">
                 <StatusBadge tone="good">{index.status || 'PASS'}</StatusBadge>
-                <StatusBadge tone="good">review bound</StatusBadge>
+                <StatusBadge tone="good">local export first</StatusBadge>
                 {Object.keys(optionalErrors).length > 0 && (
                   <StatusBadge tone="warn">Optional gaps</StatusBadge>
                 )}
@@ -2223,7 +3035,7 @@ function App() {
             </div>
           </header>
 
-          <ReviewerTaskCallout activePage={activePage} onNavigate={handleNavigate} />
+          <WorkspaceTaskCallout activePage={activePage} onNavigate={handleNavigate} />
 
           {Object.keys(optionalErrors).length > 0 && (
             <details className="optional-errors">
@@ -2283,10 +3095,10 @@ function AuthBrandPanel({ mode }) {
       </div>
       <div>
         <p className="eyebrow">Algo-Rhythm</p>
-        <h1>{mode === 'sign-up' ? 'Request dashboard access' : 'Sign in to Algo-Rhythm'}</h1>
+        <h1>{mode === 'sign-up' ? 'Request workspace access' : 'Sign in to Algo-Rhythm'}</h1>
         <p>
-          Internal Lane B review dashboard. Clerk protects the operator UI; static JSON and
-          bundled downloads remain file-based snapshots.
+          Social strategy workspace for turning one source idea into a manual posting plan.
+          Clerk protects the UI; static seed data and bundled downloads remain file-based snapshots.
         </p>
       </div>
       <div className="auth-limits">
@@ -2306,7 +3118,7 @@ function SignInPage() {
           routing="path"
           path={`${basePath}/sign-in`}
           signUpUrl={`${basePath}/sign-up`}
-          fallbackRedirectUrl={reviewRedirectUrl}
+          fallbackRedirectUrl={workspaceRedirectUrl}
         />
       </div>
     </main>
@@ -2322,7 +3134,7 @@ function SignUpPage() {
           routing="path"
           path={`${basePath}/sign-up`}
           signInUrl={`${basePath}/sign-in`}
-          fallbackRedirectUrl={reviewRedirectUrl}
+          fallbackRedirectUrl={workspaceRedirectUrl}
         />
       </div>
     </main>
@@ -2331,11 +3143,11 @@ function SignUpPage() {
 
 function SignedInRoute({ routePath }) {
   useEffect(() => {
-    if (isAuthPath(routePath)) pushAppPath('/review', true);
+    if (isAuthPath(routePath)) pushAppPath('/workspace', true);
   }, [routePath]);
 
   if (isAuthPath(routePath)) {
-    return <LoadingShell title="Opening reviewer workspace…" detail="Your Clerk session is active." />;
+    return <LoadingShell title="Opening strategy workspace…" detail="Your Clerk session is active." />;
   }
 
   return <App />;
@@ -2370,8 +3182,8 @@ function AuthenticatedApp() {
       publishableKey={clerkPubKey}
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
-      signInFallbackRedirectUrl={reviewRedirectUrl}
-      signUpFallbackRedirectUrl={reviewRedirectUrl}
+      signInFallbackRedirectUrl={workspaceRedirectUrl}
+      signUpFallbackRedirectUrl={workspaceRedirectUrl}
       routerPush={(to) => pushAppPath(stripBase(to))}
       routerReplace={(to) => pushAppPath(stripBase(to), true)}
     >

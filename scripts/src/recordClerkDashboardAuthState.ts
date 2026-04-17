@@ -48,9 +48,9 @@ async function main() {
     process.stdout.write("Complete login in the browser window. This script will save storage state after the dashboard loads.\n");
 
     await page.goto(urlFor("/sign-in"), { waitUntil: "domcontentloaded" });
-    await page.getByRole("heading", { name: "Review", exact: true }).first().waitFor({ timeout: 5 * 60_000 });
-    await page.goto(urlFor("/review"), { waitUntil: "domcontentloaded" });
-    await page.getByRole("heading", { name: "Make the beta review usable", exact: true }).waitFor({ timeout: 30_000 });
+    await page.getByRole("heading", { name: "Workspace", exact: true }).first().waitFor({ timeout: 5 * 60_000 });
+    await page.goto(urlFor("/workspace"), { waitUntil: "domcontentloaded" });
+    await page.getByRole("heading", { name: "Build a usable social posting plan.", exact: true }).waitFor({ timeout: 30_000 });
 
     await context.storageState({ path: storageState });
     fs.chmodSync(storageState, 0o600);

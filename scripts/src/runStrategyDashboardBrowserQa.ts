@@ -45,14 +45,38 @@ const outputDir =
 
 const routes: RouteCheck[] = [
   {
-    path: "/",
-    label: "overview",
-    heading: "Overview",
-    requiredText: ["multi-run review", "Roadmap-target multi-run Lane B review", "20260414T232200Z"],
+    path: "/workspace",
+    label: "workspace",
+    heading: "Workspace",
+    requiredText: ["Build a usable social posting plan.", "Campaign summary", "Platform plan"],
+  },
+  {
+    path: "/intake",
+    label: "intake",
+    heading: "Intake",
+    requiredText: ["Describe the campaign in plain language.", "Source idea", "Target platforms"],
+  },
+  {
+    path: "/drafts",
+    label: "drafts",
+    heading: "Drafts",
+    requiredText: ["Adapt the idea for each selected surface.", "Draft copy", "LinkedIn"],
+  },
+  {
+    path: "/calendar",
+    label: "calendar",
+    heading: "Calendar",
+    requiredText: ["Plan the manual test window.", "Schedule notes", "LinkedIn"],
+  },
+  {
+    path: "/results",
+    label: "results",
+    heading: "Results",
+    requiredText: ["Log outcomes after posting manually.", "Manual test plan", "Qualitative notes"],
   },
   {
     path: "/strategy",
-    label: "strategy",
+    label: "internal-strategy",
     heading: "Strategy",
     requiredText: ["Strategic substrate"],
   },
@@ -63,20 +87,20 @@ const routes: RouteCheck[] = [
     requiredText: ["Latest multi-run review recommendation", "Ranked runs in reviewed cohort", "20260416T124500Z"],
   },
   {
-    path: "/package",
-    label: "package",
+    path: "/admin/package",
+    label: "admin-package",
     heading: "Package",
     requiredText: ["Review-bound package summary", "Package mode", "matches this review", "20260414T232200Z"],
   },
   {
-    path: "/batch",
-    label: "batch",
+    path: "/admin/batch",
+    label: "admin-batch",
     heading: "Batch",
     requiredText: ["Reviewed cohort batch facts", "Runs in this reviewed cohort", "matches this review", "20260416T134500Z"],
   },
   {
-    path: "/handoff",
-    label: "handoff",
+    path: "/admin/handoff",
+    label: "admin-handoff",
     heading: "Handoff",
     requiredText: [
       "Reviewer receipt context",
@@ -94,7 +118,22 @@ const downloadPaths = [
   "/downloads/CANONICAL_SHA256__SSOT_LATEST.txt",
 ];
 
-const signedOutPaths = ["/", "/strategy", "/review", "/package", "/batch", "/handoff"];
+const signedOutPaths = [
+  "/",
+  "/workspace",
+  "/intake",
+  "/drafts",
+  "/calendar",
+  "/results",
+  "/review",
+  "/strategy",
+  "/package",
+  "/batch",
+  "/handoff",
+  "/admin/package",
+  "/admin/batch",
+  "/admin/handoff",
+];
 
 const viewports: ViewportCheck[] = [
   { label: "desktop", width: 1440, height: 960 },
@@ -231,8 +270,8 @@ async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel
 async function assertSignedInAuthRedirect(page: Page) {
   await page.goto(urlFor("/sign-in"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.waitForURL(/\/review(?:$|[?#])/, { timeout: 15_000 });
-  await page.getByRole("heading", { name: "Review", exact: true }).waitFor({ timeout: 10_000 });
+  await page.waitForURL(/\/workspace(?:$|[?#])/, { timeout: 15_000 });
+  await page.getByRole("heading", { name: "Workspace", exact: true }).waitFor({ timeout: 10_000 });
 }
 
 async function assertDataContract(context: BrowserContext) {
@@ -394,6 +433,114 @@ async function runReviewerWorkspaceCheck(page: Page) {
   }
 }
 
+async function runStrategyWorkspaceCheck(page: Page) {
+  await page.goto(urlFor("/intake"), { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("heading", { name: "Intake", exact: true }).waitFor({ timeout: 10_000 });
+
+  const projectName = `Browser QA strategy ${Date.now()}`;
+  await page.getByLabel("Project name").fill(projectName);
+  await page.getByLabel("Offer").fill("A reusable social planning checklist");
+  await page.getByLabel("Audience").fill("Solo operators testing manual social strategy");
+  await page.getByLabel("Primary CTA").fill("Download the checklist and run the manual test.");
+  await page.getByLabel("Tone notes").fill("Practical, specific, and calm.");
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByLabel("Project name").waitFor({ timeout: 10_000 });
+  const persistedName = await page.getByLabel("Project name").inputValue();
+  if (persistedName !== projectName) {
+    throw new Error(`Workspace localStorage did not persist project name: ${persistedName}`);
+  }
+
+  await page.goto(urlFor("/drafts"), { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("heading", { name: "Drafts", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("textbox", { name: "Draft notes" }).first().fill("Use a direct opening and keep the asset manual.");
+  await page.getByRole("button", { name: "copy", exact: true }).first().click();
+  await page.getByRole("button", { name: "✓", exact: true }).first().waitFor({ timeout: 5_000 });
+
+  await page.goto(urlFor("/calendar"), { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("heading", { name: "Calendar", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByLabel("Date").first().fill("2026-04-20");
+  await page.getByLabel("Time").first().fill("09:30");
+  await page.getByLabel("Schedule notes").first().fill("Post after final manual review.");
+
+  await page.goto(urlFor("/results"), { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("heading", { name: "Results", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("spinbutton", { name: "Impressions" }).first().fill("1234");
+  await page.getByRole("spinbutton", { name: "Saves" }).first().fill("56");
+  await page.getByRole("textbox", { name: "Qualitative notes" }).first().fill("Manual result logging works for the first platform.");
+
+  await page.goto(urlFor("/workspace"), { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("heading", { name: "Workspace", exact: true }).waitFor({ timeout: 10_000 });
+  const strategyJsonButton = page.getByRole("button", { name: "Download strategy JSON" });
+  const strategyMarkdownButton = page.getByRole("button", { name: "Download strategy Markdown" });
+  if (!(await strategyJsonButton.isDisabled())) {
+    throw new Error("Strategy JSON export was enabled before local export acknowledgement.");
+  }
+  await page.getByLabel(/I understand this export is local-only/).check();
+  if (await strategyJsonButton.isDisabled()) {
+    throw new Error("Strategy JSON export remained disabled after local export acknowledgement.");
+  }
+
+  const [jsonDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    strategyJsonButton.click(),
+  ]);
+  if (!jsonDownload.suggestedFilename().endsWith(".json")) {
+    throw new Error(`Expected strategy JSON download, received ${jsonDownload.suggestedFilename()}`);
+  }
+  const jsonPath = await jsonDownload.path();
+  if (!jsonPath) throw new Error("Strategy JSON download did not produce a local path.");
+  const receipt = JSON.parse(await fs.promises.readFile(jsonPath, "utf8"));
+  if (receipt.schema_version !== "strategy_workspace_v1") {
+    throw new Error(`Unexpected strategy schema ${receipt.schema_version}`);
+  }
+  if (receipt.project?.name !== projectName) {
+    throw new Error(`Strategy JSON missing edited project name ${projectName}`);
+  }
+  if (receipt.intake?.offer !== "A reusable social planning checklist") {
+    throw new Error("Strategy JSON missing edited offer.");
+  }
+  if (!receipt.platform_drafts?.some((draft: { notes?: string }) => draft.notes?.includes("direct opening"))) {
+    throw new Error("Strategy JSON missing edited draft notes.");
+  }
+  if (!receipt.calendar_items?.some((item: { date?: string }) => item.date === "2026-04-20")) {
+    throw new Error("Strategy JSON missing edited calendar date.");
+  }
+  if (!receipt.result_logs?.some((item: { impressions?: string }) => item.impressions === "1234")) {
+    throw new Error("Strategy JSON missing edited result metrics.");
+  }
+
+  const [markdownDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    strategyMarkdownButton.click(),
+  ]);
+  if (!markdownDownload.suggestedFilename().endsWith(".md")) {
+    throw new Error(`Expected strategy Markdown download, received ${markdownDownload.suggestedFilename()}`);
+  }
+  const markdownPath = await markdownDownload.path();
+  if (!markdownPath) throw new Error("Strategy Markdown download did not produce a local path.");
+  const markdown = await fs.promises.readFile(markdownPath, "utf8");
+  for (const expected of [
+    "Algo-Rhythm Strategy Workspace Export",
+    projectName,
+    "A reusable social planning checklist",
+    "Platform Drafts",
+    "Posting Schedule",
+    "Manual Test Plan",
+    "Results Notes",
+  ]) {
+    if (!markdown.includes(expected)) {
+      throw new Error(`Strategy Markdown missing ${expected}`);
+    }
+  }
+}
+
 async function main() {
   ensureDir(outputDir);
   if (authMode === "signed-in" && !storageState) {
@@ -453,6 +600,7 @@ async function main() {
           screenshots.push(await runRouteCheck(page, route, viewport.label));
         }
         if (viewport.label === "desktop") {
+          await runStrategyWorkspaceCheck(page);
           await runReviewerWorkspaceCheck(page);
         }
       }
