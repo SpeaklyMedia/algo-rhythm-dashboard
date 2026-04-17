@@ -3,19 +3,20 @@
 ## Current Synthesis Status
 
 - Status: `pending_collaborator_receipt`
-- Evidence source: collaborator-exported JSON and Markdown receipts from `/review`
+- Evidence source: collaborator-exported strategy JSON and Markdown from `/workspace`, plus optional reviewer receipts from `/review`
 - Public repo storage: sanitized summary only
 - Raw receipt storage: private operator area only if the receipt includes identity or notes
 
 ## What To Synthesize
 
-After collaborator 1 returns both receipt formats, summarize:
+After collaborator 1 returns the strategy exports, summarize:
 
 - what the collaborator understood without extra operator explanation
 - what still required operator explanation
-- whether the reviewer workspace was enough to evaluate the recommendation
-- whether package, batch, and handoff downloads were trusted
-- whether any ambiguity repeated across dashboard, package, batch, and handoff surfaces
+- whether the workspace was enough to turn the source idea into a useful posting plan
+- whether the intake, drafts, calendar, results, and export surfaces were usable without repo archaeology
+- whether any optional reviewer receipt was clear enough for approval evidence
+- whether any ambiguity repeated across workspace, review, and internal/admin surfaces
 
 ## Issue Triage Summary
 

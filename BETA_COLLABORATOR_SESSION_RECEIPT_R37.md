@@ -5,12 +5,13 @@
 This is the sanitized operator receipt for the first one-collaborator beta
 session. It records the session gate without storing Clerk account data,
 private collaborator identity, browser storage state, screenshots, or raw
-reviewer receipt contents.
+strategy export or reviewer receipt contents.
 
 ## Session Record
 
 - Session target: `https://algo.mrksylvstr.com`
-- Primary workflow: signed-in `/review` reviewer workspace
+- Primary workflow: signed-in `/workspace` strategy workspace
+- Secondary workflow: `/review` reviewer approval receipt
 - Dashboard mode: `multi_run_review`
 - Cohort size: `4`
 - Recommended run: `20260414T232200Z`
@@ -37,18 +38,25 @@ reviewer receipt contents.
 - Signed-in QA status: passed after refreshing private Clerk Playwright storage
   state outside the repo on 2026-04-17.
 
-The reviewer workspace now exports additive completion metadata in the local
-JSON receipt: `completion_status`, `missing_required_fields`,
-`downloaded_artifacts_acknowledged`, and `needs_operator_explanation`.
-
 The primary signed-in workflow is now the strategy workspace. It stores guided
 intake, platform drafts, schedule items, and manual result logs in browser
 localStorage, then exports local JSON/Markdown strategy plans with
 `schema_version: "strategy_workspace_v1"`.
 
+The reviewer workspace remains available as a secondary approval flow and
+exports additive completion metadata in the local JSON receipt:
+`completion_status`, `missing_required_fields`,
+`downloaded_artifacts_acknowledged`, and `needs_operator_explanation`.
+
 ## Required Collaborator Evidence
 
-The operator must collect both exported files from the reviewer workspace:
+The operator must collect both exported files from the strategy workspace:
+
+- JSON export with `schema_version: "strategy_workspace_v1"`
+- Markdown campaign plan generated from the same workspace state
+
+If approval evidence is requested, the operator must also collect both exported
+files from the reviewer workspace:
 
 - JSON receipt with `schema_version: "reviewer_session_v1"`
 - Markdown summary generated from the same reviewer workspace state
@@ -60,24 +68,26 @@ identity, notes, account details, or other sensitive content.
 
 Mark these complete during the live session:
 
-- `/`
+- `/workspace`
+- `/intake`
+- `/drafts`
+- `/calendar`
+- `/results`
 - `/review`
-- `/package`
-- `/batch`
-- `/handoff`
 
-`/strategy` may be reviewed as supporting context, but the beta task is the
-reviewer workspace.
+Internal/admin routes may be reviewed only if needed for operator audit context:
+`/admin/package`, `/admin/batch`, and `/admin/handoff`.
 
 ## Required Explanations
 
 The operator must verify that collaborator 1 can explain:
 
-- what the recommended run means
-- what `multi_run_review` means
-- how the reviewed cohort differs from a single refreshed snapshot
-- what package and batch downloads represent
-- that receipt export is local only and is not submitted to a server
+- what the source idea, audience, offer, goal, and recommended angle mean
+- how platform drafts map to a manual social posting plan
+- how schedule and results notes are manually logged
+- that strategy export is local only and is not submitted to a server
+- that there is no social account connection, auto-posting, scraping, or outreach automation
+- that package, batch, and handoff pages are internal/admin context
 - that Clerk is a UI gate only and direct static asset URLs remain public if known
 
 ## Issue Categories

@@ -17,13 +17,13 @@
 - Cloudflare DNS record: active, DNS-only `A` record to Vercel
 - Vercel domain verification: passed
 - HTTPS certificate: issued for `algo.mrksylvstr.com`
-- GitHub Actions deployment: passed on runs `24520601622`, `24520678802`, and `24522697119`
+- GitHub Actions deployment: passed on runs `24520601622`, `24520678802`, `24522697119`, and `24566889412`
 - Static data verification: passed on `https://algo.mrksylvstr.com/data/dashboard_index.json`
 - Signed-out browser QA: passed on `https://algo.mrksylvstr.com`
 - Google OAuth social connection: enabled in the dedicated Algo-Rhythm Clerk
   production instance with custom Google credentials and sign-up/sign-in enabled
-- Signed-in browser QA: requires refreshed local non-repo Playwright storage
-  state after the production Clerk key switch
+- Signed-in browser QA: passed after refreshing local non-repo Playwright
+  storage state after the production Clerk key switch
 - Clerk project guardrail: do not reuse ThetaFrame Clerk credentials for this app
 - Algo-Rhythm Clerk production CNAMEs: created in Cloudflare
 - Algo-Rhythm Clerk production TLS: verified for both auth subdomains
@@ -88,9 +88,11 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
 
 - Strategy workspace production deployment:
   `dpl_8oHfSXr1oNWnYFy3zUVzKPCTVLiF`
-- GitHub Actions deploy for commit `4087674` failed because the repository
-  `VERCEL_TOKEN` secret is invalid; production was deployed with the local
-  authenticated Vercel CLI and aliased to `https://algo.mrksylvstr.com`.
+- GitHub Actions deploy for commit `4087674` initially failed because the
+  repository `VERCEL_TOKEN` secret was invalid. Production was deployed with the
+  local authenticated Vercel CLI and aliased to `https://algo.mrksylvstr.com`.
+  The GitHub Actions Vercel secrets were then refreshed, and workflow run
+  `24566889412` passed end-to-end.
 - Command: `DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard`
 - Auth mode: signed out
 - Routes checked: `/`, `/workspace`, `/intake`, `/drafts`, `/calendar`,

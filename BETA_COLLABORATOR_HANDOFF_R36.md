@@ -4,28 +4,29 @@
 
 This handoff is for the first supervised collaborator beta session.
 
-You are reviewing the live Lane B `multi_run_review` dashboard and exporting a
-reviewer receipt for the operator. You are not generating new runs or submitting
-feedback to a server.
+You are reviewing the live Algo-Rhythm strategy workspace and exporting a
+local campaign plan for the operator. You are not generating new runs,
+connecting social accounts, auto-posting, or submitting feedback to a server.
 
 ## Access
 
 - Live app: `https://algo.mrksylvstr.com`
 - Login: use the Clerk sign-in flow provided by the operator.
-- After login, open the `Review` page or go directly to `https://algo.mrksylvstr.com/review`.
+- After login, open `Workspace` or go directly to `https://algo.mrksylvstr.com/workspace`.
 
 If you cannot sign in, stop and report `access_blocked` to the operator. Do not
 try to bypass the Clerk gate.
 
 ## What To Review
 
-Use the dashboard pages in this order:
+Use the workspace pages in this order:
 
-1. `Overview`: confirm you understand promoted alias, latest run, recommendation, package, and batch state.
-2. `Review`: inspect the recommended run, ranked cohort, excluded runs, and reviewer workspace.
-3. `Package`: verify the package meaning and package integrity fields are understandable.
-4. `Batch`: verify the batch represents the reviewed cohort and included runs.
-5. `Handoff`: verify downloads and static contract metadata are understandable.
+1. `Workspace`: confirm you understand the campaign summary, next actions, target platforms, and export status.
+2. `Intake`: confirm or edit the source idea, audience, offer, goal, tone, platforms, and constraints.
+3. `Drafts`: inspect platform drafts, tune any draft notes/copy that would make the plan usable, and test copy buttons.
+4. `Calendar`: add or adjust at least one manual schedule item.
+5. `Results`: add manual result notes or sample expected outcomes if nothing has been posted yet.
+6. `Review`: complete the secondary approval receipt only if the operator asks for approval evidence.
 
 Expected current state:
 
@@ -40,7 +41,20 @@ Expected current state:
 
 ## Reviewer Workspace Task
 
-On the `Review` page:
+The primary task is to produce usable strategy exports:
+
+1. Confirm or edit the workspace intake fields.
+2. Inspect the platform drafts and tune notes/copy where needed.
+3. Add at least one calendar item or schedule note.
+4. Add a result note, expected metric, or manual logging reminder.
+5. Acknowledge the local export status.
+6. Download both strategy exports:
+   - strategy JSON
+   - strategy Markdown
+7. Send both downloaded strategy files back to the operator.
+
+If the operator asks for a reviewer approval receipt, complete the `Review`
+page:
 
 1. Enter a reviewer alias.
 2. Choose a decision:
@@ -56,10 +70,10 @@ On the `Review` page:
 8. Download both receipts:
    - `Download JSON receipt`
    - `Download Markdown summary`
-9. Send both downloaded files back to the operator.
+9. Send both downloaded reviewer files back to the operator.
 
-The app saves a browser-local draft while you work. It does not submit anything
-automatically.
+The app saves browser-local drafts while you work. It does not submit anything
+automatically and does not store work in a cloud workspace.
 
 ## Issue Categories
 
@@ -77,18 +91,21 @@ If unsure, choose `usability_feedback` and explain the ambiguity in notes.
 
 The session is successful if you can:
 
-- Explain what the recommended run is and why it is recommended.
-- Explain the difference between promoted/latest/recommended/package/batch.
-- Open or understand the package and batch download surfaces.
-- Complete the reviewer workspace without repo archaeology.
-- Export both JSON and Markdown receipts.
+- Explain the source idea, audience, offer, goal, and recommended angle.
+- Produce useful platform draft notes or copy for the target platforms.
+- Add a manual posting schedule item.
+- Add manual result notes or logging expectations.
+- Export both strategy JSON and Markdown files.
+- Complete the optional reviewer receipt only if approval evidence is requested.
 
 ## Known Limitations
 
 - The dashboard is a static published snapshot, not a live generator.
-- The app does not submit feedback to a server.
-- The app does not autonomously promote a run.
+- The app stores editable work in browser `localStorage` and local downloads only.
+- The app does not submit feedback, strategy edits, or result logs to a server.
+- The app does not autonomously promote a run or publish social posts.
+- The app does not connect social accounts or automate outreach.
 - The app does not trigger refresh, package, batch, or deploy actions.
 - Clerk protects the UI only; direct `/data/*` and `/downloads/*` URLs remain public if known.
-- Receipt files are local exports and must be sent back to the operator manually.
-
+- Strategy exports and optional reviewer receipt files must be sent back to the operator manually.
+- Package, batch, and handoff pages are internal/admin context unless the operator specifically asks you to inspect them.

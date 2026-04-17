@@ -8,7 +8,8 @@ and `BETA_OPERATOR_INTAKE_R36.md`.
 
 ## Current Model
 
-`algo.mrksylvstr.com` uses a Clerk UI gate in front of the static Algo-Rhythm dashboard.
+`algo.mrksylvstr.com` uses a Clerk UI gate in front of the static Algo-Rhythm
+strategy workspace.
 
 - Hosting: existing Vercel project for `SpeaklyMedia/algo-rhythm-dashboard`
 - Auth: dedicated Algo-Rhythm Clerk instance configured by the Vercel
@@ -19,6 +20,9 @@ and `BETA_OPERATOR_INTAKE_R36.md`.
   Google OAuth secrets or callback handlers.
 - Domain: `algo.mrksylvstr.com`
 - Static runtime: bundled `/data/*.json` and `/downloads/*`
+- Primary signed-in route: `/workspace`
+- Secondary reviewer route: `/review`
+- Internal audit routes: `/admin/package`, `/admin/batch`, `/admin/handoff`
 
 This is not full asset secrecy. Clerk prevents normal dashboard use unless signed in, but direct static asset URLs remain public if known.
 
@@ -184,9 +188,11 @@ pnpm --filter @workspace/scripts run qa:dashboard:auth:record
 pnpm --filter @workspace/scripts run qa:dashboard:signed-in
 ```
 
-In signed-in mode, the QA script verifies the `/review` reviewer workspace by filling
-the decision controls, checklist, issue intake, notes, and JSON/Markdown receipt
-downloads.
+In signed-in mode, the QA script verifies the `/workspace` landing, local
+strategy edits, localStorage persistence, draft copy action, JSON/Markdown
+strategy exports, the secondary `/review` reviewer receipt workflow, admin
+trust routes, download endpoints, and absence of dashboard-origin write
+requests.
 
 The default storage-state path is:
 
@@ -204,6 +210,19 @@ pnpm --filter @workspace/scripts run qa:dashboard
 ```
 
 Never commit browser storage state files.
+
+## GitHub Actions Vercel Deploy
+
+GitHub Actions deploy uses:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+If the workflow fails at `Validate Vercel credentials`, refresh `VERCEL_TOKEN`
+from a valid Vercel account token and validate it before saving. Do not print or
+commit token values. As of 2026-04-17, these secrets were refreshed and
+workflow run `24566889412` passed end-to-end.
 
 ## Share Preview
 

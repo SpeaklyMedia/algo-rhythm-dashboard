@@ -3,7 +3,7 @@
 ## Purpose
 
 Use this note to run the first one-collaborator beta session and triage the
-exported reviewer receipts.
+exported strategy workspace files plus any optional reviewer receipts.
 
 ## Before The Session
 
@@ -15,17 +15,31 @@ exported reviewer receipts.
 ## Operator Script
 
 1. Ask the collaborator to sign in.
-2. Ask them to open `Review`.
-3. Confirm they can see the reviewer workspace.
-4. Ask them to review Overview, Review, Package, Batch, and Handoff.
-5. Ask them to complete the reviewer workspace.
-6. Ask them to download JSON and Markdown receipts.
-7. Collect both files.
-8. Triage every issue before considering local repo work.
+2. Ask them to open `Workspace`.
+3. Confirm they can see the strategy workspace.
+4. Ask them to review Workspace, Intake, Drafts, Calendar, and Results.
+5. Ask them to complete useful local edits or confirmations.
+6. Ask them to download strategy JSON and Markdown exports.
+7. If approval evidence is needed, ask them to complete `/review` and download reviewer JSON and Markdown receipts.
+8. Collect the exported files.
+9. Triage every issue before considering local repo work.
 
 ## Receipt Intake
 
-The expected JSON receipt has:
+The expected strategy JSON export has:
+
+- `schema_version: "strategy_workspace_v1"`
+- `workspace_id`
+- `source_content_id`
+- `project`
+- `intake`
+- `platform_drafts`
+- `calendar_items`
+- `result_logs`
+- `export_status`
+- `updated_at`
+
+The optional reviewer JSON receipt has:
 
 - `schema_version: "reviewer_session_v1"`
 - `review_context`
@@ -40,8 +54,9 @@ The expected JSON receipt has:
 Reject or request a replacement receipt if:
 
 - The receipt is missing `schema_version`.
-- The receipt is not tied to `multi_run_review`.
-- The receipt has no reviewer alias and no useful notes.
+- The strategy export is missing intake, platform drafts, calendar, or results fields.
+- The optional reviewer receipt is not tied to `multi_run_review`.
+- The optional reviewer receipt has no reviewer alias and no useful notes.
 - The collaborator reports a problem but does not include an issue row or note.
 
 ## Triage Rules
@@ -60,7 +75,8 @@ or broken receipt export.
 
 Invite collaborator 2 only if:
 
-- Collaborator 1 produced both JSON and Markdown receipts.
+- Collaborator 1 produced strategy JSON and Markdown exports.
+- Any requested reviewer approval receipts were also produced.
 - No unresolved `contract_gap`, `handoff_packet_gap`, or `operational_regression` remains.
 - The operator can explain any usability/content feedback without repo archaeology.
 
@@ -84,8 +100,9 @@ DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com \
 pnpm --filter @workspace/scripts run qa:dashboard
 ```
 
-If no storage state exists, manually verify signed-in behavior during the first
-collaborator session and record the receipt files as session evidence.
+If no storage state exists, manually verify `/workspace` signed-in behavior
+during the first collaborator session and record the exported strategy files as
+session evidence.
 
 Never commit Clerk browser storage state, cookies, screenshots containing
 account data, or receipt files containing private collaborator identity.
