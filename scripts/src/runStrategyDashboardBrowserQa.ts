@@ -208,7 +208,7 @@ async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel
   await page.locator('input[name="password"]').waitFor({ state: "visible", timeout: 10_000 });
   await page.getByRole("button", { name: "Continue", exact: true }).waitFor({ timeout: 10_000 });
   if (expectClerkGoogleOption) {
-    await page.getByRole("button", { name: "Continue with Google", exact: true }).waitFor({ timeout: 10_000 });
+    await page.locator("button", { hasText: "Continue with Google" }).waitFor({ state: "visible", timeout: 10_000 });
   }
 
   const dashboardHeadingVisible = await page.getByRole("heading", { name: "Overview", exact: true }).isVisible().catch(() => false);
