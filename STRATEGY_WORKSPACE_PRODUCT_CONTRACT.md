@@ -126,10 +126,11 @@ Current production target:
 - Live app: `https://algo.mrksylvstr.com`
 - Strategy workspace deployment: `dpl_8oHfSXr1oNWnYFy3zUVzKPCTVLiF`
 - GitHub Actions Vercel deploy restored: workflow run `24566889412`
+- Neurodivergent-friendly onboarding deploy: workflow run `24567687169`
 - Signed-out QA receipt:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-05-00-123Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-31-43-506Z/receipt.json`
 - Signed-in QA receipt:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-08-14-847Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-34-53-132Z/receipt.json`
 
 Signed-in QA must continue to verify:
 

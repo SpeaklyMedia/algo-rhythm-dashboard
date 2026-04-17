@@ -88,6 +88,8 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
 
 - Strategy workspace production deployment:
   `dpl_8oHfSXr1oNWnYFy3zUVzKPCTVLiF`
+- Neurodivergent-friendly onboarding production deploy:
+  GitHub Actions run `24567687169` for commit `c1eea09`
 - GitHub Actions deploy for commit `4087674` initially failed because the
   repository `VERCEL_TOKEN` secret was invalid. Production was deployed with the
   local authenticated Vercel CLI and aliased to `https://algo.mrksylvstr.com`.
@@ -99,7 +101,7 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
   `/results`, `/review`, `/strategy`, `/package`, `/batch`, `/handoff`,
   `/admin/package`, `/admin/batch`, `/admin/handoff`
 - Latest signed-out receipt after strategy workspace deployment:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-05-00-123Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-31-43-506Z/receipt.json`
 - Google-required QA flag: `DASHBOARD_QA_EXPECT_CLERK_GOOGLE=1`
 - Google click-through smoke: `Continue with Google` reached Google Accounts
   using Clerk's `https://clerk.algo.mrksylvstr.com/v1/oauth_callback` redirect
@@ -109,13 +111,14 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
   storage state outside the repo on 2026-04-17.
 - Signed-in command: `pnpm --filter @workspace/scripts run qa:dashboard:signed-in`
 - Signed-in receipt:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-08-14-847Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-34-53-132Z/receipt.json`
 - Signed-in coverage included `/sign-in` to `/workspace` redirect,
-  authenticated route rendering, strategy workspace local edit persistence,
-  draft copy action, JSON/Markdown strategy exports with
-  `schema_version: "strategy_workspace_v1"`, existing reviewer receipt export,
-  admin trust indicators, download endpoints, and no dashboard-origin write
-  requests.
+  authenticated route rendering, first-run onboarding hide/show behavior,
+  plain-language navigation, `What to do here` panels, progress rows, strategy
+  workspace local edit persistence, draft copy action, JSON/Markdown strategy
+  exports with `schema_version: "strategy_workspace_v1"`, existing reviewer
+  receipt export, admin trust indicators, download endpoints, and no
+  dashboard-origin write requests.
 
 ## Security Notes
 

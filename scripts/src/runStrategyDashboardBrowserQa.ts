@@ -475,9 +475,9 @@ async function runStrategyWorkspaceCheck(page: Page) {
   }
   await page.getByLabel("I understand this is a local file. I will use it or send it by hand.").uncheck();
 
-  await page.getByRole("button", { name: "Start: Check Idea" }).click();
+  await page.getByLabel("Getting started guide").getByRole("button", { name: "Start: Check Idea" }).click();
   await page.waitForURL(/\/intake(?:$|[?#])/, { timeout: 10_000 });
-  await page.getByRole("heading", { name: "Check Idea", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Check Idea", exact: true }).first().waitFor({ timeout: 10_000 });
 
   const projectName = `Browser QA strategy ${Date.now()}`;
   await page.getByLabel("Project name").fill(projectName);
@@ -496,21 +496,21 @@ async function runStrategyWorkspaceCheck(page: Page) {
 
   await page.goto(urlFor("/drafts"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Edit Drafts", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Edit Drafts", exact: true }).first().waitFor({ timeout: 10_000 });
   await page.getByRole("textbox", { name: "Draft notes" }).first().fill("Use a direct opening and keep the asset manual.");
   await page.getByRole("button", { name: "Copy Draft", exact: true }).first().click();
   await page.getByRole("button", { name: "Copied", exact: true }).first().waitFor({ timeout: 5_000 });
 
   await page.goto(urlFor("/calendar"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Pick Schedule", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Pick Schedule", exact: true }).first().waitFor({ timeout: 10_000 });
   await page.getByLabel("Date").first().fill("2026-04-20");
   await page.getByLabel("Time").first().fill("09:30");
   await page.getByLabel("Schedule notes").first().fill("Post after final manual review.");
 
   await page.goto(urlFor("/results"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Track Results", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Track Results", exact: true }).first().waitFor({ timeout: 10_000 });
   await page.getByRole("spinbutton", { name: "Impressions" }).first().fill("1234");
   await page.getByRole("spinbutton", { name: "Saves" }).first().fill("56");
   await page.getByRole("textbox", { name: "Qualitative notes" }).first().fill("Manual result logging works for the first platform.");
@@ -518,10 +518,10 @@ async function runStrategyWorkspaceCheck(page: Page) {
   await page.goto(urlFor("/workspace"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.getByRole("heading", { name: "Home", exact: true }).waitFor({ timeout: 10_000 });
-  await page.getByText("Idea checked", { exact: true }).waitFor({ timeout: 10_000 });
-  await page.getByText("At least one draft reviewed", { exact: true }).waitFor({ timeout: 10_000 });
-  await page.getByText("Schedule added", { exact: true }).waitFor({ timeout: 10_000 });
-  await page.getByText("Results notes added", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByText("Idea checked", { exact: false }).waitFor({ timeout: 10_000 });
+  await page.getByText("At least one draft reviewed", { exact: false }).waitFor({ timeout: 10_000 });
+  await page.getByText("Schedule added", { exact: false }).waitFor({ timeout: 10_000 });
+  await page.getByText("Results notes added", { exact: false }).waitFor({ timeout: 10_000 });
   await page.getByRole("button", { name: "Go to Idea", exact: true }).waitFor({ timeout: 10_000 });
   await page.getByRole("button", { name: "Go to Drafts", exact: true }).waitFor({ timeout: 10_000 });
   await page.getByRole("button", { name: "Go to Schedule", exact: true }).waitFor({ timeout: 10_000 });
