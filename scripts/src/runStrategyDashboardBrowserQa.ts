@@ -48,31 +48,68 @@ const routes: RouteCheck[] = [
     path: "/workspace",
     label: "workspace",
     heading: "Home",
-    requiredText: ["Make a posting plan in 5 steps.", "Your Progress", "Download your plan."],
+    requiredText: [
+      "Make a posting plan in 5 steps.",
+      "Your Progress",
+      "Download plan",
+      "What this page is for",
+      "Use this section to download files you can keep or send.",
+    ],
   },
   {
     path: "/intake",
     label: "intake",
     heading: "Check Idea",
-    requiredText: ["What to do here", "Check the idea, audience, offer, and goal.", "Next: Edit Drafts"],
+    requiredText: [
+      "What this page is for",
+      "What to do here",
+      "What happens next",
+      "What will not happen",
+      "Use this page to make sure the idea, audience, offer, and goal are right.",
+      "Next: Edit Drafts",
+    ],
   },
   {
     path: "/drafts",
     label: "drafts",
     heading: "Edit Drafts",
-    requiredText: ["What to do here", "Read each draft.", "Copy Draft"],
+    requiredText: [
+      "What this page is for",
+      "What to do here",
+      "What happens next",
+      "What will not happen",
+      "Draft style",
+      "Opening idea",
+      "Call to action",
+      "Why this draft may work",
+      "Copy Draft",
+    ],
   },
   {
     path: "/calendar",
     label: "calendar",
     heading: "Pick Schedule",
-    requiredText: ["What to do here", "This does not post for you.", "Next: Track Results"],
+    requiredText: [
+      "What this page is for",
+      "What to do here",
+      "What happens next",
+      "What will not happen",
+      "This page does not connect to a calendar or social account.",
+      "Next: Track Results",
+    ],
   },
   {
     path: "/results",
     label: "results",
     heading: "Track Results",
-    requiredText: ["What to do here", "Add numbers after you post by hand.", "Next: Download Plan"],
+    requiredText: [
+      "What this page is for",
+      "What to do here",
+      "What happens next",
+      "What will not happen",
+      "Notes about what happened",
+      "Next: Download Plan",
+    ],
   },
   {
     path: "/strategy",
@@ -84,25 +121,33 @@ const routes: RouteCheck[] = [
     path: "/review",
     label: "review",
     heading: "Review Approval",
-    requiredText: ["Latest multi-run review recommendation", "Ranked runs in reviewed cohort", "20260416T124500Z"],
+    requiredText: [
+      "Use this page only when your team needs a record of an approval decision.",
+      "Share an approval decision",
+      "This is technical proof for the current recommended plan. Most users can skip it.",
+      "Ranked runs in reviewed cohort",
+      "20260416T124500Z",
+    ],
   },
   {
     path: "/admin/package",
     label: "admin-package",
     heading: "Package",
-    requiredText: ["Review-bound package summary", "Package mode", "matches this review", "20260414T232200Z"],
+    requiredText: ["Internal check", "Most users can skip this page.", "Review-bound package summary", "Package mode", "matches this review", "20260414T232200Z"],
   },
   {
     path: "/admin/batch",
     label: "admin-batch",
     heading: "Batch",
-    requiredText: ["Reviewed cohort batch facts", "Runs in this reviewed cohort", "matches this review", "20260416T134500Z"],
+    requiredText: ["Internal check", "Most users can skip this page.", "Reviewed cohort batch facts", "Runs in this reviewed cohort", "matches this review", "20260416T134500Z"],
   },
   {
     path: "/admin/handoff",
     label: "admin-handoff",
     heading: "Handoff",
     requiredText: [
+      "Internal check",
+      "Most users can skip this page.",
       "Reviewer receipt context",
       "Package ZIP",
       "Batch ZIP",
@@ -154,9 +199,41 @@ function urlFor(pathname: string): string {
   return new URL(pathname, baseUrl).toString();
 }
 
+const primaryRouteLabels = new Set(["workspace", "intake", "drafts", "calendar", "results"]);
+const bannedPrimaryTerms = [
+  /\bcohort\b/i,
+  /\bpackage\b/i,
+  /\bbatch\b/i,
+  /\bsha\b/i,
+  /\bcontract\b/i,
+  /\boperator\b/i,
+  /\blocalStorage\b/i,
+  /\bartifact\b/i,
+  /\brun\b/i,
+];
+
 function isInside(childPath: string, parentPath: string): boolean {
   const relative = path.relative(parentPath, childPath);
   return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+async function clearWorkspaceLocalState(page: Page) {
+  await page.evaluate(() => {
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith("algo-rhythm:strategy-workspace:"))
+      .forEach((key) => localStorage.removeItem(key));
+  });
+}
+
+async function assertPrimaryPageMessaging(page: Page, route: RouteCheck) {
+  if (!primaryRouteLabels.has(route.label)) return;
+  const text = await page.locator("main").innerText();
+  const failures = bannedPrimaryTerms
+    .filter((pattern) => pattern.test(text))
+    .map((pattern) => pattern.source);
+  if (failures.length > 0) {
+    throw new Error(`${route.label} exposed technical wording in the primary workflow: ${failures.join(", ")}`);
+  }
 }
 
 async function assertNoRequiredDataFailure(page: Page, route: RouteCheck) {
@@ -242,6 +319,7 @@ async function runRouteCheck(page: Page, route: RouteCheck, viewportLabel: strin
     await page.getByText(text, { exact: false }).first().waitFor({ timeout: 10_000 });
   }
 
+  await assertPrimaryPageMessaging(page, route);
   await assertResponsiveSizing(page, route.label, viewportLabel);
 
   const screenshot = path.join(outputDir, `${viewportLabel}-${sanitizeLabel(route.label)}.png`);
@@ -324,7 +402,7 @@ async function assertDownloadEndpoints(context: BrowserContext) {
 async function runReviewerWorkspaceCheck(page: Page) {
   await page.goto(urlFor("/review"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Make the beta review usable", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Share an approval decision", exact: true }).waitFor({ timeout: 10_000 });
 
   await page.getByLabel("Reviewer alias").fill("browser-qa-reviewer");
   await page.getByLabel("Accept with notes").check();
@@ -351,7 +429,7 @@ async function runReviewerWorkspaceCheck(page: Page) {
     "The signed-in reviewer can classify feedback and export a local receipt without network writes.",
   );
   await page.getByLabel("Reviewer notes").fill("Signed-in QA completed the reviewer workspace workflow.");
-  await page.getByLabel("This review still needed operator explanation.").check();
+  await page.getByLabel("I still needed help to understand this.").check();
 
   const jsonButton = page.getByRole("button", { name: "Download JSON receipt" });
   const markdownButton = page.getByRole("button", { name: "Download Markdown summary" });
@@ -483,7 +561,7 @@ async function runStrategyWorkspaceCheck(page: Page) {
   await page.getByLabel("Project name").fill(projectName);
   await page.getByLabel("Offer").fill("A reusable social planning checklist");
   await page.getByLabel("Audience").fill("Solo operators testing manual social strategy");
-  await page.getByLabel("Primary CTA").fill("Download the checklist and run the manual test.");
+  await page.getByLabel("Call to action").fill("Download the checklist and start the manual test.");
   await page.getByLabel("Tone notes").fill("Practical, specific, and calm.");
 
   await page.reload({ waitUntil: "domcontentloaded" });
@@ -497,6 +575,10 @@ async function runStrategyWorkspaceCheck(page: Page) {
   await page.goto(urlFor("/drafts"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.getByRole("heading", { name: "Edit Drafts", exact: true }).first().waitFor({ timeout: 10_000 });
+  await page.getByText("Draft style", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByText("Opening idea", { exact: true }).first().waitFor({ timeout: 10_000 });
+  await page.getByText("Call to action", { exact: true }).first().waitFor({ timeout: 10_000 });
+  await page.getByText("Why this draft may work", { exact: true }).first().waitFor({ timeout: 10_000 });
   await page.getByRole("textbox", { name: "Draft notes" }).first().fill("Use a direct opening and keep the asset manual.");
   await page.getByRole("button", { name: "Copy Draft", exact: true }).first().click();
   await page.getByRole("button", { name: "Copied", exact: true }).first().waitFor({ timeout: 5_000 });
@@ -513,7 +595,7 @@ async function runStrategyWorkspaceCheck(page: Page) {
   await page.getByRole("heading", { name: "Track Results", exact: true }).first().waitFor({ timeout: 10_000 });
   await page.getByRole("spinbutton", { name: "Impressions" }).first().fill("1234");
   await page.getByRole("spinbutton", { name: "Saves" }).first().fill("56");
-  await page.getByRole("textbox", { name: "Qualitative notes" }).first().fill("Manual result logging works for the first platform.");
+  await page.getByRole("textbox", { name: "Notes about what happened" }).first().fill("Manual result logging works for the first platform.");
 
   await page.goto(urlFor("/workspace"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
@@ -643,6 +725,9 @@ async function main() {
           screenshots.push(await runSignedOutGateCheck(page, pathname, viewport.label));
         }
       } else {
+        await page.goto(urlFor("/workspace"), { waitUntil: "domcontentloaded" });
+        await page.waitForLoadState("networkidle").catch(() => undefined);
+        await clearWorkspaceLocalState(page);
         if (viewport.label === "desktop") {
           await assertSignedInAuthRedirect(page);
         }

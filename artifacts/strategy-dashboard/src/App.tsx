@@ -37,10 +37,10 @@ const PAGE_DATA_KEYS = {
 };
 
 const REVIEW_DECISIONS = [
-  { id: 'accept_recommended', label: 'Accept recommended run' },
+  { id: 'accept_recommended', label: 'Accept recommended plan' },
   { id: 'accept_with_notes', label: 'Accept with notes' },
   { id: 'reject_recommendation', label: 'Reject recommendation' },
-  { id: 'needs_operator_review', label: 'Needs operator review' },
+  { id: 'needs_operator_review', label: 'Needs more review' },
 ];
 
 const ISSUE_CATEGORY_OPTIONS = [
@@ -141,7 +141,7 @@ const STRIP_ICONS = {
   promoted: 'LIVE',
   latest: 'LATEST',
   recommended: 'PICK',
-  package: 'PKG',
+  package: 'FILE',
   properties: 'PROPS',
 };
 
@@ -191,7 +191,7 @@ const PAGE_DISPLAY = {
   review: {
     label: 'Review Approval',
     shortLabel: 'Review',
-    subtitle: 'Optional approval receipt for the operator',
+    subtitle: 'Optional approval files to share by hand',
     kicker: 'Approval',
   },
   adminPackage: {
@@ -222,7 +222,10 @@ const WORKFLOW_STEPS = [
     label: 'Check Idea',
     shortLabel: 'Idea',
     actionLabel: 'Go to Idea',
-    guide: 'Check the idea, audience, offer, and goal. Change anything that sounds wrong. Then click Next: Edit Drafts.',
+    purpose: 'Use this page to make sure the idea, audience, offer, and goal are right.',
+    todo: 'Change any field that sounds wrong or unclear.',
+    next: 'Next, edit the drafts for each platform.',
+    willNot: 'This page does not send or post anything.',
   },
   {
     id: 'drafts',
@@ -231,7 +234,10 @@ const WORKFLOW_STEPS = [
     label: 'Edit Drafts',
     shortLabel: 'Drafts',
     actionLabel: 'Go to Drafts',
-    guide: 'Read each draft. Edit the words if needed. Use Copy Draft when you are ready to paste it somewhere else.',
+    purpose: 'Use this page to edit starter text for each platform.',
+    todo: 'Change the words, add notes, then use Copy Draft when you are ready.',
+    next: 'Next, pick when you want to post.',
+    willNot: 'Copying a draft does not post it.',
   },
   {
     id: 'calendar',
@@ -240,7 +246,10 @@ const WORKFLOW_STEPS = [
     label: 'Pick Schedule',
     shortLabel: 'Schedule',
     actionLabel: 'Go to Schedule',
-    guide: 'Pick a day, time, and platform. This does not post for you. It only helps you plan.',
+    purpose: 'Use this page to plan when you will post by hand.',
+    todo: 'Pick a date, time, platform, and status.',
+    next: 'Next, come back here or track results after you post.',
+    willNot: 'This page does not connect to a calendar or social account.',
   },
   {
     id: 'results',
@@ -249,7 +258,10 @@ const WORKFLOW_STEPS = [
     label: 'Track Results',
     shortLabel: 'Results',
     actionLabel: 'Go to Results',
-    guide: 'Add numbers after you post by hand. If you have not posted yet, add what you want to check later.',
+    purpose: 'Use this page to type in what happened after you post.',
+    todo: 'Add numbers and short notes for each platform.',
+    next: 'Next, download your plan when you are ready to save or share it.',
+    willNot: 'This page does not pull results from social platforms.',
   },
   {
     id: 'download',
@@ -258,7 +270,10 @@ const WORKFLOW_STEPS = [
     label: 'Download Plan',
     shortLabel: 'Download',
     actionLabel: 'Go to Download',
-    guide: 'Download your plan when you are ready to use it or send it to someone.',
+    purpose: 'Use this section to download files you can keep or send.',
+    todo: 'Check the box, then download JSON or Markdown.',
+    next: 'After download, use the files by hand.',
+    willNot: 'Downloading does not send the plan to anyone.',
   },
 ];
 
@@ -434,11 +449,37 @@ function getTierById(datasets = {}, tierId) {
   return tiers.find((tier) => tier.tier_id === tierId) || getDefaultWorkspaceTier(datasets);
 }
 
+function plainStarterText(value) {
+  return String(value || '')
+    .replace(/\boperator-reviewed\b/gi, 'reviewed by a person')
+    .replace(/\boperator pain point\b/gi, 'creator pain point')
+    .replace(/\bsmall business operators\b/gi, 'small business owners')
+    .replace(/\boperators\b/gi, 'owners')
+    .replace(/\boperator\b/gi, 'person')
+    .replace(/\bsignal cards\b/gi, 'platform cues')
+    .replace(/\btest package\b/gi, 'posting plan')
+    .replace(/\bcampaign package\b/gi, 'campaign plan');
+}
+
+function draftStyleLabel(value) {
+  return plainStarterText(String(value || 'custom').replace(/_/g, ' '));
+}
+
+function supportSignalLabel(id) {
+  const labels = {
+    META_UNCONNECTED_SHARE: 'Works for manual sharing',
+    PLATFORM_NATIVE_REWRITE: 'Fits the platform',
+    SOURCE_THESIS_REUSE: 'Keeps the main idea',
+    LOW_RISK_CLAIMS: 'Avoids risky claims',
+  };
+  return labels[id] || plainStarterText(String(id || '').replace(/_/g, ' ').toLowerCase());
+}
+
 function buildDraftCopy(content, platformPlan) {
   const parts = [
-    platformPlan?.hook_direction,
-    content?.source_summary || content?.core_thesis,
-    platformPlan?.cta || content?.primary_cta,
+    plainStarterText(platformPlan?.hook_direction),
+    plainStarterText(content?.source_summary || content?.core_thesis),
+    plainStarterText(platformPlan?.cta || content?.primary_cta),
   ].filter(Boolean);
   return parts.join('\n\n');
 }
@@ -447,9 +488,9 @@ function buildPlatformDrafts(content, tier) {
   return asArray(tier?.per_platform).map((platformPlan) => ({
     platform: platformPlan.platform,
     tier_id: tier?.tier_id || 'custom',
-    hook_direction: platformPlan.hook_direction || '',
-    format_shift: platformPlan.format_shift || '',
-    cta: platformPlan.cta || content?.primary_cta || '',
+    hook_direction: plainStarterText(platformPlan.hook_direction),
+    format_shift: plainStarterText(platformPlan.format_shift),
+    cta: plainStarterText(platformPlan.cta || content?.primary_cta),
     supporting_card_ids: asArray(platformPlan.supporting_card_ids),
     draft_copy: buildDraftCopy(content, platformPlan),
     notes: '',
@@ -495,13 +536,13 @@ function buildInitialWorkspaceDraft(index = {}, datasets = {}) {
       status: 'planning',
     },
     intake: {
-      source_idea: content.source_text || content.source_summary || '',
-      audience: content.audience || '',
-      offer: content.offer || '',
-      goal: content.operator_goal || '',
-      primary_cta: content.primary_cta || '',
-      tone_notes: content.brand_voice || '',
-      constraints: asArray(content.constraints).join('\n'),
+      source_idea: plainStarterText(content.source_text || content.source_summary),
+      audience: plainStarterText(content.audience),
+      offer: plainStarterText(content.offer),
+      goal: plainStarterText(content.operator_goal),
+      primary_cta: plainStarterText(content.primary_cta),
+      tone_notes: plainStarterText(content.brand_voice),
+      constraints: plainStarterText(asArray(content.constraints).join('\n')),
       target_platforms: platforms,
     },
     selected_draft_tier: tier?.tier_id || '',
@@ -584,7 +625,7 @@ ${draft.draft_copy || 'No draft copy recorded.'}
 - Audience: ${receipt.intake?.audience || 'Unavailable'}
 - Offer: ${receipt.intake?.offer || 'None recorded'}
 - Goal: ${receipt.intake?.goal || 'Unavailable'}
-- Primary CTA: ${receipt.intake?.primary_cta || 'Unavailable'}
+- Call to action: ${receipt.intake?.primary_cta || 'Unavailable'}
 - Tone notes: ${receipt.intake?.tone_notes || 'Unavailable'}
 - Platforms: ${(receipt.intake?.target_platforms || []).join(', ') || 'Unavailable'}
 - Constraints: ${receipt.intake?.constraints || 'None recorded'}
@@ -1801,15 +1842,23 @@ function WorkflowProgressPanel({ workspace, onNavigate }) {
 function PageTaskGuide({ pageId }) {
   const step = getWorkflowStepForPage(pageId);
   if (!step) return null;
+  const items = [
+    ['What this page is for', step.purpose],
+    ['What to do here', step.todo],
+    ['What happens next', step.next],
+    ['What will not happen', step.willNot],
+  ];
   return (
-    <section className="panel span-2 page-task-guide" aria-label="What to do here">
-      <p className="panel-kicker">What to do here</p>
+    <section className="panel span-2 page-task-guide" aria-label={`${step.label} guide`}>
+      <p className="panel-kicker">Step {step.number} of 5</p>
       <h2>{step.label}</h2>
-      <p>{step.guide}</p>
-      <div className="safety-note safety-note--inline" role="note">
-        <span>This app does not post.</span>
-        <span>This app does not send your notes.</span>
-        <span>This app saves only in this browser.</span>
+      <div className="purpose-grid">
+        {items.map(([label, detail]) => (
+          <div className="purpose-item" key={label}>
+            <h3>{label}</h3>
+            <p>{detail}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -1857,9 +1906,26 @@ function WorkspaceExportPanel({ workspace }) {
   return (
     <section className="workspace-export-panel" id="download-plan" aria-label="Download plan">
       <div>
-        <p className="panel-kicker">What to do here · Step 5</p>
+        <p className="panel-kicker">Download plan · Step 5</p>
         <h3>Download your plan.</h3>
-        <p className="muted">Download your plan when you are ready to use it or send it to someone.</p>
+        <div className="purpose-grid purpose-grid--compact">
+          <div className="purpose-item">
+            <h3>What this page is for</h3>
+            <p>Use this section to download files you can keep or send.</p>
+          </div>
+          <div className="purpose-item">
+            <h3>What to do here</h3>
+            <p>Check the box, then download JSON or Markdown.</p>
+          </div>
+          <div className="purpose-item">
+            <h3>What happens next</h3>
+            <p>Use the files by hand after download.</p>
+          </div>
+          <div className="purpose-item">
+            <h3>What will not happen</h3>
+            <p>Downloading does not send the plan to anyone.</p>
+          </div>
+        </div>
         <ul className="export-checklist">
           {checklist.map(([label, done]) => (
             <li key={label} className={done ? 'export-checklist__item export-checklist__item--done' : 'export-checklist__item'}>
@@ -1871,7 +1937,7 @@ function WorkspaceExportPanel({ workspace }) {
         {missingCount > 0 && (
           <p className="muted">You can still download, but these items are not done yet.</p>
         )}
-        <p className="muted">Exports are local files only. Nothing is posted, submitted, or saved to a server.</p>
+        <p className="muted">Downloads are files only. Nothing is posted, submitted, or saved to a server.</p>
         <label className="check-row workspace-export-panel__ack">
           <input
             type="checkbox"
@@ -1933,7 +1999,7 @@ function WorkspacePage({ datasets, workspace, onNavigate }) {
         <h2>Build a social posting plan.</h2>
         <p className="lede">
           Start with one idea. Edit the drafts. Pick a schedule. Track results. Download the plan.
-          The current seed is “{draft.project?.name || content.title || 'Untitled strategy'}”.
+          The starter plan is “{draft.project?.name || content.title || 'Untitled strategy'}”.
         </p>
         <div className="stat-row">
           <div className="stat-item stat-item--promoted">
@@ -1949,15 +2015,15 @@ function WorkspacePage({ datasets, workspace, onNavigate }) {
           </div>
           <div className="stat-divider" />
           <div className="stat-item stat-item--pick">
-            <span className="stat-chip stat-chip--pick">draft tier</span>
-            <code className="stat-value">{draft.selected_draft_tier || 'custom'}</code>
+            <span className="stat-chip stat-chip--pick">draft style</span>
+            <code className="stat-value">{draftStyleLabel(draft.selected_draft_tier)}</code>
             <span className="stat-detail">Editable platform drafts</span>
           </div>
           <div className="stat-divider" />
           <div className="stat-item">
-            <span className="stat-chip">export</span>
+            <span className="stat-chip">download</span>
             <code className="stat-value">{draft.export_status?.acknowledged ? 'ready' : 'not ready'}</code>
-            <span className="stat-detail">{draft.export_status?.last_exported_at ? `last ${formatDateShort(draft.export_status.last_exported_at)}` : 'No export yet'}</span>
+            <span className="stat-detail">{draft.export_status?.last_exported_at ? `last ${formatDateShort(draft.export_status.last_exported_at)}` : 'No download yet'}</span>
           </div>
         </div>
       </section>
@@ -1987,9 +2053,9 @@ function WorkspacePage({ datasets, workspace, onNavigate }) {
           rows={[
             { label: 'Audience', value: draft.intake?.audience || 'Unavailable' },
             { label: 'Goal', value: draft.intake?.goal || 'Unavailable' },
-            { label: 'CTA', value: draft.intake?.primary_cta || 'Unavailable' },
+            { label: 'Call to action', value: draft.intake?.primary_cta || 'Unavailable' },
             { label: 'Schedule items', value: `${filledSchedule}/${draft.calendar_items.length}` },
-            { label: 'Result logs', value: `${resultCount}/${draft.result_logs.length}` },
+            { label: 'Result notes', value: `${resultCount}/${draft.result_logs.length}` },
           ]}
         />
       </section>
@@ -2001,10 +2067,10 @@ function WorkspacePage({ datasets, workspace, onNavigate }) {
             <article className="surface-card" key={item.platform}>
               <div className="surface-heading">
                 <h3>{item.platform}</h3>
-                <StatusBadge tone="good">manual draft</StatusBadge>
+                <StatusBadge tone="good">starter draft</StatusBadge>
               </div>
-              <p>{item.format_shift || 'Manual platform rewrite.'}</p>
-              <p className="muted">{item.cta || draft.intake?.primary_cta || 'No CTA recorded.'}</p>
+              <p>{item.format_shift || 'Starter text for this platform.'}</p>
+              <p className="muted">{item.cta || draft.intake?.primary_cta || 'No call to action yet.'}</p>
             </article>
           ))}
         </div>
@@ -2034,7 +2100,7 @@ function IntakePage({ datasets, workspace, onNavigate }) {
       <section className="panel span-2">
         <p className="panel-kicker">Step 1</p>
         <h2>Check the idea.</h2>
-        <p className="lede">These fields only update this browser and your downloaded files.</p>
+        <p className="lede">These fields only change this browser and your downloaded files.</p>
       </section>
 
       <section className="panel span-2">
@@ -2077,7 +2143,7 @@ function IntakePage({ datasets, workspace, onNavigate }) {
 
         <div className="form-row">
           <label className="field">
-            <span>Primary CTA</span>
+            <span>Call to action</span>
             <input type="text" value={draft.intake.primary_cta} onChange={(event) => workspace.updateIntake('primary_cta', event.target.value)} />
           </label>
           <label className="field">
@@ -2126,10 +2192,10 @@ function DraftsPage({ datasets, workspace, onNavigate }) {
         <h2>Edit the drafts.</h2>
         <p className="lede">Use the draft as a start. Change the words before you use them.</p>
         <label className="field workspace-tier-select">
-          <span>Draft tier</span>
+          <span>Draft style</span>
           <select value={draft.selected_draft_tier} onChange={(event) => workspace.selectDraftTier(event.target.value)}>
             {tiers.map((tier) => (
-              <option key={tier.tier_id} value={tier.tier_id}>{tier.tier_label || tier.tier_id}</option>
+              <option key={tier.tier_id} value={tier.tier_id}>{draftStyleLabel(tier.tier_label || tier.tier_id)}</option>
             ))}
           </select>
         </label>
@@ -2141,7 +2207,7 @@ function DraftsPage({ datasets, workspace, onNavigate }) {
             <h2>{item.platform}</h2>
             <CopyButton value={item.draft_copy || ''} label="Copy Draft" />
           </div>
-          <p className="muted">{item.format_shift || 'Manual platform rewrite.'}</p>
+          <p className="muted">{item.format_shift || 'Starter text for this platform.'}</p>
           <label className="field">
             <span>Draft copy</span>
             <textarea rows={8} value={item.draft_copy} onChange={(event) => workspace.updatePlatformDraft(item.platform, 'draft_copy', event.target.value)} />
@@ -2152,9 +2218,9 @@ function DraftsPage({ datasets, workspace, onNavigate }) {
           </label>
           <KeyValueTable
             rows={[
-              { label: 'Hook direction', value: item.hook_direction || 'Unavailable' },
-              { label: 'CTA', value: item.cta || 'Unavailable' },
-              { label: 'Signal cards', value: asArray(item.supporting_card_ids).join(', ') || 'Unavailable' },
+              { label: 'Opening idea', value: item.hook_direction || 'Unavailable' },
+              { label: 'Call to action', value: item.cta || 'Unavailable' },
+              { label: 'Why this draft may work', value: asArray(item.supporting_card_ids).map(supportSignalLabel).join(', ') || 'Unavailable' },
             ]}
           />
         </section>
@@ -2231,9 +2297,9 @@ function ResultsPage({ datasets, workspace, onNavigate }) {
             <article className="surface-card" key={item.platform}>
               <div className="surface-heading">
                 <h3>{item.platform}</h3>
-                <StatusBadge tone="warn">hypothesis</StatusBadge>
+                <StatusBadge tone="warn">test idea</StatusBadge>
               </div>
-              <p>{item.hypothesis}</p>
+              <p>{plainStarterText(item.hypothesis)}</p>
             </article>
           ))}
         </div>
@@ -2243,7 +2309,7 @@ function ResultsPage({ datasets, workspace, onNavigate }) {
         <section className="panel workspace-result-card" key={item.id}>
           <div className="surface-heading">
             <h2>{item.platform}</h2>
-            <StatusBadge tone="neutral">manual log</StatusBadge>
+            <StatusBadge tone="neutral">typed by hand</StatusBadge>
           </div>
           <div className="metric-input-grid">
             {[
@@ -2261,7 +2327,7 @@ function ResultsPage({ datasets, workspace, onNavigate }) {
             ))}
           </div>
           <label className="field">
-            <span>Qualitative notes</span>
+            <span>Notes about what happened</span>
             <textarea rows={4} value={item.qualitative_notes} onChange={(event) => workspace.updateResultLog(item.id, 'qualitative_notes', event.target.value)} />
           </label>
         </section>
@@ -2387,10 +2453,10 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
       <div className="reviewer-workspace__header">
         <div>
           <p className="panel-kicker">Reviewer task</p>
-          <h2>Make the beta review usable</h2>
+          <h2>Share an approval decision</h2>
           <p className="lede">
-            Work through the reviewed cohort, record your decision, classify feedback, then export an
-            operator-ready receipt. Nothing is submitted automatically.
+            Use this optional page only when someone asks for approval evidence.
+            It makes files you download and send by hand. Nothing is submitted automatically.
           </p>
         </div>
         <div className="reviewer-workspace__actions">
@@ -2408,6 +2474,9 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
       <div className="reviewer-grid">
         <div className="reviewer-card">
           <h3>Review context</h3>
+          <p className="muted">
+            This is technical proof for the current recommended plan. Most users can skip it.
+          </p>
           <KeyValueTable
             rows={[
               { label: 'Review ID', value: context.review_id || 'Unavailable' },
@@ -2521,7 +2590,7 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
                 checked={Boolean(draft.downloaded_artifacts_acknowledged)}
                 onChange={(event) => updateField('downloaded_artifacts_acknowledged', event.target.checked)}
               />
-              <span>I understand the package, batch, JSON receipt, and Markdown summary are local/downloaded artifacts that I must send back manually.</span>
+              <span>I understand the package, batch, JSON receipt, and Markdown summary are downloaded files that I must send back manually.</span>
             </label>
             <label className="check-row">
               <input
@@ -2529,7 +2598,7 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
                 checked={Boolean(draft.needs_operator_explanation)}
                 onChange={(event) => updateField('needs_operator_explanation', event.target.checked)}
               />
-              <span>This review still needed operator explanation.</span>
+              <span>I still needed help to understand this.</span>
             </label>
           </div>
         </form>
@@ -2570,7 +2639,7 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
                   <textarea
                     value={issue.detail}
                     onChange={(event) => updateIssue(issue.id, 'detail', event.target.value)}
-                    placeholder="Why it matters, affected page, missing artifact, or reproduction note."
+                    placeholder="Why it matters, affected page, missing file, or steps to repeat."
                     rows={3}
                   />
                 </label>
@@ -2590,18 +2659,18 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
         <textarea
           value={draft.notes}
           onChange={(event) => updateField('notes', event.target.value)}
-          placeholder="What did you understand immediately? What required operator explanation?"
+          placeholder="What did you understand right away? What still needed help?"
           rows={5}
         />
       </label>
 
       <div className="receipt-actions">
         <div>
-          <h3>Export operator receipt</h3>
+          <h3>Download approval files</h3>
           <p className="muted">
             {canExportReceipt
-              ? 'Export both files and send them back to the operator manually.'
-              : 'Complete the required fields above before exporting the receipt.'}
+              ? 'Download both files and send them back by hand.'
+              : 'Complete the required fields above before downloading approval files.'}
           </p>
           <p className="muted">Draft key: <code>{storageKey}</code></p>
         </div>
@@ -2624,8 +2693,9 @@ function ReviewPage({ index, datasets }) {
   return (
     <div className="page-grid">
       <section className="panel span-2 hero-panel">
-        <p className="panel-kicker">Make your call</p>
+        <p className="panel-kicker">Optional approval</p>
         <h2>{singleRun ? 'Latest refresh snapshot review' : 'Latest multi-run review recommendation'}</h2>
+        <p className="lede">Use this page only when your team needs a record of an approval decision.</p>
         {recommendation ? (
           <>
             <div className="metrics compact">
@@ -2735,6 +2805,15 @@ function PackagePage({ index, datasets }) {
 
   return (
     <div className="page-grid">
+      <section className="panel span-2 admin-purpose">
+        <p className="panel-kicker">Internal check</p>
+        <h2>Most users can skip this page.</h2>
+        <p>
+          This page proves the downloaded package matches the current recommendation.
+          It is here for technical checks, not everyday planning.
+        </p>
+      </section>
+
       <section className="panel">
         <h2>{singleRun ? 'Single-run package summary' : 'Review-bound package summary'}</h2>
         {latestPackage ? (
@@ -2829,6 +2908,15 @@ function BatchPage({ index, datasets }) {
 
   return (
     <div className="page-grid">
+      <section className="panel span-2 admin-purpose">
+        <p className="panel-kicker">Internal check</p>
+        <h2>Most users can skip this page.</h2>
+        <p>
+          This page proves the reviewed group of files matches the current recommendation.
+          It is here for technical checks, not everyday planning.
+        </p>
+      </section>
+
       <section className="panel">
         <h2>{singleRun ? 'Single-run batch facts' : 'Reviewed cohort batch facts'}</h2>
         {latestBatch ? (
@@ -2920,6 +3008,15 @@ function HandoffPage({ index }) {
 
   return (
     <div className="page-grid">
+      <section className="panel span-2 admin-purpose">
+        <p className="panel-kicker">Internal check</p>
+        <h2>Most users can skip this page.</h2>
+        <p>
+          This page lists downloads and technical proof for the published snapshot.
+          It is here for technical checks, not everyday planning.
+        </p>
+      </section>
+
       <section className="panel span-2">
         <h2>Files ready to download</h2>
         <div className="handoff-download-groups">
@@ -3070,16 +3167,15 @@ function ReviewerTaskCallout({ activePage, onNavigate }) {
     <section className="reviewer-task-callout" aria-label="Reviewer task">
       <div>
         <p className="panel-kicker">Reviewer task</p>
-        <h3>After login, your usable workflow is the reviewer workspace.</h3>
+        <h3>Optional approval files</h3>
         <p>
-          Review the cohort, make a decision, classify feedback, and export an operator-ready
-          receipt from the Review page. This app still cannot generate new runs, submit feedback
-          to a server, autonomously promote a run, or protect direct static asset URLs.
+          Use Review Approval only when someone asks for proof of a decision.
+          It downloads files you send by hand and does not submit feedback to a server.
         </p>
       </div>
       {activePage !== 'review' ? (
         <button type="button" className="btn btn-primary" onClick={() => onNavigate('review')}>
-          Open reviewer workspace
+          Open Review Approval
         </button>
       ) : (
         <StatusBadge tone="good">workspace active</StatusBadge>
@@ -3097,7 +3193,7 @@ function App() {
         <div className="loading-panel">
           <p className="eyebrow">Algo-Rhythm</p>
           <h1>Loading strategy workspace…</h1>
-          <p>Reading static seeded data from the bundled strategy snapshot.</p>
+          <p>Reading starter plan data from the bundled strategy snapshot.</p>
         </div>
       </div>
     );
@@ -3244,7 +3340,7 @@ function DashboardShell({ index, datasets, optionalErrors }) {
                 className="sidebar-link"
                 onClick={() => handleNavigate('adminPackage')}
               >
-                Internal package ({propertyCount} {propertyCount === 1 ? 'property' : 'properties'})
+                Advanced checks ({propertyCount} {propertyCount === 1 ? 'item' : 'items'})
               </button>
             )}
             <button
@@ -3252,14 +3348,14 @@ function DashboardShell({ index, datasets, optionalErrors }) {
               className="sidebar-link sidebar-link--secondary"
               onClick={() => handleNavigate('strategy')}
             >
-              Internal strategy data
+              Advanced data
             </button>
             <button
               type="button"
               className="sidebar-link sidebar-link--secondary"
               onClick={() => handleNavigate('adminHandoff')}
             >
-              Admin handoff →
+              Advanced files
             </button>
           </div>
         </aside>
@@ -3291,19 +3387,19 @@ function DashboardShell({ index, datasets, optionalErrors }) {
             <div className="rail-cell">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Draft tier</span>
-                  <span className="rail-label__short">TIER</span>
+                  <span className="rail-label__full">Draft style</span>
+                  <span className="rail-label__short">STYLE</span>
                 </span>
                 <span className="rail-icon">{STRIP_ICONS.recommended}</span>
               </div>
-              <code className="rail-value">{workspace.draft.selected_draft_tier || 'custom'}</code>
+              <code className="rail-value">{draftStyleLabel(workspace.draft.selected_draft_tier)}</code>
             </div>
             <div className="rail-divider" />
             <div className="rail-cell">
               <div className="rail-label-row">
                 <span className="rail-label">
-                  <span className="rail-label__full">Local export</span>
-                  <span className="rail-label__short">EXPORT</span>
+                  <span className="rail-label__full">Download plan</span>
+                  <span className="rail-label__short">SAVE</span>
                 </span>
                 <span className="rail-icon">{STRIP_ICONS.package}</span>
               </div>
@@ -3336,14 +3432,14 @@ function DashboardShell({ index, datasets, optionalErrors }) {
               <h2 className="page-title">{displayLabel}</h2>
               <p className="header-note">
                 {activeWorkflowStep
-                  ? `Next: ${activePage === 'workspace' ? 'Start: Check Idea' : nextWorkflowStep.label} · Local browser draft · No social account connection`
-                  : 'Local browser draft · Manual posting workflow · No social account connection'}
+                  ? `Next: ${activePage === 'workspace' ? 'Start: Check Idea' : nextWorkflowStep.label} · Saved in this browser · No social account connection`
+                  : 'Saved in this browser · Manual posting workflow · No social account connection'}
               </p>
             </div>
             <div className="header-right">
               <div className="header-badges-inline">
                 <StatusBadge tone="good">{index.status || 'PASS'}</StatusBadge>
-                <StatusBadge tone="good">local export first</StatusBadge>
+                <StatusBadge tone="good">download first</StatusBadge>
                 {Object.keys(optionalErrors).length > 0 && (
                   <StatusBadge tone="warn">Optional gaps</StatusBadge>
                 )}
@@ -3375,7 +3471,7 @@ function DashboardShell({ index, datasets, optionalErrors }) {
   );
 }
 
-function LoadingShell({ title = 'Loading review dashboard…', detail = 'Preparing the authenticated static dashboard shell.' }) {
+function LoadingShell({ title = 'Loading strategy workspace…', detail = 'Preparing your signed-in workspace.' }) {
   return (
     <div className="shell centered">
       <div className="loading-panel">
@@ -3414,7 +3510,7 @@ function AuthBrandPanel({ mode }) {
         <h1>{mode === 'sign-up' ? 'Request workspace access' : 'Sign in to Algo-Rhythm'}</h1>
         <p>
           Social strategy workspace for turning one source idea into a manual posting plan.
-          Clerk protects the UI; static seed data and bundled downloads remain file-based snapshots.
+          Clerk protects the UI; starter plan data and bundled downloads remain file-based snapshots.
         </p>
       </div>
       <div className="auth-limits">

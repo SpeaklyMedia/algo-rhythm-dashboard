@@ -3,13 +3,13 @@
 ## Purpose
 
 Use this note to run the first one-collaborator beta session and triage the
-exported strategy workspace files plus any optional reviewer receipts.
+downloaded strategy workspace files plus any optional approval receipts.
 
 ## Before The Session
 
 - Confirm the collaborator has Clerk access for `https://algo.mrksylvstr.com`.
 - Send `BETA_COLLABORATOR_HANDOFF_R36.md`.
-- Remind the collaborator that feedback is exported locally and sent back manually.
+- Remind the collaborator that plan files are downloaded and sent back manually.
 - Do not invite collaborator 2 until collaborator 1 completes the session with no unresolved real trigger.
 
 ## Operator Script
@@ -19,9 +19,9 @@ exported strategy workspace files plus any optional reviewer receipts.
 3. Confirm they can see the strategy workspace.
 4. Ask them to review Home, Check Idea, Edit Drafts, Pick Schedule, and Track Results.
 5. Ask them to complete useful local edits or confirmations.
-6. Ask them to download strategy JSON and Markdown exports.
-7. If approval evidence is needed, ask them to complete `/review` and download reviewer JSON and Markdown receipts.
-8. Collect the exported files.
+6. Ask them to use Download Plan and download strategy JSON and Markdown files.
+7. If approval evidence is needed, ask them to complete `Review Approval` and download reviewer JSON and Markdown receipts.
+8. Collect the downloaded files.
 9. Triage every issue before considering local repo work.
 
 ## Receipt Intake
@@ -51,9 +51,9 @@ The optional reviewer JSON receipt has:
 - `issues`
 - `notes`
 
-Reject or request a replacement receipt if:
+Reject or request a replacement file if:
 
-- The receipt is missing `schema_version`.
+- The file is missing `schema_version`.
 - The strategy export is missing intake, platform drafts, calendar, or results fields.
 - The optional reviewer receipt is not tied to `multi_run_review`.
 - The optional reviewer receipt has no reviewer alias and no useful notes.
@@ -68,7 +68,7 @@ Reject or request a replacement receipt if:
 - `operational_regression`: reproduce first, then patch only the broken route, workflow, download, or deployment path.
 
 If an issue is ambiguous, default it to `usability_feedback` unless it names an
-exact missing contract field, missing artifact, broken download, failed login,
+exact missing contract field, missing file, broken download, failed login,
 or broken receipt export.
 
 ## Expansion Gate

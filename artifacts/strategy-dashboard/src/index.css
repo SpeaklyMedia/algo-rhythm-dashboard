@@ -2099,13 +2099,16 @@ html[data-theme="light"] .score-dim__bar {
 
 .onboarding-panel,
 .page-task-guide {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: grid;
   gap: 1.2rem;
   min-width: 0;
   border-color: rgba(104, 214, 255, 0.24);
   background: rgba(104, 214, 255, 0.055);
+}
+
+.onboarding-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
 }
 
 .onboarding-panel h2,
@@ -2120,6 +2123,43 @@ html[data-theme="light"] .score-dim__bar {
   padding-left: 1.25rem;
   color: var(--text-soft);
   font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.purpose-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 0.2rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.purpose-grid--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0.8rem 0;
+}
+
+.purpose-item {
+  min-width: 0;
+  padding: 0.9rem 1rem 0.9rem 0;
+}
+
+.purpose-item + .purpose-item {
+  padding-left: 1rem;
+  border-left: 1px solid var(--line);
+}
+
+.purpose-item h3 {
+  margin: 0 0 0.35rem;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.purpose-item p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.88rem;
   line-height: 1.55;
 }
 
@@ -2979,6 +3019,15 @@ html[data-theme="light"] .home-lane-card__num {
     align-items: stretch;
   }
 
+  .onboarding-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .purpose-grid,
+  .purpose-grid--compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .header-right {
     padding-top: 0;
   }
@@ -3122,6 +3171,21 @@ html[data-theme="light"] .home-lane-card__num {
 
   .split-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .purpose-grid,
+  .purpose-grid--compact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .purpose-item {
+    padding: 0.85rem 0;
+  }
+
+  .purpose-item + .purpose-item {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid var(--line);
   }
 
   .home-lanes__grid {

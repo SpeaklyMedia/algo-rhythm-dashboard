@@ -27,8 +27,53 @@ The primary workflow is:
 approval and receipt workflow, not the primary signed-in landing experience.
 
 The surface language should stay plain and direct. The app should show the
-first-run inline guide, `Your Progress`, `What to do here` panels, and obvious
-next/back buttons so the order of operations is never hidden.
+first-run inline guide, `Your Progress`, purpose blocks, and obvious next/back
+buttons so the order of operations is never hidden.
+
+Each main workflow page must explain:
+
+- `What this page is for`
+- `What to do here`
+- `What happens next`
+- `What will not happen`
+
+## Messaging Standard
+
+Primary user-facing copy must be short, direct, and close to a 6th grade
+reading level. Prefer sentences that start with `Use this page to...`,
+`Next...`, and `This does not...`.
+
+Approved main-flow terms:
+
+- `Home`
+- `Check Idea`
+- `Edit Drafts`
+- `Pick Schedule`
+- `Track Results`
+- `Download Plan`
+- `Draft style`
+- `Opening idea`
+- `Call to action`
+- `Why this draft may work`
+- `Notes about what happened`
+- `Download JSON Plan`
+- `Download Markdown Plan`
+
+Do not use these technical terms in the primary workflow UI unless they are in
+hidden data, exported JSON field names, or internal/admin pages:
+
+- `run`
+- `cohort`
+- `package`
+- `batch`
+- `SHA`
+- `contract`
+- `operator`
+- `localStorage`
+- `artifact`
+
+`/review` and `/admin/*` may show technical terms, but each page must also
+include one plain sentence that explains why a normal user can skip it.
 
 ## Internal Routes
 
@@ -73,15 +118,15 @@ The workspace draft includes:
 
 Defaults are deterministic and come from bundled static data:
 
-- `content_object` seeds source idea, audience, operator goal, CTA, constraints, and target platforms.
+- `content_object` seeds source idea, audience, goal, call to action, constraints, and target platforms.
 - `four_tier_adaptations` seeds platform draft options.
 - `experiment_plan` seeds manual test-plan copy.
 - `campaign_ledger_seed` provides supporting campaign context.
 
 ## Export Contract
 
-Strategy JSON and Markdown exports are local downloads only. They are useful
-portable artifacts for the operator or creator, not server submissions.
+Strategy JSON and Markdown exports are downloads only. They are useful
+portable files for the creator, team, or reviewer, not server submissions.
 
 The Markdown export should remain readable as a campaign plan and include:
 
@@ -138,8 +183,9 @@ Signed-in QA must continue to verify:
 - first-run onboarding can be hidden and shown again
 - `/workspace`, `/intake`, `/drafts`, `/calendar`, `/results`, and `/review` render across supported viewports
 - main navigation uses `Home`, `Check Idea`, `Edit Drafts`, `Pick Schedule`, `Track Results`, and `Review Approval`
-- each main workflow route explains `What to do here`
-- guided edits persist after reload through `localStorage`
+- each main workflow route explains `What this page is for`, `What to do here`, `What happens next`, and `What will not happen`
+- primary workflow pages do not expose banned technical terms
+- guided edits persist after reload through browser storage
 - draft copy buttons work
 - progress rows update after intake, draft, schedule, and result edits
 - strategy JSON includes `schema_version: "strategy_workspace_v1"`

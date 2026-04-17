@@ -4,8 +4,8 @@
 
 This handoff is for the first supervised collaborator beta session.
 
-You are reviewing the live Algo-Rhythm strategy workspace and exporting a
-local campaign plan for the operator. You are not generating new runs,
+You are reviewing the live Algo-Rhythm strategy workspace and downloading a
+campaign plan for the operator. You are not generating new strategy data,
 connecting social accounts, auto-posting, or submitting feedback to a server.
 
 ## Access
@@ -26,7 +26,8 @@ Use the workspace pages in this order:
 3. `Edit Drafts`: inspect platform drafts, tune any draft notes/copy that would make the plan usable, and test `Copy Draft`.
 4. `Pick Schedule`: add or adjust at least one manual schedule item.
 5. `Track Results`: add manual result notes or sample expected outcomes if nothing has been posted yet.
-6. `Review Approval`: complete the secondary approval receipt only if the operator asks for approval evidence.
+6. `Download Plan`: check the download box and download both plan files.
+7. `Review Approval`: complete the secondary approval receipt only if the operator asks for approval evidence.
 
 Expected current state:
 
@@ -41,14 +42,14 @@ Expected current state:
 
 ## Strategy Workspace Task
 
-The primary task is to produce usable strategy exports:
+The primary task is to produce usable strategy plan downloads:
 
 1. Confirm or edit the workspace intake fields.
 2. Inspect the platform drafts and tune notes/copy where needed.
 3. Add at least one calendar item or schedule note.
 4. Add a result note, expected metric, or manual logging reminder.
-5. Acknowledge the local export status.
-6. Download both strategy exports:
+5. Acknowledge that the plan downloads are files you send by hand.
+6. Download both strategy files:
    - strategy JSON
    - strategy Markdown
 7. Send both downloaded strategy files back to the operator.
@@ -72,8 +73,8 @@ page:
    - `Download Markdown summary`
 9. Send both downloaded reviewer files back to the operator.
 
-The app saves browser-local drafts while you work. It does not submit anything
-automatically and does not store work in a cloud workspace.
+The app saves drafts in this browser while you work. It does not submit
+anything automatically and does not store work in a cloud workspace.
 
 ## Issue Categories
 
@@ -101,7 +102,7 @@ The session is successful if you can:
 ## Known Limitations
 
 - The dashboard is a static published snapshot, not a live generator.
-- The app stores editable work in browser `localStorage` and local downloads only.
+- The app stores editable work in this browser and downloaded files only.
 - The app does not submit feedback, strategy edits, or result logs to a server.
 - The app does not autonomously promote a run or publish social posts.
 - The app does not connect social accounts or automate outreach.
