@@ -204,8 +204,8 @@ async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.getByRole("heading", { name: "Sign in to Algo-Rhythm", exact: true }).first().waitFor({ timeout: 15_000 });
   await page.getByText("Clerk UI gate", { exact: false }).first().waitFor({ timeout: 10_000 });
-  await page.getByRole("textbox", { name: "Email address", exact: true }).waitFor({ timeout: 10_000 });
-  await page.getByLabel("Password", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.locator('input[name="identifier"]').waitFor({ state: "visible", timeout: 10_000 });
+  await page.locator('input[name="password"]').waitFor({ state: "visible", timeout: 10_000 });
   await page.getByRole("button", { name: "Continue", exact: true }).waitFor({ timeout: 10_000 });
   if (expectClerkGoogleOption) {
     await page.getByRole("button", { name: "Continue with Google", exact: true }).waitFor({ timeout: 10_000 });

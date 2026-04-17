@@ -2071,6 +2071,14 @@ function SignedInRoute({ routePath }) {
 }
 
 function SignedOutRoute({ routePath }) {
+  useEffect(() => {
+    if (!isAuthPath(routePath)) pushAppPath('/sign-in', true);
+  }, [routePath]);
+
+  if (!isAuthPath(routePath)) {
+    return <LoadingShell title="Opening sign-in…" detail="Clerk protects dashboard routes." />;
+  }
+
   if (routePath.startsWith('/sign-up')) return <SignUpPage />;
   return <SignInPage />;
 }
