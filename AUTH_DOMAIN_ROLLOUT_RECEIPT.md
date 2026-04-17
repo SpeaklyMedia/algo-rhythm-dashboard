@@ -96,14 +96,15 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
   using Clerk's `https://clerk.algo.mrksylvstr.com/v1/oauth_callback` redirect
   and did not reproduce the prior Clerk 422 strategy error.
 
-Signed-in browser QA is pending a refreshed private Clerk Playwright storage
-state for the dedicated production instance. The previous private storage state
-was invalidated by switching from the temporary working test key to the
-production Clerk key. On 2026-04-17, `qa:dashboard:signed-in` was retried and
-stopped at `/sign-in` because the private storage state no longer authenticated;
-`qa:dashboard:auth:record` was also retried but timed out without a completed
-interactive login. The auth recorder now waits for the current `/review`
-post-login landing before saving state.
+- Signed-in browser QA: passed after refreshing private Clerk Playwright
+  storage state outside the repo on 2026-04-17.
+- Signed-in command: `pnpm --filter @workspace/scripts run qa:dashboard:signed-in`
+- Signed-in receipt:
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T01-28-44-090Z/receipt.json`
+- Signed-in coverage included `/sign-in` to `/review` redirect, authenticated
+  route rendering, reviewer completion state, JSON receipt additive fields,
+  Markdown summary content, package/batch trust indicators, download endpoints,
+  and no dashboard-origin write requests.
 
 ## Security Notes
 

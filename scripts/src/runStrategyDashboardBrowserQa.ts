@@ -301,8 +301,10 @@ async function runReviewerWorkspaceCheck(page: Page) {
   await page.getByText("Static dashboard data is missing, inconsistent, or contradicts the review contract.", {
     exact: true,
   }).waitFor({ timeout: 5_000 });
-  await page.getByLabel("Summary").fill("Browser QA confirms reviewer workspace is usable");
-  await page.getByLabel("Detail").fill("The signed-in reviewer can classify feedback and export a local receipt without network writes.");
+  await page.getByRole("textbox", { name: "Summary", exact: true }).fill("Browser QA confirms reviewer workspace is usable");
+  await page.getByRole("textbox", { name: "Detail", exact: true }).fill(
+    "The signed-in reviewer can classify feedback and export a local receipt without network writes.",
+  );
   await page.getByLabel("Reviewer notes").fill("Signed-in QA completed the reviewer workspace workflow.");
   await page.getByLabel("This review still needed operator explanation.").check();
 
