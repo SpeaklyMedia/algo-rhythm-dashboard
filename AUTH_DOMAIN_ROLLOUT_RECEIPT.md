@@ -90,7 +90,7 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
 - Auth mode: signed out
 - Routes checked: `/`, `/strategy`, `/review`, `/package`, `/batch`, `/handoff`
 - Latest receipt after enabling Clerk Google OAuth:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T00-41-29-026Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T01-17-41-282Z/receipt.json`
 - Google-required QA flag: `DASHBOARD_QA_EXPECT_CLERK_GOOGLE=1`
 - Google click-through smoke: `Continue with Google` reached Google Accounts
   using Clerk's `https://clerk.algo.mrksylvstr.com/v1/oauth_callback` redirect
@@ -99,7 +99,11 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
 Signed-in browser QA is pending a refreshed private Clerk Playwright storage
 state for the dedicated production instance. The previous private storage state
 was invalidated by switching from the temporary working test key to the
-production Clerk key.
+production Clerk key. On 2026-04-17, `qa:dashboard:signed-in` was retried and
+stopped at `/sign-in` because the private storage state no longer authenticated;
+`qa:dashboard:auth:record` was also retried but timed out without a completed
+interactive login. The auth recorder now waits for the current `/review`
+post-login landing before saving state.
 
 ## Security Notes
 

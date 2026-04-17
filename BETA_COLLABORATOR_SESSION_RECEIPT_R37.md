@@ -20,6 +20,22 @@ reviewer receipt contents.
 - Session status: `pending_collaborator_receipt`
 - Collaborator 2 expansion: `hold`
 
+## Interface Readiness Evidence
+
+- Deployed frontend commit: `41f9213` (`Make reviewer workspace self-serve`)
+- Auth recorder follow-up commit: `c83d26b` (`Update auth recorder for review landing`)
+- Signed-out production QA receipt:
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T01-17-41-282Z/receipt.json`
+- Google click-through smoke: Clerk `Continue with Google` reached
+  `accounts.google.com` and did not reproduce the prior Clerk 422 strategy
+  error.
+- Signed-in QA status: blocked until the private Clerk Playwright storage state
+  is refreshed through an interactive production login outside the repo.
+
+The reviewer workspace now exports additive completion metadata in the local
+JSON receipt: `completion_status`, `missing_required_fields`,
+`downloaded_artifacts_acknowledged`, and `needs_operator_explanation`.
+
 ## Required Collaborator Evidence
 
 The operator must collect both exported files from the reviewer workspace:
