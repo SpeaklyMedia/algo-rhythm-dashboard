@@ -86,11 +86,18 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
 
 ## Browser QA Evidence
 
+- Strategy workspace production deployment:
+  `dpl_8oHfSXr1oNWnYFy3zUVzKPCTVLiF`
+- GitHub Actions deploy for commit `4087674` failed because the repository
+  `VERCEL_TOKEN` secret is invalid; production was deployed with the local
+  authenticated Vercel CLI and aliased to `https://algo.mrksylvstr.com`.
 - Command: `DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard`
 - Auth mode: signed out
-- Routes checked: `/`, `/strategy`, `/review`, `/package`, `/batch`, `/handoff`
-- Latest receipt after enabling Clerk Google OAuth:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T01-17-41-282Z/receipt.json`
+- Routes checked: `/`, `/workspace`, `/intake`, `/drafts`, `/calendar`,
+  `/results`, `/review`, `/strategy`, `/package`, `/batch`, `/handoff`,
+  `/admin/package`, `/admin/batch`, `/admin/handoff`
+- Latest signed-out receipt after strategy workspace deployment:
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-05-00-123Z/receipt.json`
 - Google-required QA flag: `DASHBOARD_QA_EXPECT_CLERK_GOOGLE=1`
 - Google click-through smoke: `Continue with Google` reached Google Accounts
   using Clerk's `https://clerk.algo.mrksylvstr.com/v1/oauth_callback` redirect
@@ -100,11 +107,13 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
   storage state outside the repo on 2026-04-17.
 - Signed-in command: `pnpm --filter @workspace/scripts run qa:dashboard:signed-in`
 - Signed-in receipt:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T01-28-44-090Z/receipt.json`
-- Signed-in coverage included `/sign-in` to `/review` redirect, authenticated
-  route rendering, reviewer completion state, JSON receipt additive fields,
-  Markdown summary content, package/batch trust indicators, download endpoints,
-  and no dashboard-origin write requests.
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-08-14-847Z/receipt.json`
+- Signed-in coverage included `/sign-in` to `/workspace` redirect,
+  authenticated route rendering, strategy workspace local edit persistence,
+  draft copy action, JSON/Markdown strategy exports with
+  `schema_version: "strategy_workspace_v1"`, existing reviewer receipt export,
+  admin trust indicators, download endpoints, and no dashboard-origin write
+  requests.
 
 ## Security Notes
 

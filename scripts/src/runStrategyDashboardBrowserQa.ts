@@ -54,7 +54,7 @@ const routes: RouteCheck[] = [
     path: "/intake",
     label: "intake",
     heading: "Intake",
-    requiredText: ["Describe the campaign in plain language.", "Source idea", "Target platforms"],
+    requiredText: ["Describe the campaign in plain language.", "Source idea", "These fields only update local browser state"],
   },
   {
     path: "/drafts",

@@ -22,12 +22,15 @@ reviewer receipt contents.
 
 ## Interface Readiness Evidence
 
+- Strategy workspace commit: `4087674` (`Add strategy workspace flow`)
+- Strategy workspace production deployment:
+  `dpl_8oHfSXr1oNWnYFy3zUVzKPCTVLiF`
 - Deployed frontend commit: `41f9213` (`Make reviewer workspace self-serve`)
 - Auth recorder follow-up commit: `c83d26b` (`Update auth recorder for review landing`)
 - Signed-out production QA receipt:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T01-17-41-282Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-05-00-123Z/receipt.json`
 - Signed-in production QA receipt:
-  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T01-28-44-090Z/receipt.json`
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T13-08-14-847Z/receipt.json`
 - Google click-through smoke: Clerk `Continue with Google` reached
   `accounts.google.com` and did not reproduce the prior Clerk 422 strategy
   error.
@@ -37,6 +40,11 @@ reviewer receipt contents.
 The reviewer workspace now exports additive completion metadata in the local
 JSON receipt: `completion_status`, `missing_required_fields`,
 `downloaded_artifacts_acknowledged`, and `needs_operator_explanation`.
+
+The primary signed-in workflow is now the strategy workspace. It stores guided
+intake, platform drafts, schedule items, and manual result logs in browser
+localStorage, then exports local JSON/Markdown strategy plans with
+`schema_version: "strategy_workspace_v1"`.
 
 ## Required Collaborator Evidence
 
