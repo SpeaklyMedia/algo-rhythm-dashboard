@@ -8,7 +8,7 @@
   `VITE_CLERK_PUBLISHABLE_KEY`
 - Auth boundary: Clerk UI gate only
 
-## Status As Of 2026-04-16
+## Status As Of 2026-04-17
 
 - Clerk UI gate: implemented in the static React shell
 - Vercel env var `VITE_CLERK_PUBLISHABLE_KEY`: configured for Production with
@@ -20,6 +20,8 @@
 - GitHub Actions deployment: passed on runs `24520601622`, `24520678802`, and `24522697119`
 - Static data verification: passed on `https://algo.mrksylvstr.com/data/dashboard_index.json`
 - Signed-out browser QA: passed on `https://algo.mrksylvstr.com`
+- Google OAuth social connection: enabled in the dedicated Algo-Rhythm Clerk
+  production instance with custom Google credentials and sign-up/sign-in enabled
 - Signed-in browser QA: requires refreshed local non-repo Playwright storage
   state after the production Clerk key switch
 - Clerk project guardrail: do not reuse ThetaFrame Clerk credentials for this app
@@ -87,7 +89,12 @@ vercel certs issue algo.mrksylvstr.com --scope marks-projects-f03fd1cc
 - Command: `DASHBOARD_QA_BASE_URL=https://algo.mrksylvstr.com pnpm --filter @workspace/scripts run qa:dashboard`
 - Auth mode: signed out
 - Routes checked: `/`, `/strategy`, `/review`, `/package`, `/batch`, `/handoff`
-- Latest receipt after production Clerk switch: `test-results/algo-rhythm-dashboard-browser-qa/2026-04-16T22-43-36-146Z/receipt.json`
+- Latest receipt after enabling Clerk Google OAuth:
+  `test-results/algo-rhythm-dashboard-browser-qa/2026-04-17T00-41-29-026Z/receipt.json`
+- Google-required QA flag: `DASHBOARD_QA_EXPECT_CLERK_GOOGLE=1`
+- Google click-through smoke: `Continue with Google` reached Google Accounts
+  using Clerk's `https://clerk.algo.mrksylvstr.com/v1/oauth_callback` redirect
+  and did not reproduce the prior Clerk 422 strategy error.
 
 Signed-in browser QA is pending a refreshed private Clerk Playwright storage
 state for the dedicated production instance. The previous private storage state
