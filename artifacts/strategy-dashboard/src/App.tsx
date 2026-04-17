@@ -147,34 +147,34 @@ const STRIP_ICONS = {
 
 const PAGE_DISPLAY = {
   workspace: {
-    label: 'Workspace',
+    label: 'Home',
     shortLabel: 'Home',
-    subtitle: 'Campaign summary · next actions · local export status',
-    kicker: 'Strategy workspace',
+    subtitle: 'Start here · see your progress · download your plan',
+    kicker: 'Posting plan',
   },
   intake: {
-    label: 'Intake',
-    shortLabel: 'Intake',
-    subtitle: 'Source idea · audience · offer · goals · tone and constraints',
-    kicker: 'Project setup',
+    label: 'Check Idea',
+    shortLabel: 'Idea',
+    subtitle: 'Check the idea, audience, offer, and goal',
+    kicker: 'Step 1',
   },
   drafts: {
-    label: 'Drafts',
+    label: 'Edit Drafts',
     shortLabel: 'Drafts',
-    subtitle: 'Platform-specific draft directions · copyable assets · notes',
-    kicker: 'Posting assets',
+    subtitle: 'Edit the words you want to use',
+    kicker: 'Step 2',
   },
   calendar: {
-    label: 'Calendar',
-    shortLabel: 'Calendar',
-    subtitle: 'Manual posting schedule · platform status · schedule notes',
-    kicker: 'Posting schedule',
+    label: 'Pick Schedule',
+    shortLabel: 'Schedule',
+    subtitle: 'Pick when and where to post by hand',
+    kicker: 'Step 3',
   },
   results: {
-    label: 'Results',
+    label: 'Track Results',
     shortLabel: 'Results',
-    subtitle: 'Manual outcome logging · qualitative notes · experiment learning',
-    kicker: 'Results notes',
+    subtitle: 'Write down what happened after posting',
+    kicker: 'Step 4',
   },
   overview: {
     label: 'Internal Overview',
@@ -189,10 +189,10 @@ const PAGE_DISPLAY = {
     kicker: 'Strategic substrate',
   },
   review: {
-    label: 'Review',
+    label: 'Review Approval',
     shortLabel: 'Review',
-    subtitle: 'Promotion recommendation · cohort shape · ranked runs or single refresh snapshot',
-    kicker: 'Review recommendation',
+    subtitle: 'Optional approval receipt for the operator',
+    kicker: 'Approval',
   },
   adminPackage: {
     label: 'Package',
@@ -213,6 +213,144 @@ const PAGE_DISPLAY = {
     kicker: 'Canonical handoff',
   },
 };
+
+const WORKFLOW_STEPS = [
+  {
+    id: 'intake',
+    pageId: 'intake',
+    number: 1,
+    label: 'Check Idea',
+    shortLabel: 'Idea',
+    actionLabel: 'Go to Idea',
+    guide: 'Check the idea, audience, offer, and goal. Change anything that sounds wrong. Then click Next: Edit Drafts.',
+  },
+  {
+    id: 'drafts',
+    pageId: 'drafts',
+    number: 2,
+    label: 'Edit Drafts',
+    shortLabel: 'Drafts',
+    actionLabel: 'Go to Drafts',
+    guide: 'Read each draft. Edit the words if needed. Use Copy Draft when you are ready to paste it somewhere else.',
+  },
+  {
+    id: 'calendar',
+    pageId: 'calendar',
+    number: 3,
+    label: 'Pick Schedule',
+    shortLabel: 'Schedule',
+    actionLabel: 'Go to Schedule',
+    guide: 'Pick a day, time, and platform. This does not post for you. It only helps you plan.',
+  },
+  {
+    id: 'results',
+    pageId: 'results',
+    number: 4,
+    label: 'Track Results',
+    shortLabel: 'Results',
+    actionLabel: 'Go to Results',
+    guide: 'Add numbers after you post by hand. If you have not posted yet, add what you want to check later.',
+  },
+  {
+    id: 'download',
+    pageId: 'workspace',
+    number: 5,
+    label: 'Download Plan',
+    shortLabel: 'Download',
+    actionLabel: 'Go to Download',
+    guide: 'Download your plan when you are ready to use it or send it to someone.',
+  },
+];
+
+function hasText(value) {
+  return String(value || '').trim().length > 0;
+}
+
+function isStepPage(pageId) {
+  return pageId === 'workspace' || WORKFLOW_STEPS.some((step) => step.pageId === pageId);
+}
+
+function getWorkflowStepForPage(pageId) {
+  if (pageId === 'workspace') return WORKFLOW_STEPS[4];
+  return WORKFLOW_STEPS.find((step) => step.pageId === pageId) || null;
+}
+
+function getNextStep(activePage) {
+  if (activePage === 'workspace') return WORKFLOW_STEPS[0];
+  const current = WORKFLOW_STEPS.findIndex((step) => step.pageId === activePage);
+  return current >= 0 && current < WORKFLOW_STEPS.length - 1 ? WORKFLOW_STEPS[current + 1] : WORKFLOW_STEPS[4];
+}
+
+function getPreviousStep(activePage) {
+  if (activePage === 'workspace' || activePage === 'intake') return null;
+  const current = WORKFLOW_STEPS.findIndex((step) => step.pageId === activePage);
+  return current > 0 ? WORKFLOW_STEPS[current - 1] : null;
+}
+
+function getWorkspaceProgress(draft) {
+  const intakeDone = Boolean(
+    hasText(draft.intake?.source_idea) &&
+    hasText(draft.intake?.audience) &&
+    hasText(draft.intake?.goal) &&
+    asArray(draft.intake?.target_platforms).length > 0
+  );
+  const intakeStarted = Boolean(
+    hasText(draft.intake?.source_idea) ||
+    hasText(draft.intake?.audience) ||
+    hasText(draft.intake?.offer) ||
+    hasText(draft.intake?.goal) ||
+    asArray(draft.intake?.target_platforms).length > 0
+  );
+  const draftReviewed = asArray(draft.platform_drafts).some((item) => hasText(item.notes));
+  const draftsStarted = asArray(draft.platform_drafts).some((item) => hasText(item.draft_copy) || hasText(item.notes));
+  const scheduleAdded = asArray(draft.calendar_items).some((item) => hasText(item.date) || hasText(item.time) || hasText(item.notes));
+  const resultsAdded = asArray(draft.result_logs).some((item) => (
+    hasText(item.impressions) ||
+    hasText(item.saves) ||
+    hasText(item.clicks) ||
+    hasText(item.replies_comments) ||
+    hasText(item.reposts_shares) ||
+    hasText(item.conversions) ||
+    hasText(item.qualitative_notes)
+  ));
+  const exportAcknowledged = Boolean(draft.export_status?.acknowledged);
+  const exported = Boolean(draft.export_status?.last_exported_at);
+
+  return {
+    intake: {
+      done: intakeDone,
+      started: intakeStarted,
+      status: intakeDone ? 'Done' : intakeStarted ? 'Started' : 'Needs info',
+    },
+    drafts: {
+      done: draftReviewed,
+      started: draftsStarted,
+      status: draftReviewed ? 'Done' : draftsStarted ? 'Started' : 'Needs info',
+    },
+    calendar: {
+      done: scheduleAdded,
+      started: scheduleAdded,
+      status: scheduleAdded ? 'Done' : 'Not started',
+    },
+    results: {
+      done: resultsAdded,
+      started: resultsAdded,
+      status: resultsAdded ? 'Done' : 'Not started',
+    },
+    download: {
+      done: exported,
+      started: exportAcknowledged,
+      status: exported ? 'Done' : exportAcknowledged ? 'Started' : 'Not started',
+    },
+  };
+}
+
+function progressTone(status) {
+  if (status === 'Done') return 'good';
+  if (status === 'Needs info') return 'bad';
+  if (status === 'Started') return 'warn';
+  return 'neutral';
+}
 
 function getReviewModeMeta(index, datasets = {}) {
   const explicit = index?.review_mode;
@@ -700,7 +838,7 @@ ${receipt.notes || 'No notes.'}
 `;
 }
 
-function CopyButton({ value }) {
+function CopyButton({ value, label = 'Copy' }) {
   const [copied, setCopied] = useState(false);
   if (!value || value === 'Unavailable') return null;
   const canCopy = typeof navigator !== 'undefined' && typeof navigator?.clipboard?.writeText === 'function';
@@ -716,9 +854,9 @@ function CopyButton({ value }) {
       type="button"
       className={`copy-btn${copied ? ' copy-btn--copied' : ''}`}
       onClick={handleCopy}
-      title={copied ? 'Copied!' : 'Copy to clipboard'}
+      title={copied ? 'Copied!' : label}
     >
-      {copied ? '✓' : 'copy'}
+      {copied ? 'Copied' : label}
     </button>
   );
 }
@@ -1437,6 +1575,7 @@ function StrategyPage({ datasets }) {
 function useWorkspaceDraft(index, datasets) {
   const sourceId = getWorkspaceSourceId(datasets);
   const storageKey = `algo-rhythm:strategy-workspace:v1:${sourceId}`;
+  const onboardingKey = `algo-rhythm:strategy-workspace:onboarding:v1:${sourceId}`;
   const [draft, setDraft] = useState(() => {
     const initial = buildInitialWorkspaceDraft(index, datasets);
     if (typeof window === 'undefined') return initial;
@@ -1445,6 +1584,14 @@ function useWorkspaceDraft(index, datasets) {
       return saved ? mergeWorkspaceDraft(initial, JSON.parse(saved)) : initial;
     } catch {
       return initial;
+    }
+  });
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      return localStorage.getItem(onboardingKey) !== 'hidden';
+    } catch {
+      return true;
     }
   });
 
@@ -1557,9 +1704,20 @@ function useWorkspaceDraft(index, datasets) {
     recordExport();
   }
 
+  function setOnboardingVisible(value) {
+    setShowOnboarding(value);
+    if (typeof window === 'undefined') return;
+    try {
+      if (value) localStorage.removeItem(onboardingKey);
+      else localStorage.setItem(onboardingKey, 'hidden');
+    } catch {}
+  }
+
   return {
     draft,
     storageKey,
+    onboardingKey,
+    showOnboarding,
     updateProject,
     updateIntake,
     updatePlatformDraft,
@@ -1570,16 +1728,149 @@ function useWorkspaceDraft(index, datasets) {
     resetWorkspace,
     downloadWorkspaceJson,
     downloadWorkspaceMarkdown,
+    setOnboardingVisible,
   };
+}
+
+function WorkspaceOnboardingPanel({ workspace, onNavigate }) {
+  if (!workspace.showOnboarding) {
+    return (
+      <div className="guide-toggle">
+        <button type="button" className="btn btn-outline" onClick={() => workspace.setOnboardingVisible(true)}>
+          Show guide
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <section className="panel span-2 onboarding-panel" aria-label="Getting started guide">
+      <div>
+        <p className="panel-kicker">Start here</p>
+        <h2>Make a posting plan in 5 steps.</h2>
+        <ol className="onboarding-list">
+          <li>Check your idea.</li>
+          <li>Edit your drafts.</li>
+          <li>Pick when to post.</li>
+          <li>Track results.</li>
+          <li>Download your plan.</li>
+        </ol>
+        <div className="safety-note" role="note">
+          <p>Nothing posts automatically.</p>
+          <p>Your edits stay in this browser until you download them.</p>
+        </div>
+      </div>
+      <div className="onboarding-actions">
+        <button type="button" className="btn btn-primary btn-large" onClick={() => onNavigate('intake')}>
+          Start: Check Idea
+        </button>
+        <button type="button" className="btn btn-outline" onClick={() => workspace.setOnboardingVisible(false)}>
+          Hide this guide
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function WorkflowProgressPanel({ workspace, onNavigate }) {
+  const progress = getWorkspaceProgress(workspace.draft);
+  return (
+    <section className="panel workflow-progress-panel" aria-label="Your progress">
+      <h2>Your Progress</h2>
+      <div className="workflow-progress-list">
+        {WORKFLOW_STEPS.map((step) => {
+          const state = progress[step.id];
+          return (
+            <div className="workflow-progress-row" key={step.id}>
+              <div>
+                <span className="workflow-progress-row__step">Step {step.number}</span>
+                <strong>{step.label}</strong>
+              </div>
+              <StatusBadge tone={progressTone(state.status)}>{state.status}</StatusBadge>
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => onNavigate(step.pageId)}>
+                {step.actionLabel}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function PageTaskGuide({ pageId }) {
+  const step = getWorkflowStepForPage(pageId);
+  if (!step) return null;
+  return (
+    <section className="panel span-2 page-task-guide" aria-label="What to do here">
+      <p className="panel-kicker">What to do here</p>
+      <h2>{step.label}</h2>
+      <p>{step.guide}</p>
+      <div className="safety-note safety-note--inline" role="note">
+        <span>This app does not post.</span>
+        <span>This app does not send your notes.</span>
+        <span>This app saves only in this browser.</span>
+      </div>
+    </section>
+  );
+}
+
+function StepActionBar({ activePage, onNavigate }) {
+  const nextStep = getNextStep(activePage);
+  const previousStep = getPreviousStep(activePage);
+  if (!isStepPage(activePage)) return null;
+
+  const primaryLabel = activePage === 'workspace'
+    ? 'Start: Check Idea'
+    : activePage === 'results'
+      ? 'Next: Download Plan'
+      : `Next: ${nextStep.label}`;
+  const primaryTarget = activePage === 'workspace' ? 'intake' : nextStep.pageId;
+  const secondaryLabel = previousStep ? `Back: ${previousStep.label}` : 'Back to Home';
+  const secondaryTarget = previousStep ? previousStep.pageId : 'workspace';
+
+  return (
+    <div className="step-action-bar" aria-label="Step actions">
+      {activePage !== 'workspace' && (
+        <button type="button" className="btn btn-outline" onClick={() => onNavigate(secondaryTarget)}>
+          {secondaryLabel}
+        </button>
+      )}
+      <button type="button" className="btn btn-primary btn-large" onClick={() => onNavigate(primaryTarget)}>
+        {primaryLabel}
+      </button>
+    </div>
+  );
 }
 
 function WorkspaceExportPanel({ workspace }) {
   const canExport = Boolean(workspace.draft.export_status?.acknowledged);
+  const progress = getWorkspaceProgress(workspace.draft);
+  const checklist = [
+    ['Idea checked', progress.intake.done],
+    ['At least one draft reviewed', progress.drafts.done],
+    ['Schedule added', progress.calendar.done],
+    ['Results notes added', progress.results.done],
+    ['I understand this is a local file', canExport],
+  ];
+  const missingCount = checklist.filter(([, done]) => !done).length;
   return (
-    <section className="workspace-export-panel" aria-label="Strategy export">
+    <section className="workspace-export-panel" id="download-plan" aria-label="Download plan">
       <div>
-        <p className="panel-kicker">Local export</p>
-        <h3>Download the plan when it is ready to share or use.</h3>
+        <p className="panel-kicker">What to do here · Step 5</p>
+        <h3>Download your plan.</h3>
+        <p className="muted">Download your plan when you are ready to use it or send it to someone.</p>
+        <ul className="export-checklist">
+          {checklist.map(([label, done]) => (
+            <li key={label} className={done ? 'export-checklist__item export-checklist__item--done' : 'export-checklist__item'}>
+              <span aria-hidden="true">{done ? '✓' : '□'}</span>
+              {label}
+            </li>
+          ))}
+        </ul>
+        {missingCount > 0 && (
+          <p className="muted">You can still download, but these items are not done yet.</p>
+        )}
         <p className="muted">Exports are local files only. Nothing is posted, submitted, or saved to a server.</p>
         <label className="check-row workspace-export-panel__ack">
           <input
@@ -1587,15 +1878,15 @@ function WorkspaceExportPanel({ workspace }) {
             checked={canExport}
             onChange={(event) => workspace.updateExportAcknowledgement(event.target.checked)}
           />
-          <span>I understand this export is local-only and I am responsible for using or sharing it manually.</span>
+          <span>I understand this is a local file. I will use it or send it by hand.</span>
         </label>
       </div>
       <div className="reviewer-workspace__actions">
-        <button type="button" className="btn btn-primary" onClick={workspace.downloadWorkspaceJson} disabled={!canExport}>
-          Download strategy JSON
+        <button type="button" className="btn btn-primary btn-large" onClick={workspace.downloadWorkspaceJson} disabled={!canExport}>
+          Download JSON Plan
         </button>
         <button type="button" className="btn btn-outline" onClick={workspace.downloadWorkspaceMarkdown} disabled={!canExport}>
-          Download strategy Markdown
+          Download Markdown Plan
         </button>
       </div>
     </section>
@@ -1606,19 +1897,19 @@ function WorkspaceTaskCallout({ activePage, onNavigate }) {
   return (
     <section className="reviewer-task-callout workspace-task-callout" aria-label="Workspace task">
       <div>
-        <p className="panel-kicker">Strategy workspace</p>
-        <h3>Turn the source idea into a manual posting plan.</h3>
+        <p className="panel-kicker">Posting plan</p>
+        <h3>Turn one idea into posts you can use.</h3>
         <p>
-          Fill the intake, tune platform drafts, schedule posts, log results, then export a local plan.
-          This app does not post, connect social accounts, submit feedback, or store private customer data on a server.
+          Follow the steps in order. This app does not post, connect social accounts, send notes,
+          or save your work to a server.
         </p>
       </div>
       {activePage !== 'workspace' ? (
         <button type="button" className="btn btn-primary" onClick={() => onNavigate('workspace')}>
-          Open workspace home
+          Go to Home
         </button>
       ) : (
-        <StatusBadge tone="good">workspace active</StatusBadge>
+        <StatusBadge tone="good">Home active</StatusBadge>
       )}
     </section>
   );
@@ -1635,11 +1926,13 @@ function WorkspacePage({ datasets, workspace, onNavigate }) {
 
   return (
     <div className="page-grid">
+      <WorkspaceOnboardingPanel workspace={workspace} onNavigate={onNavigate} />
+
       <section className="panel span-2 hero-panel workspace-hero">
-        <p className="panel-kicker">Workspace home</p>
-        <h2>Build a usable social posting plan.</h2>
+        <p className="panel-kicker">Home</p>
+        <h2>Build a social posting plan.</h2>
         <p className="lede">
-          Start with one source idea, adapt it for each platform, schedule a manual test, and export the plan.
+          Start with one idea. Edit the drafts. Pick a schedule. Track results. Download the plan.
           The current seed is “{draft.project?.name || content.title || 'Untitled strategy'}”.
         </p>
         <div className="stat-row">
@@ -1669,14 +1962,16 @@ function WorkspacePage({ datasets, workspace, onNavigate }) {
         </div>
       </section>
 
+      <WorkflowProgressPanel workspace={workspace} onNavigate={onNavigate} />
+
       <section className="panel">
         <h2>Next actions</h2>
         <div className="workspace-action-list">
           {[
-            ['intake', 'Confirm the source idea and target audience.'],
-            ['drafts', 'Tune platform drafts and copy the assets you need.'],
-            ['calendar', 'Schedule the manual posting test.'],
-            ['results', 'Log outcomes after posts go live.'],
+            ['intake', 'Check the idea, audience, offer, and goal.'],
+            ['drafts', 'Edit the words for each platform.'],
+            ['calendar', 'Pick when and where to post by hand.'],
+            ['results', 'Write down what happened after posting.'],
           ].map(([pageId, detail]) => (
             <button key={pageId} type="button" className="workspace-action" onClick={() => onNavigate(pageId)}>
               <span>{PAGE_DISPLAY[pageId].label}</span>
@@ -1716,11 +2011,12 @@ function WorkspacePage({ datasets, workspace, onNavigate }) {
       </section>
 
       <WorkspaceExportPanel workspace={workspace} />
+      <StepActionBar activePage="workspace" onNavigate={onNavigate} />
     </div>
   );
 }
 
-function IntakePage({ datasets, workspace }) {
+function IntakePage({ datasets, workspace, onNavigate }) {
   const draft = workspace.draft;
   const availablePlatforms = asArray(datasets.content_object?.target_platforms);
 
@@ -1733,10 +2029,12 @@ function IntakePage({ datasets, workspace }) {
 
   return (
     <div className="page-grid">
+      <PageTaskGuide pageId="intake" />
+
       <section className="panel span-2">
-        <p className="panel-kicker">Project intake</p>
-        <h2>Describe the campaign in plain language.</h2>
-        <p className="lede">These fields only update local browser state and exported files.</p>
+        <p className="panel-kicker">Step 1</p>
+        <h2>Check the idea.</h2>
+        <p className="lede">These fields only update this browser and your downloaded files.</p>
       </section>
 
       <section className="panel span-2">
@@ -1807,23 +2105,26 @@ function IntakePage({ datasets, workspace }) {
         <label className="field">
           <span>Constraints</span>
           <textarea rows={5} value={draft.intake.constraints} onChange={(event) => workspace.updateIntake('constraints', event.target.value)} />
-          <small>Keep this manual and evidence-first. Do not add posting automation or unsupported platform claims.</small>
+          <small>Keep this manual. Do not add posting automation or claims you cannot support.</small>
         </label>
       </section>
+      <StepActionBar activePage="intake" onNavigate={onNavigate} />
     </div>
   );
 }
 
-function DraftsPage({ datasets, workspace }) {
+function DraftsPage({ datasets, workspace, onNavigate }) {
   const draft = workspace.draft;
   const tiers = getAdaptationTiers(datasets);
 
   return (
     <div className="page-grid">
+      <PageTaskGuide pageId="drafts" />
+
       <section className="panel span-2">
-        <p className="panel-kicker">Platform drafts</p>
-        <h2>Adapt the idea for each selected surface.</h2>
-        <p className="lede">Use the seeded strategy as a starting point, then edit the copy and notes before exporting.</p>
+        <p className="panel-kicker">Step 2</p>
+        <h2>Edit the drafts.</h2>
+        <p className="lede">Use the draft as a start. Change the words before you use them.</p>
         <label className="field workspace-tier-select">
           <span>Draft tier</span>
           <select value={draft.selected_draft_tier} onChange={(event) => workspace.selectDraftTier(event.target.value)}>
@@ -1838,7 +2139,7 @@ function DraftsPage({ datasets, workspace }) {
         <section className="panel workspace-draft-card" key={item.platform}>
           <div className="surface-heading">
             <h2>{item.platform}</h2>
-            <CopyButton value={item.draft_copy || ''} />
+            <CopyButton value={item.draft_copy || ''} label="Copy Draft" />
           </div>
           <p className="muted">{item.format_shift || 'Manual platform rewrite.'}</p>
           <label className="field">
@@ -1858,18 +2159,21 @@ function DraftsPage({ datasets, workspace }) {
           />
         </section>
       ))}
+      <StepActionBar activePage="drafts" onNavigate={onNavigate} />
     </div>
   );
 }
 
-function CalendarPage({ workspace }) {
+function CalendarPage({ workspace, onNavigate }) {
   const draft = workspace.draft;
   return (
     <div className="page-grid">
+      <PageTaskGuide pageId="calendar" />
+
       <section className="panel span-2">
-        <p className="panel-kicker">Posting schedule</p>
-        <h2>Plan the manual test window.</h2>
-        <p className="lede">This schedule is for operator use only. It does not connect to social platforms or publish anything.</p>
+        <p className="panel-kicker">Step 3</p>
+        <h2>Pick a schedule.</h2>
+        <p className="lede">This does not connect to social platforms. It does not publish anything.</p>
       </section>
 
       {asArray(draft.calendar_items).map((item) => (
@@ -1903,18 +2207,21 @@ function CalendarPage({ workspace }) {
           </label>
         </section>
       ))}
+      <StepActionBar activePage="calendar" onNavigate={onNavigate} />
     </div>
   );
 }
 
-function ResultsPage({ datasets, workspace }) {
+function ResultsPage({ datasets, workspace, onNavigate }) {
   const hypotheses = asArray(datasets.experiment_plan?.hypotheses);
   return (
     <div className="page-grid">
+      <PageTaskGuide pageId="results" />
+
       <section className="panel span-2">
-        <p className="panel-kicker">Results notes</p>
-        <h2>Log outcomes after posting manually.</h2>
-        <p className="lede">Capture enough signal to decide whether to repeat, revise, or stop the campaign.</p>
+        <p className="panel-kicker">Step 4</p>
+        <h2>Track results.</h2>
+        <p className="lede">Write down enough to decide if you should repeat, change, or stop.</p>
       </section>
 
       <section className="panel span-2">
@@ -1959,6 +2266,7 @@ function ResultsPage({ datasets, workspace }) {
           </label>
         </section>
       ))}
+      <StepActionBar activePage="results" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -2856,19 +3164,21 @@ function DashboardShell({ index, datasets, optionalErrors }) {
 
   const displayLabel = PAGE_DISPLAY[activePage]?.label || activePageMeta?.label || 'Workspace';
   const displayKicker = PAGE_DISPLAY[activePage]?.kicker || '';
+  const activeWorkflowStep = getWorkflowStepForPage(activePage);
+  const nextWorkflowStep = getNextStep(activePage);
 
   const renderPage = () => {
     switch (activePage) {
       case 'workspace':
         return <WorkspacePage datasets={datasets} workspace={workspace} onNavigate={handleNavigate} />;
       case 'intake':
-        return <IntakePage datasets={datasets} workspace={workspace} />;
+        return <IntakePage datasets={datasets} workspace={workspace} onNavigate={handleNavigate} />;
       case 'drafts':
-        return <DraftsPage datasets={datasets} workspace={workspace} />;
+        return <DraftsPage datasets={datasets} workspace={workspace} onNavigate={handleNavigate} />;
       case 'calendar':
-        return <CalendarPage workspace={workspace} />;
+        return <CalendarPage workspace={workspace} onNavigate={handleNavigate} />;
       case 'results':
-        return <ResultsPage datasets={datasets} workspace={workspace} />;
+        return <ResultsPage datasets={datasets} workspace={workspace} onNavigate={handleNavigate} />;
       case 'review':
         return <ReviewPage index={index} datasets={datasets} />;
       case 'strategy':
@@ -3019,10 +3329,16 @@ function DashboardShell({ index, datasets, optionalErrors }) {
           <header className="content-header">
             <div className="header-left">
               <p className="eyebrow">
-                {pageIndex + 1} / {pageDefinitions.length} · {displayKicker}
+                {activeWorkflowStep
+                  ? `Step ${activeWorkflowStep.number} of 5: ${activeWorkflowStep.label}`
+                  : `${pageIndex + 1} / ${pageDefinitions.length} · ${displayKicker}`}
               </p>
               <h2 className="page-title">{displayLabel}</h2>
-              <p className="header-note">Local browser draft · Manual posting workflow · No social account connection</p>
+              <p className="header-note">
+                {activeWorkflowStep
+                  ? `Next: ${activePage === 'workspace' ? 'Start: Check Idea' : nextWorkflowStep.label} · Local browser draft · No social account connection`
+                  : 'Local browser draft · Manual posting workflow · No social account connection'}
+              </p>
             </div>
             <div className="header-right">
               <div className="header-badges-inline">

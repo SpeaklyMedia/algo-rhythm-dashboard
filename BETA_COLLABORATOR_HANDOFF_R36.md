@@ -12,7 +12,7 @@ connecting social accounts, auto-posting, or submitting feedback to a server.
 
 - Live app: `https://algo.mrksylvstr.com`
 - Login: use the Clerk sign-in flow provided by the operator.
-- After login, open `Workspace` or go directly to `https://algo.mrksylvstr.com/workspace`.
+- After login, open `Home` or go directly to `https://algo.mrksylvstr.com/workspace`.
 
 If you cannot sign in, stop and report `access_blocked` to the operator. Do not
 try to bypass the Clerk gate.
@@ -21,12 +21,12 @@ try to bypass the Clerk gate.
 
 Use the workspace pages in this order:
 
-1. `Workspace`: confirm you understand the campaign summary, next actions, target platforms, and export status.
-2. `Intake`: confirm or edit the source idea, audience, offer, goal, tone, platforms, and constraints.
-3. `Drafts`: inspect platform drafts, tune any draft notes/copy that would make the plan usable, and test copy buttons.
-4. `Calendar`: add or adjust at least one manual schedule item.
-5. `Results`: add manual result notes or sample expected outcomes if nothing has been posted yet.
-6. `Review`: complete the secondary approval receipt only if the operator asks for approval evidence.
+1. `Home`: read the 5-step guide and check `Your Progress`.
+2. `Check Idea`: confirm or edit the source idea, audience, offer, goal, tone, platforms, and constraints.
+3. `Edit Drafts`: inspect platform drafts, tune any draft notes/copy that would make the plan usable, and test `Copy Draft`.
+4. `Pick Schedule`: add or adjust at least one manual schedule item.
+5. `Track Results`: add manual result notes or sample expected outcomes if nothing has been posted yet.
+6. `Review Approval`: complete the secondary approval receipt only if the operator asks for approval evidence.
 
 Expected current state:
 
@@ -39,7 +39,7 @@ Expected current state:
   - `20260414T232500Z`
   - `20260416T124500Z`
 
-## Reviewer Workspace Task
+## Strategy Workspace Task
 
 The primary task is to produce usable strategy exports:
 
@@ -53,7 +53,7 @@ The primary task is to produce usable strategy exports:
    - strategy Markdown
 7. Send both downloaded strategy files back to the operator.
 
-If the operator asks for a reviewer approval receipt, complete the `Review`
+If the operator asks for a reviewer approval receipt, complete the `Review Approval`
 page:
 
 1. Enter a reviewer alias.

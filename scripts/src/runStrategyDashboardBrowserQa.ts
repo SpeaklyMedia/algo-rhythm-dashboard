@@ -47,32 +47,32 @@ const routes: RouteCheck[] = [
   {
     path: "/workspace",
     label: "workspace",
-    heading: "Workspace",
-    requiredText: ["Build a usable social posting plan.", "Campaign summary", "Platform plan"],
+    heading: "Home",
+    requiredText: ["Make a posting plan in 5 steps.", "Your Progress", "Download your plan."],
   },
   {
     path: "/intake",
     label: "intake",
-    heading: "Intake",
-    requiredText: ["Describe the campaign in plain language.", "Source idea", "These fields only update local browser state"],
+    heading: "Check Idea",
+    requiredText: ["What to do here", "Check the idea, audience, offer, and goal.", "Next: Edit Drafts"],
   },
   {
     path: "/drafts",
     label: "drafts",
-    heading: "Drafts",
-    requiredText: ["Adapt the idea for each selected surface.", "Draft copy", "LinkedIn"],
+    heading: "Edit Drafts",
+    requiredText: ["What to do here", "Read each draft.", "Copy Draft"],
   },
   {
     path: "/calendar",
     label: "calendar",
-    heading: "Calendar",
-    requiredText: ["Plan the manual test window.", "Schedule notes", "LinkedIn"],
+    heading: "Pick Schedule",
+    requiredText: ["What to do here", "This does not post for you.", "Next: Track Results"],
   },
   {
     path: "/results",
     label: "results",
-    heading: "Results",
-    requiredText: ["Log outcomes after posting manually.", "Manual test plan", "Qualitative notes"],
+    heading: "Track Results",
+    requiredText: ["What to do here", "Add numbers after you post by hand.", "Next: Download Plan"],
   },
   {
     path: "/strategy",
@@ -83,7 +83,7 @@ const routes: RouteCheck[] = [
   {
     path: "/review",
     label: "review",
-    heading: "Review",
+    heading: "Review Approval",
     requiredText: ["Latest multi-run review recommendation", "Ranked runs in reviewed cohort", "20260416T124500Z"],
   },
   {
@@ -230,6 +230,12 @@ async function runRouteCheck(page: Page, route: RouteCheck, viewportLabel: strin
   await page.goto(urlFor(route.path), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.getByRole("heading", { name: route.heading, exact: true }).first().waitFor({ timeout: 10_000 });
+  if (route.label === "workspace") {
+    const showGuide = page.getByRole("button", { name: "Show guide" });
+    if (await showGuide.isVisible().catch(() => false)) {
+      await showGuide.click();
+    }
+  }
   await assertNoRequiredDataFailure(page, route);
 
   for (const text of route.requiredText) {
@@ -271,7 +277,7 @@ async function assertSignedInAuthRedirect(page: Page) {
   await page.goto(urlFor("/sign-in"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.waitForURL(/\/workspace(?:$|[?#])/, { timeout: 15_000 });
-  await page.getByRole("heading", { name: "Workspace", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Home", exact: true }).waitFor({ timeout: 10_000 });
 }
 
 async function assertDataContract(context: BrowserContext) {
@@ -434,9 +440,44 @@ async function runReviewerWorkspaceCheck(page: Page) {
 }
 
 async function runStrategyWorkspaceCheck(page: Page) {
-  await page.goto(urlFor("/intake"), { waitUntil: "domcontentloaded" });
+  await page.goto(urlFor("/workspace"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Intake", exact: true }).waitFor({ timeout: 10_000 });
+  await page.evaluate(() => {
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith("algo-rhythm:strategy-workspace:"))
+      .forEach((key) => localStorage.removeItem(key));
+  });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("heading", { name: "Home", exact: true }).waitFor({ timeout: 10_000 });
+  for (const label of ["Home", "Check Idea", "Edit Drafts", "Pick Schedule", "Track Results", "Review Approval"]) {
+    await page.getByText(label, { exact: true }).first().waitFor({ timeout: 10_000 });
+  }
+  await page.getByText("Make a posting plan in 5 steps.", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Hide this guide" }).click();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.getByRole("button", { name: "Show guide" }).waitFor({ timeout: 10_000 });
+  if (await page.getByText("Make a posting plan in 5 steps.", { exact: true }).isVisible().catch(() => false)) {
+    throw new Error("Onboarding guide remained visible after dismissal and reload.");
+  }
+  await page.getByRole("button", { name: "Show guide" }).click();
+  await page.getByText("Make a posting plan in 5 steps.", { exact: true }).waitFor({ timeout: 10_000 });
+
+  const earlyJsonButton = page.getByRole("button", { name: "Download JSON Plan" });
+  await page.getByText("You can still download, but these items are not done yet.", { exact: true }).waitFor({ timeout: 10_000 });
+  if (!(await earlyJsonButton.isDisabled())) {
+    throw new Error("Strategy JSON export was enabled before local file acknowledgement.");
+  }
+  await page.getByLabel("I understand this is a local file. I will use it or send it by hand.").check();
+  if (await earlyJsonButton.isDisabled()) {
+    throw new Error("Strategy JSON export stayed disabled after acknowledgement while fields were incomplete.");
+  }
+  await page.getByLabel("I understand this is a local file. I will use it or send it by hand.").uncheck();
+
+  await page.getByRole("button", { name: "Start: Check Idea" }).click();
+  await page.waitForURL(/\/intake(?:$|[?#])/, { timeout: 10_000 });
+  await page.getByRole("heading", { name: "Check Idea", exact: true }).waitFor({ timeout: 10_000 });
 
   const projectName = `Browser QA strategy ${Date.now()}`;
   await page.getByLabel("Project name").fill(projectName);
@@ -455,34 +496,43 @@ async function runStrategyWorkspaceCheck(page: Page) {
 
   await page.goto(urlFor("/drafts"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Drafts", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Edit Drafts", exact: true }).waitFor({ timeout: 10_000 });
   await page.getByRole("textbox", { name: "Draft notes" }).first().fill("Use a direct opening and keep the asset manual.");
-  await page.getByRole("button", { name: "copy", exact: true }).first().click();
-  await page.getByRole("button", { name: "✓", exact: true }).first().waitFor({ timeout: 5_000 });
+  await page.getByRole("button", { name: "Copy Draft", exact: true }).first().click();
+  await page.getByRole("button", { name: "Copied", exact: true }).first().waitFor({ timeout: 5_000 });
 
   await page.goto(urlFor("/calendar"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Calendar", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Pick Schedule", exact: true }).waitFor({ timeout: 10_000 });
   await page.getByLabel("Date").first().fill("2026-04-20");
   await page.getByLabel("Time").first().fill("09:30");
   await page.getByLabel("Schedule notes").first().fill("Post after final manual review.");
 
   await page.goto(urlFor("/results"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Results", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("heading", { name: "Track Results", exact: true }).waitFor({ timeout: 10_000 });
   await page.getByRole("spinbutton", { name: "Impressions" }).first().fill("1234");
   await page.getByRole("spinbutton", { name: "Saves" }).first().fill("56");
   await page.getByRole("textbox", { name: "Qualitative notes" }).first().fill("Manual result logging works for the first platform.");
 
   await page.goto(urlFor("/workspace"), { waitUntil: "domcontentloaded" });
   await page.waitForLoadState("networkidle").catch(() => undefined);
-  await page.getByRole("heading", { name: "Workspace", exact: true }).waitFor({ timeout: 10_000 });
-  const strategyJsonButton = page.getByRole("button", { name: "Download strategy JSON" });
-  const strategyMarkdownButton = page.getByRole("button", { name: "Download strategy Markdown" });
+  await page.getByRole("heading", { name: "Home", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByText("Idea checked", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByText("At least one draft reviewed", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByText("Schedule added", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByText("Results notes added", { exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Go to Idea", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Go to Drafts", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Go to Schedule", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Go to Results", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Go to Download", exact: true }).waitFor({ timeout: 10_000 });
+  const strategyJsonButton = page.getByRole("button", { name: "Download JSON Plan" });
+  const strategyMarkdownButton = page.getByRole("button", { name: "Download Markdown Plan" });
   if (!(await strategyJsonButton.isDisabled())) {
     throw new Error("Strategy JSON export was enabled before local export acknowledgement.");
   }
-  await page.getByLabel(/I understand this export is local-only/).check();
+  await page.getByLabel("I understand this is a local file. I will use it or send it by hand.").check();
   if (await strategyJsonButton.isDisabled()) {
     throw new Error("Strategy JSON export remained disabled after local export acknowledgement.");
   }

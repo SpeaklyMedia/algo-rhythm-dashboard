@@ -15,9 +15,9 @@ exported strategy workspace files plus any optional reviewer receipts.
 ## Operator Script
 
 1. Ask the collaborator to sign in.
-2. Ask them to open `Workspace`.
+2. Ask them to open `Home`.
 3. Confirm they can see the strategy workspace.
-4. Ask them to review Workspace, Intake, Drafts, Calendar, and Results.
+4. Ask them to review Home, Check Idea, Edit Drafts, Pick Schedule, and Track Results.
 5. Ask them to complete useful local edits or confirmations.
 6. Ask them to download strategy JSON and Markdown exports.
 7. If approval evidence is needed, ask them to complete `/review` and download reviewer JSON and Markdown receipts.

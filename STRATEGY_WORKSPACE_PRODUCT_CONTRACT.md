@@ -13,19 +13,22 @@ users.
 
 ## Primary User Workflow
 
-Signed-in users should land on `/workspace`.
+Signed-in users should land on `/workspace`, shown as `Home` in the UI.
 
 The primary workflow is:
 
-1. `/workspace`: campaign summary, next actions, platform selection, export status, and continue point.
-2. `/intake`: editable source idea, audience, offer, goal, tone, platform, and constraint inputs.
-3. `/drafts`: per-platform draft cards seeded from bundled strategy adaptations, with editable notes/copy fields and copy buttons.
-4. `/calendar`: manual posting schedule with date, time, platform, status, and notes.
-5. `/results`: manual result logging for impressions, saves, clicks, replies/comments, reposts/shares, conversions, and qualitative notes.
-6. Local strategy export: downloadable JSON and Markdown campaign plans.
+1. `/intake` (`Check Idea`): source idea, audience, offer, goal, tone, platform, and constraint inputs.
+2. `/drafts` (`Edit Drafts`): per-platform draft cards with editable notes/copy fields and `Copy Draft` buttons.
+3. `/calendar` (`Pick Schedule`): manual posting schedule with date, time, platform, status, and notes.
+4. `/results` (`Track Results`): manual result logging for impressions, saves, clicks, replies/comments, reposts/shares, conversions, and qualitative notes.
+5. `/workspace` (`Download Plan` panel): downloadable JSON and Markdown campaign plans.
 
-`/review` remains a secondary collaborator approval and receipt workflow. It is
-not the primary signed-in landing experience.
+`/review` is shown as `Review Approval`. It remains a secondary collaborator
+approval and receipt workflow, not the primary signed-in landing experience.
+
+The surface language should stay plain and direct. The app should show the
+first-run inline guide, `Your Progress`, `What to do here` panels, and obvious
+next/back buttons so the order of operations is never hidden.
 
 ## Internal Routes
 
@@ -131,9 +134,13 @@ Current production target:
 Signed-in QA must continue to verify:
 
 - `/sign-in` redirects signed-in users to `/workspace`
+- first-run onboarding can be hidden and shown again
 - `/workspace`, `/intake`, `/drafts`, `/calendar`, `/results`, and `/review` render across supported viewports
+- main navigation uses `Home`, `Check Idea`, `Edit Drafts`, `Pick Schedule`, `Track Results`, and `Review Approval`
+- each main workflow route explains `What to do here`
 - guided edits persist after reload through `localStorage`
 - draft copy buttons work
+- progress rows update after intake, draft, schedule, and result edits
 - strategy JSON includes `schema_version: "strategy_workspace_v1"`
 - strategy Markdown includes the campaign plan sections
 - reviewer receipt export still works
