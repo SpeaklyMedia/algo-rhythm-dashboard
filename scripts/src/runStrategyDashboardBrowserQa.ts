@@ -66,19 +66,24 @@ const routes: RouteCheck[] = [
     path: "/package",
     label: "package",
     heading: "Package",
-    requiredText: ["Review-bound package summary", "Package mode", "20260414T232200Z"],
+    requiredText: ["Review-bound package summary", "Package mode", "matches this review", "20260414T232200Z"],
   },
   {
     path: "/batch",
     label: "batch",
     heading: "Batch",
-    requiredText: ["Reviewed cohort batch facts", "Runs in this reviewed cohort", "20260416T134500Z"],
+    requiredText: ["Reviewed cohort batch facts", "Runs in this reviewed cohort", "matches this review", "20260416T134500Z"],
   },
   {
     path: "/handoff",
     label: "handoff",
     heading: "Handoff",
-    requiredText: ["Canonical downloads", "STRATEGY_RUN_BATCH 20260416T134500Z 20260416T134500Z"],
+    requiredText: [
+      "Reviewer receipt context",
+      "Package ZIP",
+      "Batch ZIP",
+      "STRATEGY_RUN_BATCH 20260416T134500Z 20260416T134500Z",
+    ],
   },
 ];
 
@@ -223,6 +228,13 @@ async function runSignedOutGateCheck(page: Page, pathname: string, viewportLabel
   return { viewport: viewportLabel, route: pathname, screenshot };
 }
 
+async function assertSignedInAuthRedirect(page: Page) {
+  await page.goto(urlFor("/sign-in"), { waitUntil: "domcontentloaded" });
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.waitForURL(/\/review(?:$|[?#])/, { timeout: 15_000 });
+  await page.getByRole("heading", { name: "Review", exact: true }).waitFor({ timeout: 10_000 });
+}
+
 async function assertDataContract(context: BrowserContext) {
   const response = await context.request.get(urlFor("/data/dashboard_index.json"));
   if (!response.ok()) {
@@ -285,14 +297,36 @@ async function runReviewerWorkspaceCheck(page: Page) {
   }
 
   await page.getByRole("button", { name: "Add issue" }).click();
-  await page.getByLabel("Category 1").selectOption("usability_feedback");
+  await page.getByLabel("Category 1").selectOption("contract_gap");
+  await page.getByText("Static dashboard data is missing, inconsistent, or contradicts the review contract.", {
+    exact: true,
+  }).waitFor({ timeout: 5_000 });
   await page.getByLabel("Summary").fill("Browser QA confirms reviewer workspace is usable");
   await page.getByLabel("Detail").fill("The signed-in reviewer can classify feedback and export a local receipt without network writes.");
-  await page.getByLabel("Reviewer notes").fill("Signed-in QA completed the R35 reviewer workflow.");
+  await page.getByLabel("Reviewer notes").fill("Signed-in QA completed the reviewer workspace workflow.");
+  await page.getByLabel("This review still needed operator explanation.").check();
+
+  const jsonButton = page.getByRole("button", { name: "Download JSON receipt" });
+  const markdownButton = page.getByRole("button", { name: "Download Markdown summary" });
+  await page.getByText("1 missing", { exact: false }).waitFor({ timeout: 5_000 });
+  if (!(await jsonButton.isDisabled())) {
+    throw new Error("JSON receipt export was enabled before downloaded-artifact acknowledgement.");
+  }
+  if (!(await markdownButton.isDisabled())) {
+    throw new Error("Markdown receipt export was enabled before downloaded-artifact acknowledgement.");
+  }
+  await page.getByLabel(/I understand the package, batch, JSON receipt/).check();
+  await page.getByText("ready to export", { exact: false }).waitFor({ timeout: 5_000 });
+  if (await jsonButton.isDisabled()) {
+    throw new Error("JSON receipt export remained disabled after required fields were complete.");
+  }
+  if (await markdownButton.isDisabled()) {
+    throw new Error("Markdown receipt export remained disabled after required fields were complete.");
+  }
 
   const [jsonDownload] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("button", { name: "Download JSON receipt" }).click(),
+    jsonButton.click(),
   ]);
   if (!jsonDownload.suggestedFilename().endsWith(".json")) {
     throw new Error(`Expected JSON receipt download, received ${jsonDownload.suggestedFilename()}`);
@@ -317,16 +351,44 @@ async function runReviewerWorkspaceCheck(page: Page) {
       throw new Error(`Receipt missing included run ${runId}`);
     }
   }
-  if (receipt.issues?.[0]?.category !== "usability_feedback") {
+  if (receipt.completion_status !== "complete") {
+    throw new Error(`Unexpected receipt completion_status ${receipt.completion_status}`);
+  }
+  if (!Array.isArray(receipt.missing_required_fields) || receipt.missing_required_fields.length !== 0) {
+    throw new Error(`Unexpected missing_required_fields ${JSON.stringify(receipt.missing_required_fields)}`);
+  }
+  if (receipt.downloaded_artifacts_acknowledged !== true) {
+    throw new Error("Receipt did not acknowledge downloaded artifacts.");
+  }
+  if (receipt.needs_operator_explanation !== true) {
+    throw new Error("Receipt did not capture the operator-explanation flag.");
+  }
+  if (receipt.issues?.[0]?.category !== "contract_gap") {
     throw new Error("Receipt did not include the browser QA issue category.");
   }
 
   const [markdownDownload] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("button", { name: "Download Markdown summary" }).click(),
+    markdownButton.click(),
   ]);
   if (!markdownDownload.suggestedFilename().endsWith(".md")) {
     throw new Error(`Expected Markdown receipt download, received ${markdownDownload.suggestedFilename()}`);
+  }
+  const markdownPath = await markdownDownload.path();
+  if (!markdownPath) throw new Error("Markdown receipt download did not produce a local path.");
+  const markdown = await fs.promises.readFile(markdownPath, "utf8");
+  for (const expected of [
+    "Completion status: `complete`",
+    "Decision: `accept_with_notes`",
+    "Selected run: `20260414T232200Z`",
+    "Browser QA confirms reviewer workspace is usable",
+    "contract_gap",
+    "Signed-in QA completed the reviewer workspace workflow.",
+    "Needs operator explanation: `yes`",
+  ]) {
+    if (!markdown.includes(expected)) {
+      throw new Error(`Markdown receipt missing ${expected}`);
+    }
   }
 }
 
@@ -382,6 +444,9 @@ async function main() {
           screenshots.push(await runSignedOutGateCheck(page, pathname, viewport.label));
         }
       } else {
+        if (viewport.label === "desktop") {
+          await assertSignedInAuthRedirect(page);
+        }
         for (const route of routes) {
           screenshots.push(await runRouteCheck(page, route, viewport.label));
         }

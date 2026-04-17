@@ -6,7 +6,7 @@ const PAGE_ORDER = ['overview', 'strategy', 'review', 'package', 'batch', 'hando
 const AUTH_PATHS = ['/sign-in', '/sign-up'];
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-const homeRedirectUrl = `${basePath || ''}/`;
+const reviewRedirectUrl = `${basePath || ''}/review`;
 
 const PAGE_PATHS = {
   overview: '/',
@@ -33,12 +33,32 @@ const REVIEW_DECISIONS = [
   { id: 'needs_operator_review', label: 'Needs operator review' },
 ];
 
-const ISSUE_CATEGORIES = [
-  'usability_feedback',
-  'content_quality_feedback',
-  'contract_gap',
-  'handoff_packet_gap',
-  'operational_regression',
+const ISSUE_CATEGORY_OPTIONS = [
+  {
+    id: 'usability_feedback',
+    label: 'Usability feedback',
+    detail: 'UI, wording, flow, or comprehension feedback.',
+  },
+  {
+    id: 'content_quality_feedback',
+    label: 'Content quality feedback',
+    detail: 'Strategy quality, evidence quality, or output usefulness feedback.',
+  },
+  {
+    id: 'contract_gap',
+    label: 'Contract gap',
+    detail: 'Static dashboard data is missing, inconsistent, or contradicts the review contract.',
+  },
+  {
+    id: 'handoff_packet_gap',
+    label: 'Handoff packet gap',
+    detail: 'A required handoff/download/instruction surface is missing or unusable.',
+  },
+  {
+    id: 'operational_regression',
+    label: 'Operational regression',
+    detail: 'Something expected to work is broken, such as login, routing, downloads, or receipt export.',
+  },
 ];
 
 const REVIEW_CHECKLIST = [
@@ -187,6 +207,12 @@ function formatNumber(value) {
   return new Intl.NumberFormat().format(value);
 }
 
+function sameStringSet(a = [], b = []) {
+  if (a.length !== b.length) return false;
+  const set = new Set(a);
+  return b.every((item) => set.has(item));
+}
+
 function statusTone(value) {
   const normalized = String(value || '').toLowerCase();
   if (
@@ -321,15 +347,40 @@ function buildInitialReviewerDraft(context) {
     checklist: initialChecklistState(),
     issues: [],
     notes: '',
+    downloaded_artifacts_acknowledged: false,
+    needs_operator_explanation: false,
+  };
+}
+
+function getReviewerCompletionState(draft) {
+  const missing = [];
+  if (!String(draft.reviewer_alias || '').trim()) missing.push('reviewer_alias');
+  if (!draft.decision) missing.push('decision');
+  if (!draft.selected_run_id) missing.push('selected_run_id');
+  if (!draft.confidence) missing.push('confidence');
+  for (const [id] of REVIEW_CHECKLIST) {
+    if (!draft.checklist?.[id]) missing.push(`checklist.${id}`);
+  }
+  if (!String(draft.notes || '').trim()) missing.push('notes');
+  if (!draft.downloaded_artifacts_acknowledged) missing.push('downloaded_artifacts_acknowledged');
+
+  return {
+    status: missing.length ? 'incomplete' : 'complete',
+    missingFields: missing,
   };
 }
 
 function buildReviewerReceipt(context, draft) {
+  const completion = getReviewerCompletionState(draft);
   return {
     schema_version: 'reviewer_session_v1',
     generated_at: new Date().toISOString(),
     app_url: getAppUrl(),
     review_context: context,
+    completion_status: completion.status,
+    missing_required_fields: completion.missingFields,
+    downloaded_artifacts_acknowledged: Boolean(draft.downloaded_artifacts_acknowledged),
+    needs_operator_explanation: Boolean(draft.needs_operator_explanation),
     reviewer: {
       alias: draft.reviewer_alias || 'anonymous_reviewer',
     },
@@ -357,6 +408,10 @@ function buildReviewerMarkdown(receipt) {
 - Generated at: \`${receipt.generated_at}\`
 - App URL: ${receipt.app_url}
 - Reviewer: ${receipt.reviewer?.alias || 'anonymous_reviewer'}
+- Completion status: \`${receipt.completion_status || 'Unavailable'}\`
+- Missing required fields: ${(receipt.missing_required_fields || []).map((field) => `\`${field}\``).join(', ') || 'None'}
+- Downloaded artifacts acknowledged: \`${receipt.downloaded_artifacts_acknowledged ? 'yes' : 'no'}\`
+- Needs operator explanation: \`${receipt.needs_operator_explanation ? 'yes' : 'no'}\`
 
 ## Review Context
 
@@ -421,6 +476,118 @@ function ShaField({ hash, note }) {
       {note ? <p className="muted sha-field__note">{note}</p> : null}
     </span>
   );
+}
+
+function getRecommendedRun(scorecard, recommendedRunId) {
+  const rankedRuns = scorecard?.ranked_runs || [];
+  return rankedRuns.find((run) => run.run_id === recommendedRunId) || rankedRuns[0] || null;
+}
+
+function getTopScoreSignals(run) {
+  return Object.entries(run?.dimension_scores || {})
+    .sort(([, a], [, b]) => Number(b) - Number(a))
+    .slice(0, 3)
+    .map(([key, value]) => ({ key, label: formatDimensionLabel(key), value }));
+}
+
+function DecisionBrief({ recommendation, scorecard, reviewMode }) {
+  const recommendedRun = getRecommendedRun(scorecard, reviewMode?.recommended_run_id || recommendation?.recommended_run_id);
+  const topSignals = getTopScoreSignals(recommendedRun);
+  const includedRunIds = reviewMode?.included_run_ids || recommendation?.promotable_run_ids || [];
+
+  return (
+    <section className="decision-brief" aria-label="Decision brief">
+      <div className="decision-brief__header">
+        <div>
+          <p className="panel-kicker">Decision brief</p>
+          <h3>Review this recommendation, then export your receipt.</h3>
+        </div>
+        <StatusBadge tone="warn">manual-only</StatusBadge>
+      </div>
+      <div className="decision-brief__grid">
+        <article className="decision-brief__card decision-brief__card--primary">
+          <span>Recommended run</span>
+          <code>{reviewMode?.recommended_run_id || recommendation?.recommended_run_id || 'Unavailable'}</code>
+          <p>Accepting this run only records your local reviewer decision. It does not promote, submit, or deploy anything.</p>
+        </article>
+        <article className="decision-brief__card">
+          <span>Reviewed cohort</span>
+          <p>
+            This is a reviewed cohort of {reviewMode?.cohort_size || includedRunIds.length || 0} runs,
+            not a single refreshed snapshot.
+          </p>
+          <div className="run-chip-list">
+            {includedRunIds.map((runId) => (
+              <code key={runId}>{runId}</code>
+            ))}
+          </div>
+        </article>
+        <article className="decision-brief__card">
+          <span>Top score signals</span>
+          {topSignals.length ? (
+            <ul className="signal-list">
+              {topSignals.map((signal) => (
+                <li key={signal.key}>
+                  <strong>{signal.label}</strong>
+                  <StatusBadge tone={Number(signal.value) >= 15 ? 'good' : 'warn'}>{signal.value}</StatusBadge>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Score signals are unavailable for this snapshot.</p>
+          )}
+        </article>
+      </div>
+      {(recommendation?.rationale || []).length ? (
+        <ul className="decision-brief__rationale">
+          {recommendation.rationale.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
+function ReviewMatchStatus({ title, matches, rows }) {
+  return (
+    <section className="panel review-match-panel">
+      <div className="review-match-panel__header">
+        <h2>{title}</h2>
+        <StatusBadge tone={matches ? 'good' : 'bad'}>{matches ? 'matches this review' : 'review mismatch'}</StatusBadge>
+      </div>
+      <KeyValueTable rows={rows} />
+    </section>
+  );
+}
+
+function groupedHandoffDownloads(downloads) {
+  return [
+    {
+      id: 'reviewer_context',
+      title: 'Reviewer receipt context',
+      detail: 'Use these files to confirm canonical pointer and SHA context before sending reviewer receipts.',
+      items: downloads.filter((item) => ['canonical_pointer', 'canonical_sha'].includes(item.id)),
+    },
+    {
+      id: 'package_zip',
+      title: 'Package ZIP',
+      detail: 'The selected recommended run package for this review.',
+      items: downloads.filter((item) => item.id === 'latest_package_zip'),
+    },
+    {
+      id: 'batch_zip',
+      title: 'Batch ZIP',
+      detail: 'The reviewed cohort batch that includes every run in the decision surface.',
+      items: downloads.filter((item) => item.id === 'latest_batch_zip'),
+    },
+    {
+      id: 'external_archives',
+      title: 'External archives',
+      detail: 'These are listed for traceability but are not bundled in this static dashboard.',
+      items: downloads.filter((item) => !['canonical_pointer', 'canonical_sha', 'latest_package_zip', 'latest_batch_zip'].includes(item.id)),
+    },
+  ].filter((group) => group.items.length);
 }
 
 function ErrorPanel({ title, detail, items = [] }) {
@@ -1063,6 +1230,8 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
   const context = buildReviewContext(index, datasets, reviewMode);
   const { draft, setDraft, resetDraft, clearDraft, storageKey } = useReviewerDraft(context);
   const receipt = buildReviewerReceipt(context, draft);
+  const completion = getReviewerCompletionState(draft);
+  const canExportReceipt = completion.status === 'complete';
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   const downloads = index.downloads || [];
   const packageDownload = downloads.find((item) => item.id === 'latest_package_zip');
@@ -1109,11 +1278,13 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
   }
 
   function downloadJson() {
+    if (!canExportReceipt) return;
     const filename = `ALGO_REVIEWER_SESSION__${safeFilenamePart(context.review_id)}__${safeFilenamePart(receipt.reviewer.alias)}.json`;
     downloadTextFile(filename, `${JSON.stringify(receipt, null, 2)}\n`, 'application/json');
   }
 
   function downloadMarkdown() {
+    if (!canExportReceipt) return;
     const filename = `ALGO_REVIEWER_SESSION__${safeFilenamePart(context.review_id)}__${safeFilenamePart(receipt.reviewer.alias)}.md`;
     downloadTextFile(filename, buildReviewerMarkdown(receipt), 'text/markdown');
   }
@@ -1134,6 +1305,12 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
           <button type="button" className="btn btn-outline" onClick={clearDraft}>Clear draft</button>
         </div>
       </div>
+
+      <DecisionBrief
+        recommendation={datasets.promotion_recommendation}
+        scorecard={scorecard}
+        reviewMode={reviewMode}
+      />
 
       <div className="reviewer-grid">
         <div className="reviewer-card">
@@ -1159,6 +1336,23 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
                 Download batch
               </a>
             ) : null}
+          </div>
+          <div className="completion-card">
+            <div className="completion-card__header">
+              <h3>Receipt readiness</h3>
+              <StatusBadge tone={canExportReceipt ? 'good' : 'warn'}>
+                {canExportReceipt ? 'ready to export' : `${completion.missingFields.length} missing`}
+              </StatusBadge>
+            </div>
+            {completion.missingFields.length ? (
+              <ul className="missing-list">
+                {completion.missingFields.map((field) => (
+                  <li key={field}>{field.replace(/^checklist\./, 'checklist: ').replace(/_/g, ' ')}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted">All required reviewer fields are complete.</p>
+            )}
           </div>
         </div>
 
@@ -1226,6 +1420,25 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
               ))}
             </div>
           </div>
+
+          <div className="checklist-grid">
+            <label className="check-row">
+              <input
+                type="checkbox"
+                checked={Boolean(draft.downloaded_artifacts_acknowledged)}
+                onChange={(event) => updateField('downloaded_artifacts_acknowledged', event.target.checked)}
+              />
+              <span>I understand the package, batch, JSON receipt, and Markdown summary are local/downloaded artifacts that I must send back manually.</span>
+            </label>
+            <label className="check-row">
+              <input
+                type="checkbox"
+                checked={Boolean(draft.needs_operator_explanation)}
+                onChange={(event) => updateField('needs_operator_explanation', event.target.checked)}
+              />
+              <span>This review still needed operator explanation.</span>
+            </label>
+          </div>
         </form>
       </div>
 
@@ -1244,10 +1457,11 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
                 <label className="field">
                   <span>Category {index + 1}</span>
                   <select value={issue.category} onChange={(event) => updateIssue(issue.id, 'category', event.target.value)}>
-                    {ISSUE_CATEGORIES.map((category) => (
-                      <option key={category} value={category}>{category}</option>
+                    {ISSUE_CATEGORY_OPTIONS.map((category) => (
+                      <option key={category.id} value={category.id}>{category.label}</option>
                     ))}
                   </select>
+                  <small>{ISSUE_CATEGORY_OPTIONS.find((category) => category.id === issue.category)?.detail}</small>
                 </label>
                 <label className="field">
                   <span>Summary</span>
@@ -1291,11 +1505,16 @@ function ReviewerWorkspace({ index, datasets, reviewMode, scorecard }) {
       <div className="receipt-actions">
         <div>
           <h3>Export operator receipt</h3>
+          <p className="muted">
+            {canExportReceipt
+              ? 'Export both files and send them back to the operator manually.'
+              : 'Complete the required fields above before exporting the receipt.'}
+          </p>
           <p className="muted">Draft key: <code>{storageKey}</code></p>
         </div>
         <div className="reviewer-workspace__actions">
-          <button type="button" className="btn btn-primary" onClick={downloadJson}>Download JSON receipt</button>
-          <button type="button" className="btn btn-outline" onClick={downloadMarkdown}>Download Markdown summary</button>
+          <button type="button" className="btn btn-primary" onClick={downloadJson} disabled={!canExportReceipt}>Download JSON receipt</button>
+          <button type="button" className="btn btn-outline" onClick={downloadMarkdown} disabled={!canExportReceipt}>Download Markdown summary</button>
         </div>
       </div>
     </section>
@@ -1410,10 +1629,16 @@ function ReviewPage({ index, datasets }) {
 
 function PackagePage({ index, datasets }) {
   const latestPackage = datasets.latest_package;
+  const latestReview = datasets.latest_review;
   const manifest = datasets.package_manifest;
   const selectedCards = datasets.selected_signal_cards;
   const reviewMode = getReviewModeMeta(index, datasets);
   const singleRun = isSingleRunMode(reviewMode);
+  const packageMatchesReview = Boolean(
+    latestPackage?.review_id &&
+    latestPackage.review_id === latestReview?.review_id &&
+    latestPackage.run_id === reviewMode.recommended_run_id
+  );
 
   return (
     <div className="page-grid">
@@ -1433,6 +1658,18 @@ function PackagePage({ index, datasets }) {
           <EmptyState title="Unavailable" detail="LATEST_PACKAGE.json did not load." />
         )}
       </section>
+
+      <ReviewMatchStatus
+        title="Matches this review"
+        matches={packageMatchesReview}
+        rows={[
+          { label: 'Review ID', value: latestPackage?.review_id || 'Unavailable' },
+          { label: 'Expected review ID', value: latestReview?.review_id || 'Unavailable' },
+          { label: 'Package run', value: latestPackage?.run_id || 'Unavailable' },
+          { label: 'Recommended run', value: reviewMode.recommended_run_id || 'Unavailable' },
+          { label: 'Package ZIP SHA', value: <ShaField hash={latestPackage?.package_zip_sha256} /> },
+        ]}
+      />
 
       <section className="panel">
         <h2>How it was built</h2>
@@ -1486,10 +1723,16 @@ function PackagePage({ index, datasets }) {
 
 function BatchPage({ index, datasets }) {
   const latestBatch = datasets.latest_batch;
+  const latestReview = datasets.latest_review;
   const batchManifest = datasets.batch_manifest;
   const runPackageIndex = datasets.run_package_index;
   const reviewMode = getReviewModeMeta(index, datasets);
   const singleRun = isSingleRunMode(reviewMode);
+  const batchMatchesReview = Boolean(
+    latestBatch?.review_id &&
+    latestBatch.review_id === latestReview?.review_id &&
+    sameStringSet(latestBatch.included_run_ids || [], reviewMode.included_run_ids || [])
+  );
 
   return (
     <div className="page-grid">
@@ -1509,6 +1752,18 @@ function BatchPage({ index, datasets }) {
           <EmptyState title="Unavailable" detail="LATEST_BATCH.json did not load." />
         )}
       </section>
+
+      <ReviewMatchStatus
+        title="Matches this review"
+        matches={batchMatchesReview}
+        rows={[
+          { label: 'Review ID', value: latestBatch?.review_id || 'Unavailable' },
+          { label: 'Expected review ID', value: latestReview?.review_id || 'Unavailable' },
+          { label: 'Included runs', value: (latestBatch?.included_run_ids || []).join(', ') || 'Unavailable' },
+          { label: 'Expected runs', value: (reviewMode.included_run_ids || []).join(', ') || 'Unavailable' },
+          { label: 'Batch ZIP SHA', value: <ShaField hash={latestBatch?.batch_zip_sha256} /> },
+        ]}
+      />
 
       <section className="panel">
         <h2>How the batch was assembled</h2>
@@ -1562,6 +1817,7 @@ function BatchPage({ index, datasets }) {
 
 function HandoffPage({ index }) {
   const downloads = index.downloads || [];
+  const downloadGroups = groupedHandoffDownloads(downloads);
   const uiContract = index.ui_contract || {};
   const handoffPacket = index.handoff_packet || {};
   const designAuthority = uiContract.design_authority || {};
@@ -1573,37 +1829,52 @@ function HandoffPage({ index }) {
     <div className="page-grid">
       <section className="panel span-2">
         <h2>Files ready to download</h2>
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Artifact</th>
-                <th>SHA-256</th>
-                <th>Size</th>
-                <th>Download</th>
-              </tr>
-            </thead>
-            <tbody>
-              {downloads.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.label}</td>
-                  <td>
-                    <ShaField hash={item.sha256} note={item.hash_note} />
-                  </td>
-                  <td>{formatNumber(item.size_bytes)}</td>
-                  <td>
-                    {item.bundled && item.public_path ? (
-                      <a href={`${base}${item.public_path}`} download={item.filename} className="btn-download">
-                        ↓ Download
-                      </a>
-                    ) : (
-                      <span className="btn-not-bundled" title={item.source_path || ''}>Not bundled</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="handoff-download-groups">
+          {downloadGroups.map((group) => (
+            <article className="handoff-download-group" key={group.id}>
+              <div className="surface-heading">
+                <div>
+                  <h3>{group.title}</h3>
+                  <p className="muted">{group.detail}</p>
+                </div>
+                <StatusBadge tone={group.items.some((item) => item.bundled) ? 'good' : 'warn'}>
+                  {group.items.some((item) => item.bundled) ? 'bundled' : 'reference only'}
+                </StatusBadge>
+              </div>
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Artifact</th>
+                      <th>SHA-256</th>
+                      <th>Size</th>
+                      <th>Download</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.items.map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.label}</td>
+                        <td>
+                          <ShaField hash={item.sha256} note={item.hash_note} />
+                        </td>
+                        <td>{formatNumber(item.size_bytes)}</td>
+                        <td>
+                          {item.bundled && item.public_path ? (
+                            <a href={`${base}${item.public_path}`} download={item.filename} className="btn-download">
+                              ↓ Download
+                            </a>
+                          ) : (
+                            <span className="btn-not-bundled" title={item.source_path || ''}>Not bundled</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -2035,7 +2306,7 @@ function SignInPage() {
           routing="path"
           path={`${basePath}/sign-in`}
           signUpUrl={`${basePath}/sign-up`}
-          fallbackRedirectUrl={homeRedirectUrl}
+          fallbackRedirectUrl={reviewRedirectUrl}
         />
       </div>
     </main>
@@ -2051,7 +2322,7 @@ function SignUpPage() {
           routing="path"
           path={`${basePath}/sign-up`}
           signInUrl={`${basePath}/sign-in`}
-          fallbackRedirectUrl={homeRedirectUrl}
+          fallbackRedirectUrl={reviewRedirectUrl}
         />
       </div>
     </main>
@@ -2060,11 +2331,11 @@ function SignUpPage() {
 
 function SignedInRoute({ routePath }) {
   useEffect(() => {
-    if (isAuthPath(routePath)) pushAppPath('/', true);
+    if (isAuthPath(routePath)) pushAppPath('/review', true);
   }, [routePath]);
 
   if (isAuthPath(routePath)) {
-    return <LoadingShell title="Opening dashboard…" detail="Your Clerk session is active." />;
+    return <LoadingShell title="Opening reviewer workspace…" detail="Your Clerk session is active." />;
   }
 
   return <App />;
@@ -2099,8 +2370,8 @@ function AuthenticatedApp() {
       publishableKey={clerkPubKey}
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
-      signInFallbackRedirectUrl={homeRedirectUrl}
-      signUpFallbackRedirectUrl={homeRedirectUrl}
+      signInFallbackRedirectUrl={reviewRedirectUrl}
+      signUpFallbackRedirectUrl={reviewRedirectUrl}
       routerPush={(to) => pushAppPath(stripBase(to))}
       routerReplace={(to) => pushAppPath(stripBase(to), true)}
     >
